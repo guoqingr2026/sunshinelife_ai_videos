@@ -44,6 +44,11 @@ pm2 delete sunshinelife-videos-api 2>/dev/null || true
 PORT=${API_PORT} pm2 start deploy/ecs/ecosystem.config.cjs --update-env
 pm2 save
 
+echo ">>> 修复静态文件权限"
+chmod o+x /opt 2>/dev/null || true
+chmod o+x "$APP_DIR" "$APP_DIR/frontend" 2>/dev/null || true
+chmod -R a+rX "$APP_DIR/frontend/dist"
+
 echo ">>> 配置 Nginx"
 bash "$APP_DIR/deploy/ecs/setup-nginx-subpath.sh"
 
