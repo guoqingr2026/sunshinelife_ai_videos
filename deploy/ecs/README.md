@@ -9,11 +9,30 @@
 ### 首次安装
 
 ```bash
-# SSH 登录 ECS
+# SSH 登录 ECS — 每行单独执行，不要粘在一行
 sudo git clone https://github.com/guoqingr2026/sunshinelife_ai_videos.git /opt/sunshinelife_ai_videos
 cd /opt/sunshinelife_ai_videos
-sudo git checkout v1.0.1   # 或 main
+sudo git fetch --tags
+sudo git checkout v1.0.3
 sudo bash deploy/ecs/install-subpath.sh
+```
+
+### 已 clone，只需刷新并配置 Nginx（v1.0.3）
+
+```bash
+cd /opt/sunshinelife_ai_videos
+sudo git fetch --tags
+sudo git checkout v1.0.3
+sudo bash deploy/ecs/diagnose-nginx.sh
+sudo bash deploy/ecs/setup-nginx-subpath.sh
+```
+
+或使用一键脚本（需先 `git pull` 到含该脚本的版本）：
+
+```bash
+cd /opt/sunshinelife_ai_videos
+sudo git pull
+sudo bash deploy/ecs/pull-and-run.sh
 ```
 
 ### 配置 Nginx（只需做一次）
