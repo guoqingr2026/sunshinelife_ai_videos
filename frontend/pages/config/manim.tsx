@@ -192,7 +192,7 @@ export default function ManimConfig() {
             <h3 className="font-semibold mb-3">预览</h3>
             {task ? (
               <div className="space-y-2 text-sm">
-                <p>类型: <code className="text-gray-300">{task.type}</code></p>
+                <p>类型: <code className="text-gray-300">{String(task.payload?.type ?? type)}</code></p>
                 <p>ID: <code className="text-gray-300 break-all">{task.id}</code></p>
                 <p>
                   状态: <span className={statusColor[task.status]}>{task.status}</span>
