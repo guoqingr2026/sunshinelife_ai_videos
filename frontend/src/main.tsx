@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Layout from "../components/Layout";
+import ErrorBoundary from "../components/ErrorBoundary";
 import Home from "../pages/index";
 import SubtitleEditor from "../pages/editor/subtitle";
 import ManimConfig from "../pages/config/manim";
@@ -18,8 +19,9 @@ const basename = (import.meta.env.VITE_BASE_PATH || "/").replace(/\/$/, "") || u
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter basename={basename}>
-      <Layout>
-        <Routes>
+      <ErrorBoundary>
+        <Layout>
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/editor/subtitle" element={<SubtitleEditor />} />
           <Route path="/config/manim" element={<ManimConfig />} />
@@ -29,8 +31,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/config/shot-plan" element={<ShotPlanPage />} />
           <Route path="/packaging/bilibili" element={<BilibiliPackagingPage />} />
           <Route path="/tasks" element={<TasksPage />} />
-        </Routes>
-      </Layout>
+          </Routes>
+        </Layout>
+      </ErrorBoundary>
     </BrowserRouter>
   </React.StrictMode>
 );

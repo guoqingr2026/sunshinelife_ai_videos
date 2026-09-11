@@ -53,7 +53,11 @@ export default function AutoVideoPage() {
   useEffect(() => {
     if (!isActive) return;
     const poll = setInterval(async () => {
-      setTask(await api.getComposeTask(task!.id));
+      try {
+        setTask(await api.getComposeTask(task!.id));
+      } catch {
+        /* 轮询失败不打崩页面 */
+      }
     }, 1000);
     const clock = setInterval(() => setTick((t) => t + 1), 1000);
     return () => {
