@@ -50,6 +50,18 @@ export interface ShotPlanPreview {
   errors: string[];
 }
 
+export interface ComposeLogEntry {
+  time: string;
+  message: string;
+  level?: "info" | "success" | "warn" | "error";
+}
+
+export interface ComposeStep {
+  id: string;
+  label: string;
+  status: "pending" | "running" | "done" | "skipped" | "error";
+}
+
 export interface ComposePayload {
   brief: string;
   title?: string;
@@ -57,6 +69,13 @@ export interface ComposePayload {
   renderFinal?: boolean;
   phase?: string;
   progress?: string;
+  progressPercent?: number;
+  startedAt?: string;
+  updatedAt?: string;
+  manimTotal?: number;
+  manimCurrent?: number;
+  logs?: ComposeLogEntry[];
+  steps?: ComposeStep[];
   timeline?: Array<Record<string, unknown>>;
   manimJobs?: Array<{ timelineIndex: number; type: string; label: string }>;
   manimResults?: Array<{ timelineIndex: number; type: string; outputUrl: string; mode: string }>;

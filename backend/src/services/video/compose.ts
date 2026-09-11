@@ -1,31 +1,13 @@
-import { db } from "../../lib/db";
 import { renderManim } from "../manim/render";
 import { renderRemotion } from "../remotion/render";
 import { planFromBrief, TimelineItem, ThemeConfig } from "./plan-timeline";
+import {
+  markComposeStep,
+  patchComposeProgress,
+} from "./compose-progress";
+import type { ComposePayload } from "./compose-progress";
 
-export interface ComposePayload {
-  brief: string;
-  title?: string;
-  preview?: boolean;
-  renderFinal?: boolean;
-  templateId?: string;
-  theme?: ThemeConfig;
-  phase?: string;
-  progress?: string;
-  timeline?: TimelineItem[];
-  manimJobs?: Array<{
-    timelineIndex: number;
-    type: string;
-    label: string;
-    params?: Record<string, unknown>;
-  }>;
-  manimResults?: Array<{
-    timelineIndex: number;
-    type: string;
-    outputUrl: string;
-    mode: string;
-  }>;
-}
+export type { ComposePayload };
 
 function toRemotionMediaUrl(publicUrl: string): string {
   const port = process.env.PORT || 3001;
@@ -40,16 +22,6 @@ function toRemotionMediaUrl(publicUrl: string): string {
   return `${base}${publicUrl.startsWith("/") ? publicUrl : `/${publicUrl}`}`;
 }
 
-function patchPayload(taskId: string, patch: Partial<ComposePayload>) {
-  const task = db.task.findFirst({ id: taskId });
-  if (!task) return;
-  const current = JSON.parse(task.payload) as ComposePayload;
-  db.task.update(
-    { id: taskId },
-    { payload: JSON.stringify({ ...current, ...patch }) }
-  );
-}
-
 export async function renderCompose(
   taskId: string,
   payload: ComposePayload
@@ -57,6 +29,14 @@ export async function renderCompose(
   const renderFinal = payload.renderFinal !== false;
   const templateId = payload.templateId || "simple-electric";
   const preview = payload.preview ?? true;
+
+  markComposeStep(taskId, "queue", "done", "Worker 已接管任务");
+  markComposeStep(taskId, "plan", "running");
+  patchComposeProgress(taskId, {
+    phase: "planning",
+    progress: "正在分析视频要求并规划时间轴…",
+    log: "开始规划时间轴",
+  });
 
   let timeline = payload.timeline;
   let manimJobs = payload.manimJobs;
@@ -67,26 +47,40 @@ export async function renderCompose(
     timeline = plan.timeline;
     manimJobs = plan.manimJobs;
     theme = plan.theme;
-    patchPayload(taskId, {
+    patchComposeProgress(taskId, {
       phase: "planned",
-      progress: "已根据要求生成时间轴",
+      progress: `规划完成：${manimJobs.length} 个 Manim 镜头`,
       timeline,
       manimJobs,
       theme,
       title: plan.title,
+      manimTotal: manimJobs.length,
+      manimCurrent: 0,
+      log: `时间轴已生成，共 ${timeline.length} 个片段、${manimJobs.length} 个 Manim 任务`,
+      logLevel: "success",
     });
   }
 
+  markComposeStep(taskId, "plan", "done");
+  markComposeStep(taskId, "manim", "running");
+  patchComposeProgress(taskId, {
+    phase: "manim",
+    progress: `正在渲染 Manim（0/${manimJobs!.length}）…`,
+    manimTotal: manimJobs!.length,
+    manimCurrent: 0,
+    log: `开始 Manim 批量渲染，共 ${manimJobs!.length} 个`,
+  });
+
   const manimResults: ComposePayload["manimResults"] = [];
 
-  patchPayload(taskId, { phase: "manim", progress: "正在渲染 Manim 动画…" });
-
-  for (let i = 0; i < manimJobs.length; i++) {
-    const job = manimJobs[i];
+  for (let i = 0; i < manimJobs!.length; i++) {
+    const job = manimJobs![i];
     const manimTaskId = `${taskId}-m${i}`;
 
-    patchPayload(taskId, {
-      progress: `Manim ${i + 1}/${manimJobs.length}: ${job.label}`,
+    patchComposeProgress(taskId, {
+      manimCurrent: i,
+      progress: `Manim 渲染中 ${i + 1}/${manimJobs!.length}：${job.label}（${job.type}）`,
+      log: `[${i + 1}/${manimJobs!.length}] 开始渲染 ${job.type} — ${job.label}`,
     });
 
     const result = await renderManim(manimTaskId, {
@@ -95,8 +89,8 @@ export async function renderCompose(
     });
 
     const clipUrl = toRemotionMediaUrl(result.outputUrl);
-    const slot = timeline[job.timelineIndex];
-    timeline[job.timelineIndex] = {
+    const slot = timeline![job.timelineIndex];
+    timeline![job.timelineIndex] = {
       type: "manim_clip",
       durationInFrames: slot.durationInFrames || 150,
       title: slot.title || job.label,
@@ -111,42 +105,66 @@ export async function renderCompose(
       mode: result.mode,
     });
 
-    patchPayload(taskId, {
+    patchComposeProgress(taskId, {
+      manimCurrent: i + 1,
       timeline,
       manimResults,
-      progress: `已完成 Manim: ${job.label}`,
+      progress: `Manim 完成 ${i + 1}/${manimJobs!.length}：${job.label}`,
+      log: `[${i + 1}/${manimJobs!.length}] ✓ ${job.label}（${result.mode === "mock" ? "占位" : "真实"}）`,
+      logLevel: result.mode === "mock" ? "warn" : "success",
     });
   }
 
-  patchPayload(taskId, {
+  markComposeStep(taskId, "manim", "done");
+  markComposeStep(taskId, "timeline", "running");
+  patchComposeProgress(taskId, {
     phase: "timeline_ready",
-    progress: "时间轴已自动填入 Manim 片段",
+    progress: "时间轴 JSON 已自动填入所有 Manim 地址",
     timeline,
     manimResults,
+    log: "时间轴已更新，全部 Manim 片段已写入 sourceUrl",
+    logLevel: "success",
   });
+  markComposeStep(taskId, "timeline", "done");
 
   if (!renderFinal) {
-    patchPayload(taskId, { phase: "done", progress: "时间轴已生成（未渲染成片）" });
-    return { timeline };
+    markComposeStep(taskId, "remotion", "skipped");
+    markComposeStep(taskId, "done", "done", "任务完成（未合成成片）");
+    patchComposeProgress(taskId, {
+      phase: "done",
+      progress: "时间轴 + Manim 已生成（跳过成片合成）",
+      progressPercent: 100,
+    });
+    return { timeline: timeline! };
   }
 
-  patchPayload(taskId, { phase: "remotion", progress: "正在合成最终视频…" });
+  markComposeStep(taskId, "remotion", "running");
+  patchComposeProgress(taskId, {
+    phase: "remotion",
+    progress: "Remotion 正在合成最终 MP4（约 1～5 分钟）…",
+    log: "开始 Remotion 渲染成片",
+  });
 
   const remotionResult = await renderRemotion(taskId, {
     templateId,
-    timeline,
+    timeline: timeline!,
     theme,
     preview,
   });
 
-  patchPayload(taskId, {
+  markComposeStep(taskId, "remotion", "done");
+  markComposeStep(taskId, "done", "done", "成片已生成");
+  patchComposeProgress(taskId, {
     phase: "done",
-    progress: "成片已生成",
+    progress: "全部完成！可预览或下载成片",
+    progressPercent: 100,
     timeline,
+    log: `成片地址：${remotionResult.outputUrl}`,
+    logLevel: "success",
   });
 
   return {
     outputUrl: remotionResult.outputUrl,
-    timeline,
+    timeline: timeline!,
   };
 }

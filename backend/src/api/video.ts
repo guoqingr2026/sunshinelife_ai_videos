@@ -12,6 +12,7 @@ import {
   buildGptPrompt,
   buildDefaultShotPlanArticle,
 } from "../services/video/shot-plan-spec";
+import { initComposeProgress } from "../services/video/compose-progress";
 
 const router = Router();
 
@@ -76,6 +77,7 @@ router.post("/compose", (req, res) => {
       return res.status(400).json({ error: "brief is required" });
     }
 
+    const willRenderFinal = renderFinal !== false;
     const task = db.task.create({
       kind: "compose",
       status: "pending",
@@ -83,13 +85,13 @@ router.post("/compose", (req, res) => {
         brief,
         title,
         preview: preview ?? true,
-        renderFinal: renderFinal !== false,
+        renderFinal: willRenderFinal,
         theme,
         templateId: templateId || "simple-electric",
-        phase: "pending",
-        progress: "排队中…",
       }),
     });
+
+    initComposeProgress(task.id, willRenderFinal);
 
     res.json({
       taskId: task.id,
