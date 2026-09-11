@@ -29,7 +29,7 @@ router.get("/status", async (_req, res) => {
     ffmpegInstalled: ffmpegOk,
     mode: manimOk ? "real" : "placeholder",
     hint: manimOk
-      ? "将生成真实 Manim 工程动画（PN结、能带等）"
+      ? "支持 24+ 种场景：工程示意、数学图表、信息图、文本动画、结构轨道"
       : "未检测到 Manim，将生成占位视频。安装: py -3 -m pip install manim",
     recentTasks: recent,
   });

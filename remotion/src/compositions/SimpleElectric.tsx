@@ -9,6 +9,11 @@ import { SubtitleBar } from "./SubtitleBar";
 import { BulletList } from "./BulletList";
 import { FadeText } from "./FadeText";
 import { CompareCard } from "./CompareCard";
+import { QuoteCard } from "./QuoteCard";
+import { StatHighlight } from "./StatHighlight";
+import { FlowSteps } from "./FlowSteps";
+import { TimelineBar } from "./TimelineBar";
+import { FormulaCard } from "./FormulaCard";
 
 export interface TimelineItem {
   type: string;
@@ -22,6 +27,16 @@ export interface TimelineItem {
   rightTitle?: string;
   leftText?: string;
   rightText?: string;
+  quote?: string;
+  author?: string;
+  value?: string;
+  label?: string;
+  steps?: string[];
+  events?: string[];
+  formula?: string;
+  caption?: string;
+  manimType?: string;
+  note?: string;
 }
 
 export interface ThemeConfig {
@@ -144,14 +159,67 @@ export const SimpleElectric: React.FC<SimpleElectricProps> = ({
               );
             }
             break;
+          case "quote":
+            content = (
+              <QuoteCard
+                quote={item.quote || item.text}
+                author={item.author}
+                primaryColor={primaryColor}
+                backgroundColor={backgroundColor}
+              />
+            );
+            break;
+          case "stat":
+            content = (
+              <StatHighlight
+                value={item.value}
+                label={item.label || item.title}
+                primaryColor={primaryColor}
+                backgroundColor={backgroundColor}
+              />
+            );
+            break;
+          case "flow_steps":
+            content = (
+              <FlowSteps
+                steps={item.steps as string[] | undefined}
+                primaryColor={primaryColor}
+                backgroundColor={backgroundColor}
+              />
+            );
+            break;
+          case "timeline_bar":
+            content = (
+              <TimelineBar
+                events={item.events as string[] | undefined}
+                title={item.title}
+                primaryColor={primaryColor}
+                backgroundColor={backgroundColor}
+              />
+            );
+            break;
+          case "formula_card":
+            content = (
+              <FormulaCard
+                formula={item.formula}
+                caption={item.caption || item.title}
+                primaryColor={primaryColor}
+                backgroundColor={backgroundColor}
+              />
+            );
+            break;
           case "manim_placeholder":
           case "hyperframes_placeholder":
             content = (
               <ManimPlaceholder
                 title={item.title}
-                description={String(
-                  item.params?.说明 || item.params?.description || ""
-                )}
+                description={[
+                  item.manimType ? `Manim 类型: ${item.manimType}` : "",
+                  item.note || "",
+                  String(item.params?.说明 || item.params?.description || ""),
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
                 primaryColor={primaryColor}
               />
             );

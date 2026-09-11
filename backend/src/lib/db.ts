@@ -23,7 +23,7 @@ export interface BilibiliPackaging {
 
 export interface Task {
   id: string;
-  kind: "manim" | "remotion" | "hyperframes";
+  kind: "manim" | "remotion" | "hyperframes" | "compose";
   status: "pending" | "running" | "success" | "failed";
   payload: string;
   outputUrl?: string;
@@ -148,7 +148,9 @@ export const db = {
     },
     update(
       where: { id: string },
-      data: Partial<Pick<Task, "status" | "outputUrl" | "framesUrl" | "error">>
+      data: Partial<
+        Pick<Task, "status" | "outputUrl" | "framesUrl" | "error" | "payload">
+      >
     ): Task {
       const dbData = readDb();
       const idx = dbData.tasks.findIndex((t) => t.id === where.id);

@@ -24,9 +24,33 @@ export interface Subtitle {
   createdAt: string;
 }
 
+export interface ComposePayload {
+  brief: string;
+  title?: string;
+  preview?: boolean;
+  renderFinal?: boolean;
+  phase?: string;
+  progress?: string;
+  timeline?: Array<Record<string, unknown>>;
+  manimJobs?: Array<{ timelineIndex: number; type: string; label: string }>;
+  manimResults?: Array<{ timelineIndex: number; type: string; outputUrl: string; mode: string }>;
+  theme?: ThemeConfig;
+}
+
+export interface ComposeTask {
+  id: string;
+  kind: "compose";
+  status: "pending" | "running" | "success" | "failed";
+  payload: ComposePayload;
+  outputUrl?: string;
+  error?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Task {
   id: string;
-  kind: "manim" | "remotion" | "hyperframes";
+  kind: "manim" | "remotion" | "hyperframes" | "compose";
   status: "pending" | "running" | "success" | "failed";
   payload: Record<string, unknown>;
   outputUrl?: string;
@@ -85,6 +109,25 @@ export const api = {
     }),
 
   getManimTask: (id: string) => request<Task>(`/api/manim/task/${id}`),
+
+  planVideo: (data: { brief: string; title?: string }) =>
+    request<{ title: string; timeline: unknown[]; manimJobs: unknown[]; theme: ThemeConfig }>(
+      "/api/video/plan",
+      { method: "POST", body: JSON.stringify(data) }
+    ),
+
+  createComposeTask: (data: {
+    brief: string;
+    title?: string;
+    preview?: boolean;
+    renderFinal?: boolean;
+  }) =>
+    request<{ taskId: string; status: string }>("/api/video/compose", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  getComposeTask: (id: string) => request<ComposeTask>(`/api/video/compose/${id}`),
 
   createRemotionTask: (data: {
     templateId: string;

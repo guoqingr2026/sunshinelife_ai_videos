@@ -5,13 +5,7 @@ import shutil
 import subprocess
 import glob
 
-TEMPLATES = {
-    "pn_junction": "templates.pn_junction.PNJunction",
-    "band_structure": "templates.band_structure.BandStructure",
-    "current_arrow": "templates.current_arrow.CurrentArrow",
-    "photon_breakdown": "templates.photon_breakdown.PhotonBreakdown",
-    "semiconductor_layers": "templates.semiconductor_layers.SemiconductorLayers",
-}
+from template_catalog import TEMPLATES
 
 
 def find_manim_cmd():

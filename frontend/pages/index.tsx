@@ -2,6 +2,11 @@ import { Link } from "react-router-dom";
 
 const modules = [
   {
+    href: "/config/auto-video",
+    title: "一键自动成片",
+    desc: "填写要求 → 自动 Manim + 时间轴 + 合成",
+  },
+  {
     href: "/editor/subtitle",
     title: "字幕编辑",
     desc: "上传 SRT/TXT，自动断句修复",

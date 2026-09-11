@@ -1,27 +1,34 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { api, ManimStatus, Task } from "../../utils/api";
-
-const ANIMATION_TYPES = [
-  { id: "pn_junction", label: "PN 结示意图", desc: "N型/P型区域、耗尽层、电流方向" },
-  { id: "band_structure", label: "能带结构", desc: "导带、价带、电子空穴运动" },
-  { id: "current_arrow", label: "电流箭头", desc: "电阻电路与电流方向" },
-  { id: "photon_breakdown", label: "光子击穿", desc: "光子激发电子" },
-  { id: "semiconductor_layers", label: "半导体层", desc: "多层半导体结构" },
-];
+import {
+  MANIM_CATEGORIES,
+  MANIM_TEMPLATES,
+  getDefaultParams,
+  getManimTemplate,
+} from "../../utils/manim-catalog";
 
 export default function ManimConfig() {
   const [type, setType] = useState("pn_junction");
-  const [voltage, setVoltage] = useState(9);
-  const [current, setCurrent] = useState(1);
-  const [resistance, setResistance] = useState(9);
+  const [params, setParams] = useState<Record<string, unknown>>(() => getDefaultParams("pn_junction"));
+  const [paramsJson, setParamsJson] = useState("");
   const [task, setTask] = useState<Task | null>(null);
   const [status, setStatus] = useState<ManimStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [videoError, setVideoError] = useState(false);
 
+  const selected = getManimTemplate(type);
+  const hasParamFields = Boolean(selected?.paramFields?.length);
+  const hasComplexParams = Boolean(selected?.defaultParams) && !hasParamFields;
+
   useEffect(() => {
     api.getManimStatus().then(setStatus).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    const defaults = getDefaultParams(type);
+    setParams(defaults);
+    setParamsJson(JSON.stringify(defaults, null, 2));
+  }, [type]);
 
   useEffect(() => {
     if (!task || task.status === "success" || task.status === "failed") return;
@@ -35,14 +42,28 @@ export default function ManimConfig() {
     return () => clearInterval(timer);
   }, [task]);
 
+  const grouped = useMemo(() => {
+    return MANIM_CATEGORIES.map((cat) => ({
+      ...cat,
+      items: MANIM_TEMPLATES.filter((t) => t.category === cat.id),
+    })).filter((g) => g.items.length > 0);
+  }, []);
+
   const handleSubmit = async () => {
     setLoading(true);
     setVideoError(false);
     try {
-      const result = await api.createManimTask({
-        type,
-        params: { voltage, current, resistance },
-      });
+      let finalParams = params;
+      if (hasComplexParams) {
+        try {
+          finalParams = JSON.parse(paramsJson);
+        } catch {
+          alert("参数 JSON 格式错误");
+          setLoading(false);
+          return;
+        }
+      }
+      const result = await api.createManimTask({ type, params: finalParams });
       setTask(await api.getManimTask(result.taskId));
     } finally {
       setLoading(false);
@@ -54,8 +75,6 @@ export default function ManimConfig() {
     navigator.clipboard.writeText(task.outputUrl);
   };
 
-  const selected = ANIMATION_TYPES.find((t) => t.id === type);
-
   const statusColor = {
     pending: "text-yellow-400",
     running: "text-blue-400",
@@ -65,10 +84,10 @@ export default function ManimConfig() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">Manim 工程动画</h1>
+      <h1 className="text-2xl font-bold mb-2">Manim 动画引擎</h1>
       <p className="text-gray-400 text-sm mb-4">
-        Manim 是 Python 数学/工程动画引擎，用于生成<strong className="text-white"> PN 结、能带、电路</strong>等示意图 MP4。
-        生成后复制地址，在 Remotion 时间轴用 <code className="text-primary">manim_clip</code> 插入。
+        支持 <strong className="text-white">工程示意、数学图表、信息图、文本动画、结构轨道</strong> 等 {MANIM_TEMPLATES.length} 种场景。
+        生成后复制地址，在 Remotion 时间轴用 <code className="text-primary">manim_clip</code> 插入，组合成完整视频。
       </p>
 
       {status && (
@@ -80,29 +99,27 @@ export default function ManimConfig() {
           }`}
         >
           <p className="font-medium">
-            {status.manimInstalled ? "✓ 已安装 Manim — 将生成真实工程动画" : "⚠ 未安装 Manim — 当前为占位视频"}
+            {status.manimInstalled ? "✓ 已安装 Manim — 将生成真实动画" : "⚠ 未安装 Manim — 当前为占位视频"}
           </p>
           <p className="text-xs mt-1 opacity-80">{status.hint}</p>
-          {!status.manimInstalled && (
-            <p className="text-xs mt-1 opacity-80">
-              安装命令：<code>py -3 -m pip install manim</code>，或双击运行{" "}
-              <code>scripts\install_manim.bat</code>
-            </p>
-          )}
         </div>
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">动画类型</label>
+            <label className="block text-sm text-gray-400 mb-2">动画类型（{MANIM_TEMPLATES.length} 种）</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
               className="w-full bg-darker border border-gray-600 rounded-lg p-2"
             >
-              {ANIMATION_TYPES.map((t) => (
-                <option key={t.id} value={t.id}>{t.label}</option>
+              {grouped.map((g) => (
+                <optgroup key={g.id} label={g.label}>
+                  {g.items.map((t) => (
+                    <option key={t.id} value={t.id}>{t.label}</option>
+                  ))}
+                </optgroup>
               ))}
             </select>
             {selected && (
@@ -110,35 +127,56 @@ export default function ManimConfig() {
             )}
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
+          {hasParamFields && selected?.paramFields && (
+            <div className="grid grid-cols-1 gap-3">
+              {selected.paramFields.map((f) => (
+                <div key={f.key}>
+                  <label className="block text-sm text-gray-400 mb-1">{f.label}</label>
+                  <input
+                    type={f.type === "number" ? "number" : "text"}
+                    value={String(params[f.key] ?? "")}
+                    onChange={(e) =>
+                      setParams({
+                        ...params,
+                        [f.key]: f.type === "number" ? Number(e.target.value) : e.target.value,
+                      })
+                    }
+                    className="w-full bg-darker border border-gray-600 rounded-lg p-2"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+
+          {hasComplexParams && (
             <div>
-              <label className="block text-sm text-gray-400 mb-1">电压 (V)</label>
-              <input
-                type="number"
-                value={voltage}
-                onChange={(e) => setVoltage(Number(e.target.value))}
-                className="w-full bg-darker border border-gray-600 rounded-lg p-2"
+              <label className="block text-sm text-gray-400 mb-1">参数 JSON（数组/对象）</label>
+              <textarea
+                value={paramsJson}
+                onChange={(e) => setParamsJson(e.target.value)}
+                rows={6}
+                className="w-full bg-darker border border-gray-600 rounded-lg p-2 font-mono text-xs"
               />
             </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">电流 (A)</label>
-              <input
-                type="number"
-                value={current}
-                onChange={(e) => setCurrent(Number(e.target.value))}
-                className="w-full bg-darker border border-gray-600 rounded-lg p-2"
-              />
+          )}
+
+          {!hasParamFields && !hasComplexParams && type === "current_arrow" && (
+            <div className="grid grid-cols-3 gap-3">
+              {(["voltage", "current", "resistance"] as const).map((key) => (
+                <div key={key}>
+                  <label className="block text-sm text-gray-400 mb-1">
+                    {key === "voltage" ? "电压 (V)" : key === "current" ? "电流 (A)" : "阻值 (Ω)"}
+                  </label>
+                  <input
+                    type="number"
+                    value={Number(params[key] ?? 0)}
+                    onChange={(e) => setParams({ ...params, [key]: Number(e.target.value) })}
+                    className="w-full bg-darker border border-gray-600 rounded-lg p-2"
+                  />
+                </div>
+              ))}
             </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">阻值 (Ω)</label>
-              <input
-                type="number"
-                value={resistance}
-                onChange={(e) => setResistance(Number(e.target.value))}
-                className="w-full bg-darker border border-gray-600 rounded-lg p-2"
-              />
-            </div>
-          </div>
+          )}
 
           <button
             onClick={handleSubmit}
@@ -154,6 +192,7 @@ export default function ManimConfig() {
             <h3 className="font-semibold mb-3">预览</h3>
             {task ? (
               <div className="space-y-2 text-sm">
+                <p>类型: <code className="text-gray-300">{task.type}</code></p>
                 <p>ID: <code className="text-gray-300 break-all">{task.id}</code></p>
                 <p>
                   状态: <span className={statusColor[task.status]}>{task.status}</span>
@@ -162,10 +201,7 @@ export default function ManimConfig() {
                   <>
                     <p className="text-xs text-gray-400 break-all">{task.outputUrl}</p>
                     <div className="flex gap-2">
-                      <button
-                        onClick={copyClipUrl}
-                        className="text-primary text-sm underline"
-                      >
+                      <button onClick={copyClipUrl} className="text-primary text-sm underline">
                         复制片段地址（用于 Remotion）
                       </button>
                       <a href={task.outputUrl} download className="text-sm text-gray-400 underline">
@@ -179,14 +215,7 @@ export default function ManimConfig() {
                       onError={() => setVideoError(true)}
                     />
                     {videoError && (
-                      <p className="text-yellow-400 text-xs">
-                        视频无法播放。若未安装 Manim/ffmpeg，占位文件可能无效；请安装 Manim 后重试。
-                      </p>
-                    )}
-                    {!status?.manimInstalled && (
-                      <p className="text-yellow-400 text-xs">
-                        当前为占位模式，不是真实 PN 结动画。安装 Manim 后可看到完整示意图。
-                      </p>
+                      <p className="text-yellow-400 text-xs">视频无法播放，请检查 Manim/ffmpeg 安装。</p>
                     )}
                   </>
                 )}
@@ -212,7 +241,7 @@ export default function ManimConfig() {
           {status?.recentTasks && status.recentTasks.length > 0 && (
             <div className="bg-darker rounded-lg border border-gray-700 p-4">
               <h3 className="font-semibold mb-2 text-sm">最近任务</h3>
-              <div className="space-y-1">
+              <div className="space-y-1 max-h-48 overflow-y-auto">
                 {status.recentTasks.map((t) => (
                   <button
                     key={t.id}
@@ -220,7 +249,7 @@ export default function ManimConfig() {
                     className="w-full text-left text-xs px-2 py-1 rounded hover:bg-gray-800 truncate"
                     title="点击复制地址"
                   >
-                    {t.type} — {t.status} — {t.outputUrl || "无输出"}
+                    {t.type} — {t.status}
                   </button>
                 ))}
               </div>

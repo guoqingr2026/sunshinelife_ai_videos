@@ -2,6 +2,7 @@ import { db } from "../lib/db";
 import { renderManim } from "../services/manim/render";
 import { renderRemotion } from "../services/remotion/render";
 import { renderHyperFrames } from "../services/hyperframes/render";
+import { renderCompose } from "../services/video/compose";
 
 let isProcessing = false;
 
@@ -42,6 +43,12 @@ async function processNextTask() {
         status: "success",
         outputUrl: result.outputUrl || undefined,
         framesUrl: result.framesUrl,
+      });
+    } else if (task.kind === "compose") {
+      const result = await renderCompose(task.id, payload);
+      db.task.update({ id: task.id }, {
+        status: "success",
+        outputUrl: result.outputUrl,
       });
     } else {
       throw new Error(`Unknown task kind: ${task.kind}`);

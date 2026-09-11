@@ -35,10 +35,11 @@ export default function TasksPage() {
     failed: "bg-red-900 text-red-300",
   };
 
-  const kindLabel = {
+  const kindLabel: Record<string, string> = {
     manim: "Manim",
     remotion: "Remotion",
     hyperframes: "HyperFrames",
+    compose: "一键成片",
   };
 
   return (
@@ -54,6 +55,7 @@ export default function TasksPage() {
           <option value="manim">Manim</option>
           <option value="remotion">Remotion</option>
           <option value="hyperframes">HyperFrames</option>
+          <option value="compose">一键成片</option>
         </select>
       </div>
 

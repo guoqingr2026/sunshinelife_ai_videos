@@ -157,6 +157,72 @@ export const TIMELINE_MODULES: TimelineModule[] = [
       sourceUrl: "/video/任务ID.mp4",
     },
   },
+  {
+    type: "quote",
+    label: "引用",
+    description: "名言/观点引用卡",
+    defaultItem: {
+      type: "quote",
+      durationInFrames: 120,
+      quote: "理解优先于记忆",
+      author: "费曼",
+    },
+  },
+  {
+    type: "stat",
+    label: "数据高亮",
+    description: "大数字统计展示",
+    defaultItem: {
+      type: "stat",
+      durationInFrames: 90,
+      value: "80%",
+      label: "记忆留存",
+    },
+  },
+  {
+    type: "flow_steps",
+    label: "流程步骤",
+    description: "横向编号步骤",
+    defaultItem: {
+      type: "flow_steps",
+      durationInFrames: 150,
+      steps: ["输入", "理解", "回忆", "应用"],
+    },
+  },
+  {
+    type: "timeline_bar",
+    label: "时间轴",
+    description: "Remotion 时间轴条",
+    defaultItem: {
+      type: "timeline_bar",
+      durationInFrames: 150,
+      title: "学习路径",
+      events: ["入门", "理解", "练习", "掌握"],
+    },
+  },
+  {
+    type: "formula_card",
+    label: "公式卡",
+    description: "公式高亮展示",
+    defaultItem: {
+      type: "formula_card",
+      durationInFrames: 120,
+      caption: "核心公式",
+      formula: "P = V × I",
+    },
+  },
+  {
+    type: "manim_placeholder",
+    label: "Manim占位",
+    description: "规划 Manim 片段位置",
+    defaultItem: {
+      type: "manim_placeholder",
+      durationInFrames: 120,
+      title: "Manim 动画",
+      manimType: "forgetting_curve",
+      note: "渲染后替换为 manim_clip",
+    },
+  },
 ];
 
 export const BUILTIN_TEMPLATES = [
@@ -191,5 +257,49 @@ export const BUILTIN_TEMPLATES = [
       { type: "device_toggle", durationInFrames: 90 },
     ],
     theme: COLOR_SCHEMES[1],
+  },
+  {
+    name: "Manim+Remotion 完整科普",
+    templateId: "simple-electric",
+    timeline: [
+      { type: "title", durationInFrames: 120, title: "科普视频标题" },
+      { type: "quote", durationInFrames: 120, quote: "理解优先于记忆", author: "" },
+      { type: "chapter", durationInFrames: 90, title: "原理讲解" },
+      {
+        type: "manim_placeholder",
+        durationInFrames: 150,
+        title: "原理动画",
+        manimType: "function_graph",
+        note: "在 Manim 页渲染后，改为 manim_clip 并填入 sourceUrl",
+      },
+      { type: "bullet_list", durationInFrames: 150, title: "核心要点", items: ["定义", "机制", "应用"] },
+      { type: "flow_steps", durationInFrames: 150, steps: ["观察", "理解", "回忆", "应用"] },
+      { type: "chapter", durationInFrames: 90, title: "学习技巧" },
+      {
+        type: "manim_placeholder",
+        durationInFrames: 150,
+        title: "遗忘曲线",
+        manimType: "forgetting_curve",
+        note: "替换为 manim_clip",
+      },
+      { type: "timeline_bar", durationInFrames: 150, title: "复习节奏", events: ["第1天", "第3天", "第7天", "第30天"] },
+      { type: "stat", durationInFrames: 90, value: "2×", label: "主动回忆效率提升" },
+      { type: "fade_text", durationInFrames: 90, text: "感谢观看 · 点赞收藏" },
+    ],
+    theme: COLOR_SCHEMES[3],
+  },
+  {
+    name: "半导体工程片",
+    templateId: "simple-electric",
+    timeline: [
+      { type: "title", durationInFrames: 120, title: "半导体器件原理" },
+      { type: "chapter", durationInFrames: 90, title: "PN 结" },
+      { type: "manim_placeholder", durationInFrames: 150, title: "PN 结示意", manimType: "pn_junction" },
+      { type: "chapter", durationInFrames: 90, title: "MOSFET" },
+      { type: "manim_placeholder", durationInFrames: 150, title: "沟道结构", manimType: "mosfet_channel" },
+      { type: "formula_card", durationInFrames: 120, caption: "欧姆定律", formula: "V = I × R" },
+      { type: "params", durationInFrames: 120, params: { 电压: "12V", 电流: "2A" } },
+    ],
+    theme: COLOR_SCHEMES[2],
   },
 ];

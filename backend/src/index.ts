@@ -9,6 +9,7 @@ import manimRouter from "./api/manim";
 import remotionRouter from "./api/remotion";
 import remotionTemplatesRouter from "./api/remotion-templates";
 import hyperframesRouter from "./api/hyperframes";
+import videoRouter from "./api/video";
 import { ensureStorageDirs, getStorageRoot } from "./lib/storage";
 import { startTaskWorker } from "./workers/task-worker";
 
@@ -39,6 +40,7 @@ app.use("/api/manim", manimRouter);
 app.use("/api/remotion", remotionRouter);
 app.use("/api/remotion", remotionTemplatesRouter);
 app.use("/api/hyperframes", hyperframesRouter);
+app.use("/api/video", videoRouter);
 
 startTaskWorker();
 
