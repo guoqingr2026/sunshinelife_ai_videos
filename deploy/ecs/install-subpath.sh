@@ -79,27 +79,13 @@ pm2 delete sunshinelife-videos-api 2>/dev/null || true
 PORT=${API_PORT} pm2 start deploy/ecs/ecosystem.config.cjs --update-env
 pm2 save
 
-mkdir -p /etc/nginx/snippets
-cp "$APP_DIR/deploy/ecs/nginx-subpath.conf" /etc/nginx/snippets/sunshinelife_ai_videos.conf
-
 echo ""
-echo "------------------------------------------"
-echo "Nginx 配置片段已写入:"
-echo "  /etc/nginx/snippets/sunshinelife_ai_videos.conf"
-echo ""
-echo "请在 englishlearn 使用的 server { } 块内添加一行:"
-echo "  include /etc/nginx/snippets/sunshinelife_ai_videos.conf;"
-echo ""
-echo "常见位置:"
-echo "  /etc/nginx/sites-enabled/default"
-echo "  /etc/nginx/conf.d/*.conf"
-echo "------------------------------------------"
-
-if nginx -t 2>/dev/null; then
-  systemctl reload nginx || service nginx reload
-  echo "Nginx 已 reload"
+echo "配置 Nginx（自动挂到 englishlearn 同一 server 块）..."
+if bash "$APP_DIR/deploy/ecs/setup-nginx-subpath.sh"; then
+  echo "Nginx 已配置完成"
 else
-  echo "请先添加 include 后再执行: sudo nginx -t && sudo systemctl reload nginx"
+  echo ""
+  echo "自动配置失败，请按 deploy/ecs/NGINX.md 手动操作"
 fi
 
 echo ""

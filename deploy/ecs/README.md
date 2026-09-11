@@ -18,25 +18,18 @@ sudo bash deploy/ecs/install-subpath.sh
 
 ### 配置 Nginx（只需做一次）
 
-安装脚本会把片段写到 `/etc/nginx/snippets/sunshinelife_ai_videos.conf`。
+`install-subpath.sh` 会自动调用 `setup-nginx-subpath.sh`，在 **englishlearn 同一配置文件** 里、紧跟
 
-在 **englishlearn 正在使用的** `server { }` 块内添加：
+`include /etc/nginx/snippets/pep6-english-location.conf;`
 
-```nginx
-include /etc/nginx/snippets/sunshinelife_ai_videos.conf;
-```
+的下一行插入动画系统 include。
 
-常见配置文件：
+若需手动或排错，详见 **[deploy/ecs/NGINX.md](NGINX.md)**。
 
-- `/etc/nginx/sites-enabled/default`
-- `/etc/nginx/conf.d/englishlearn.conf`（以你实际文件名为准）
+你的 ECS 预期访问地址：
 
-然后：
-
-```bash
-sudo nginx -t
-sudo systemctl reload nginx
-```
+- 英语学习：`http://47.99.184.249/english/`
+- 动画系统：`http://47.99.184.249/sunshinelife_ai_videos/`
 
 ### 日常更新
 
