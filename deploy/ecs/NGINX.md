@@ -31,21 +31,44 @@ sudo bash deploy/ecs/setup-nginx-subpath.sh
 
 ## 手动配置（仅当自动脚本失败时）
 
-### 第 1 步：找到正确的配置文件
+### 第 0 步：若 grep 为空，先跑诊断
+
+`grep` 找不到 `pep6-english-location` **不代表没配 Nginx**，可能只是用了别的文件名或内联 `location /english`。
 
 ```bash
-sudo grep -r "pep6-english-location" /etc/nginx/sites-enabled /etc/nginx/conf.d
+cd /opt/sunshinelife_ai_videos
+sudo bash deploy/ecs/diagnose-nginx.sh
 ```
 
-输出示例：
+会自动生成 `/tmp/nginx-diagnose-*.txt`，把内容发来即可。
 
+然后直接跑自动配置（已增强检测）：
+
+```bash
+sudo bash deploy/ecs/setup-nginx-subpath.sh
 ```
-/etc/nginx/sites-enabled/default:    include /etc/nginx/snippets/pep6-english-location.conf;
+
+### 第 1 步：找到正确的配置文件
+
+按优先级查找：
+
+```bash
+# A. englishlearn 官方 snippet
+sudo grep -rn "pep6-english-location" /etc/nginx/
+
+# B. 内联 /english（没写 snippet 文件名时）
+sudo grep -rn "location.*/english" /etc/nginx/
+
+# C. pep6 独立站点
+ls -la /etc/nginx/sites-enabled/pep6-english
+
+# D. 列出所有 80 端口站点
+sudo grep -rn "listen 80" /etc/nginx/
 ```
 
-**只改这一份文件**（就是 englishlearn 正在用的那份）。
+**只改正在监听 80 端口的那一个 `server { }` 配置文件。**
 
-> 常见错误：去改 `/etc/nginx/sites-available/pep6-english` 或新建一个 `server { listen 80; }` —— 会与现有站点冲突，导致 englishlearn 或根网站异常。
+> 常见错误：新建第二个 `listen 80` 的 server 块 —— 会与 englishlearn / 根网站冲突。
 
 ### 第 2 步：确认片段文件存在
 
