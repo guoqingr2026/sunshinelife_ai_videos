@@ -15,11 +15,18 @@ fi
 
 export VITE_BASE_PATH="${BASE_PATH}/"
 export VITE_API_BASE="${BASE_PATH}"
+export NODE_ENV=production
 
 pnpm install --frozen-lockfile || pnpm install
 pnpm --filter remotion install || true
 pnpm --filter backend build
 pnpm --filter frontend build
+
+# 构建后校验，避免白屏
+if ! grep -q "${BASE_PATH}/assets/" frontend/dist/index.html; then
+  echo "错误: frontend 构建路径不对，请运行: sudo bash deploy/ecs/fix-white-screen.sh"
+  exit 1
+fi
 
 pm2 restart sunshinelife-videos-api
 pm2 save

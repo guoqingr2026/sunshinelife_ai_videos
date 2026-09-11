@@ -31,6 +31,9 @@ export default function ShotPlanPage() {
         setGptPrompt(spec.gptPrompt);
         setDefaultArticle(spec.defaultArticle);
       })
+      .catch((err: Error) => {
+        setMessage(`加载失败: ${err.message}。请确认已执行 backend build 并 pm2 restart。`);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -161,9 +164,9 @@ pn结, pn → pn_junction | PN 结
               <div>
                 <p className="text-gray-300 font-medium mb-1">3. JSON 整段（推荐，三种粘贴方式均可）</p>
                 <pre className="bg-black/40 p-2 rounded overflow-x-auto whitespace-pre-wrap text-[11px]">
-{`方式A: \`\`\`json { "rules":[], "shots":[] } \`\`\`
-方式B: 直接粘贴 { "rules":[], "shots":[] }
-方式C: GPT 输出 "json" 换行后接 { ... }`}
+                  方式A: 用 markdown 代码块包裹 JSON{"\n"}
+                  方式B: 直接粘贴纯 JSON 对象{"\n"}
+                  方式C: GPT 输出 json 换行后接对象
                 </pre>
               </div>
             </div>
