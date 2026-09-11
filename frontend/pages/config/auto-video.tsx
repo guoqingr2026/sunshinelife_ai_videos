@@ -1,12 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Link } from "react-router-dom";
 import { api, ComposePayload, ComposeTask } from "../../utils/api";
-
-const EXAMPLE_BRIEF = `PN结原理科普
-- 讲解 PN 结如何形成
-- 能带结构与载流子运动
-- 结合遗忘曲线说明如何高效记忆半导体知识
-- 主动回忆与间隔重复`;
+import { MVP_PROJECT_JSON, MVP_WORKFLOW_HELP } from "../../utils/mvp-project";
 
 const PHASE_LABELS: Record<string, string> = {
   pending: "排队中",
@@ -37,16 +31,37 @@ function formatTime(iso: string): string {
   }
 }
 
+function parseProjectJson(text: string): { title?: string; shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }> } | null {
+  const trimmed = text.trim();
+  if (!trimmed) return null;
+  try {
+    const obj = JSON.parse(trimmed);
+    if (!obj || typeof obj !== "object") return null;
+    return obj;
+  } catch {
+    return null;
+  }
+}
+
 export default function AutoVideoPage() {
-  const [title, setTitle] = useState("");
-  const [brief, setBrief] = useState(EXAMPLE_BRIEF);
+  const [projectJson, setProjectJson] = useState(MVP_PROJECT_JSON);
+  const [previewPlan, setPreviewPlan] = useState<{
+    title: string;
+    resolvedShots?: Array<{ kind: string; type: string; label: string }>;
+    manimJobs: unknown[];
+    timeline: unknown[];
+  } | null>(null);
+  const [planError, setPlanError] = useState("");
   const [preview, setPreview] = useState(true);
   const [renderFinal, setRenderFinal] = useState(true);
   const [task, setTask] = useState<ComposeTask | null>(null);
   const [loading, setLoading] = useState(false);
+  const [planning, setPlanning] = useState(false);
   const [videoError, setVideoError] = useState(false);
-  const [tick, setTick] = useState(0);
   const logEndRef = useRef<HTMLDivElement>(null);
+
+  const project = useMemo(() => parseProjectJson(projectJson), [projectJson]);
+  const jsonValid = project !== null && (project.shots?.length ?? 0) > 0;
 
   const isActive = task && task.status !== "success" && task.status !== "failed";
 
@@ -59,25 +74,44 @@ export default function AutoVideoPage() {
         /* 轮询失败不打崩页面 */
       }
     }, 1000);
-    const clock = setInterval(() => setTick((t) => t + 1), 1000);
-    return () => {
-      clearInterval(poll);
-      clearInterval(clock);
-    };
+    return () => clearInterval(poll);
   }, [task?.id, task?.status, isActive]);
 
   useEffect(() => {
     logEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [task?.payload?.logs?.length]);
 
+  const handlePreviewPlan = async () => {
+    if (!project?.shots?.length) {
+      setPlanError("项目 JSON 无效或 shots 为空");
+      return;
+    }
+    setPlanning(true);
+    setPlanError("");
+    try {
+      const plan = await api.planVideo({
+        brief: "",
+        title: project.title,
+        project,
+      });
+      setPreviewPlan(plan);
+    } catch (e) {
+      setPlanError(e instanceof Error ? e.message : String(e));
+      setPreviewPlan(null);
+    } finally {
+      setPlanning(false);
+    }
+  };
+
   const handleStart = async () => {
-    if (!brief.trim()) return;
+    if (!project?.shots?.length) return;
     setLoading(true);
     setVideoError(false);
     try {
       const { taskId } = await api.createComposeTask({
-        brief: brief.trim(),
-        title: title.trim() || undefined,
+        brief: "",
+        title: project.title,
+        project,
         preview,
         renderFinal,
       });
@@ -113,39 +147,71 @@ export default function AutoVideoPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">一键自动成片</h1>
-      <p className="text-gray-400 text-sm mb-6">
-        只需填写<strong className="text-white">视频要求</strong>，系统会自动：规划时间轴 → 渲染 Manim → 填入 JSON → 合成成片。
-        镜头规则可在
-        <Link to="/config/shot-plan" className="text-primary underline mx-1">
-          镜头规划
-        </Link>
-        页粘贴 GPT 分镜并保存。
+      <h1 className="text-2xl font-bold mb-2">一键成片（MVP）</h1>
+      <p className="text-gray-400 text-sm mb-4">
+        只需填写下方<strong className="text-white">项目 JSON</strong>，系统按固定流程执行：
+        规划时间轴 → 渲染 Manim → 写入 timeline → Remotion 合成。
       </p>
+
+      <div className="bg-darker border border-gray-700 rounded-lg p-4 mb-6 text-sm text-gray-300 font-mono leading-relaxed">
+        <pre className="whitespace-pre-wrap text-xs text-gray-400">{MVP_WORKFLOW_HELP.trim()}</pre>
+      </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-1">视频标题（可选）</label>
-            <input
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="留空则从要求中自动提取"
-              className="w-full bg-darker border border-gray-600 rounded-lg p-2"
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-sm text-gray-400">项目 JSON（唯一分镜来源）</label>
+              <button
+                type="button"
+                onClick={() => setProjectJson(MVP_PROJECT_JSON)}
+                disabled={!!isActive}
+                className="text-xs text-primary hover:underline disabled:opacity-50"
+              >
+                加载 MVP 模板
+              </button>
+            </div>
+            <textarea
+              value={projectJson}
+              onChange={(e) => {
+                setProjectJson(e.target.value);
+                setPreviewPlan(null);
+                setPlanError("");
+              }}
+              rows={16}
               disabled={!!isActive}
+              className={`w-full bg-darker border rounded-lg p-3 text-xs font-mono disabled:opacity-60 ${
+                jsonValid ? "border-gray-600" : "border-red-500/60"
+              }`}
+              spellCheck={false}
             />
+            {!jsonValid && projectJson.trim() && (
+              <p className="text-red-400 text-xs mt-1">JSON 格式错误或 shots 为空</p>
+            )}
+            {jsonValid && project && (
+              <p className="text-green-500/80 text-xs mt-1">
+                已识别 {project.shots!.length} 个镜头
+                {project.title ? ` · 标题「${project.title}」` : ""}
+              </p>
+            )}
           </div>
 
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">视频要求</label>
-            <textarea
-              value={brief}
-              onChange={(e) => setBrief(e.target.value)}
-              rows={10}
-              disabled={!!isActive}
-              className="w-full bg-darker border border-gray-600 rounded-lg p-3 text-sm disabled:opacity-60"
-              placeholder="描述你想讲什么，可写关键词或粘贴 GPT 分镜行…"
-            />
+          <div className="flex flex-wrap gap-3">
+            <button
+              type="button"
+              onClick={handlePreviewPlan}
+              disabled={planning || !!isActive || !jsonValid}
+              className="px-4 py-2 border border-gray-600 rounded-lg text-sm hover:bg-gray-800 disabled:opacity-50"
+            >
+              {planning ? "预览中…" : "预览分镜"}
+            </button>
+            <button
+              onClick={handleStart}
+              disabled={loading || !!isActive || !jsonValid}
+              className="px-6 py-2 bg-primary rounded-lg font-semibold hover:bg-red-600 disabled:opacity-50"
+            >
+              {loading ? "提交中…" : isActive ? "生成进行中…" : "一键生成视频"}
+            </button>
           </div>
 
           <div className="flex flex-wrap gap-4 text-sm">
@@ -169,13 +235,27 @@ export default function AutoVideoPage() {
             </label>
           </div>
 
-          <button
-            onClick={handleStart}
-            disabled={loading || !!isActive || !brief.trim()}
-            className="px-8 py-3 bg-primary rounded-lg font-semibold hover:bg-red-600 disabled:opacity-50"
-          >
-            {loading ? "提交中…" : isActive ? "生成进行中…" : renderFinal ? "一键生成完整视频" : "仅生成时间轴 + Manim"}
-          </button>
+          {planError && <p className="text-red-400 text-sm">{planError}</p>}
+
+          {previewPlan && (
+            <div className="bg-darker border border-gray-700 rounded-lg p-4 text-sm space-y-2">
+              <p className="font-semibold">分镜预览 · {previewPlan.title}</p>
+              <ul className="text-xs space-y-1 text-gray-300">
+                {(previewPlan.resolvedShots || []).map((s, i) => (
+                  <li key={i}>
+                    <span className="text-gray-500">{i + 1}.</span>{" "}
+                    <span className={s.kind === "manim" ? "text-green-400" : "text-blue-400"}>
+                      [{s.kind}]
+                    </span>{" "}
+                    {s.type} — {s.label}
+                  </li>
+                ))}
+              </ul>
+              <p className="text-xs text-gray-500">
+                Manim 任务 {previewPlan.manimJobs.length} 个 · 时间轴共 {previewPlan.timeline.length} 段
+              </p>
+            </div>
+          )}
         </div>
 
         <div className="space-y-4">
@@ -190,7 +270,7 @@ export default function AutoVideoPage() {
             </div>
 
             {!task ? (
-              <p className="text-gray-500 text-sm">提交后开始显示进度</p>
+              <p className="text-gray-500 text-sm">点击「一键生成视频」后开始</p>
             ) : (
               <div className="space-y-4 text-sm">
                 <div>
@@ -227,7 +307,7 @@ export default function AutoVideoPage() {
 
                 {task.status === "pending" && (
                   <p className="text-yellow-500/90 text-xs">
-                    等待 Worker 执行（约 2 秒内开始）。若其他 Manim/Remotion 任务正在跑，会依次排队。
+                    等待 Worker 执行。若其他 Manim/Remotion 任务正在跑，会依次排队。
                   </p>
                 )}
 
@@ -311,7 +391,7 @@ export default function AutoVideoPage() {
           {timelineJson && (
             <details className="bg-darker rounded-lg border border-gray-700 p-4">
               <summary className="font-semibold text-sm cursor-pointer">
-                时间轴 JSON（自动更新）
+                Remotion 时间轴 JSON（合成用）
               </summary>
               <pre className="text-xs text-gray-300 overflow-auto max-h-64 whitespace-pre-wrap mt-2">
                 {timelineJson}

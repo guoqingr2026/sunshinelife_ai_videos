@@ -62,8 +62,14 @@ export interface ComposeStep {
   status: "pending" | "running" | "done" | "skipped" | "error";
 }
 
+export interface VideoProject {
+  title?: string;
+  shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }>;
+}
+
 export interface ComposePayload {
   brief: string;
+  project?: VideoProject;
   title?: string;
   preview?: boolean;
   renderFinal?: boolean;
@@ -155,15 +161,19 @@ export const api = {
 
   getManimTask: (id: string) => request<Task>(`/api/manim/task/${id}`),
 
-  planVideo: (data: { brief: string; title?: string }) =>
-    request<{ title: string; timeline: unknown[]; manimJobs: unknown[]; theme: ThemeConfig }>(
-      "/api/video/plan",
-      { method: "POST", body: JSON.stringify(data) }
-    ),
+  planVideo: (data: { brief?: string; title?: string; project?: VideoProject }) =>
+    request<{
+      title: string;
+      timeline: unknown[];
+      manimJobs: unknown[];
+      theme: ThemeConfig;
+      resolvedShots?: Array<{ kind: string; type: string; label: string }>;
+    }>("/api/video/plan", { method: "POST", body: JSON.stringify(data) }),
 
   createComposeTask: (data: {
-    brief: string;
+    brief?: string;
     title?: string;
+    project?: VideoProject;
     preview?: boolean;
     renderFinal?: boolean;
   }) =>

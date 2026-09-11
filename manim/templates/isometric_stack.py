@@ -1,8 +1,9 @@
 from manim import *
+from templates._text import mk_text
 
 
 class IsometricStack(Scene):
-    """伪 3D 层叠结构（cairo 友好）"""
+    """�?3D 层叠结构（cairo 友好�?""
 
     def construct(self):
         layers = VGroup()
@@ -18,7 +19,7 @@ class IsometricStack(Scene):
                 fill_opacity=0.5,
             )
             layers.add(rect)
-        title = Text("层叠结构 (PCB/能带)", font_size=28).to_edge(UP)
+        title = mk_text("层叠结构 (PCB/能带)", font_size=28).to_edge(UP)
         self.play(Write(title))
         self.play(LaggedStart(*[FadeIn(l, shift=UP * 0.2) for l in layers], lag_ratio=0.25))
         self.wait(1)

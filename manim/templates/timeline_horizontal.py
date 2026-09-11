@@ -1,4 +1,5 @@
 from manim import *
+from templates._text import mk_text
 from templates._params import get_params
 
 
@@ -13,10 +14,10 @@ class TimelineHorizontal(Scene):
         for i, ev in enumerate(events):
             x = -5 + (10 * i / max(n - 1, 1))
             dot = Dot(point=[x, 0, 0], color=YELLOW)
-            lbl = Text(str(ev), font_size=20).next_to(dot, DOWN, buff=0.3)
+            lbl = mk_text(str(ev), font_size=20).next_to(dot, DOWN, buff=0.3)
             dots.add(dot)
             labels.add(lbl)
-        title = Text("时间轴", font_size=32).to_edge(UP)
+        title = mk_text("时间�?, font_size=32).to_edge(UP)
         self.play(Write(title), Create(line))
         self.play(LaggedStart(*[FadeIn(d) for d in dots], lag_ratio=0.2))
         self.play(LaggedStart(*[Write(l) for l in labels], lag_ratio=0.15))

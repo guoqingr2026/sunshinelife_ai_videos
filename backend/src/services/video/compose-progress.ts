@@ -15,6 +15,7 @@ export interface ComposeStep {
 
 export interface ComposePayload {
   brief: string;
+  project?: { title?: string; shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }> };
   title?: string;
   preview?: boolean;
   renderFinal?: boolean;

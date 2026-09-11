@@ -40,12 +40,17 @@ def main():
     output_path = payload.get("outputPath", "output.mp4")
     params = payload.get("params", {})
 
-    scene_class = TEMPLATES.get(task_type, TEMPLATES["pn_junction"])
+    if task_type not in TEMPLATES:
+        sys.stderr.write(f"Unknown manim template: {task_type}\n")
+        sys.stderr.write(f"Valid types: {', '.join(sorted(TEMPLATES.keys()))}\n")
+        sys.exit(1)
+    scene_class = TEMPLATES[task_type]
     module_path, class_name = scene_class.rsplit(".", 1)
 
     os.environ["MANIM_PARAMS"] = json.dumps(params)
     os.environ["MANIM_OUTPUT"] = output_path
     os.environ["MANIM_RENDERER"] = "cairo"
+    os.environ.setdefault("MANIM_CJK_FONT", "Noto Sans CJK SC")
 
     output_dir = os.path.dirname(output_path)
     os.makedirs(output_dir, exist_ok=True)

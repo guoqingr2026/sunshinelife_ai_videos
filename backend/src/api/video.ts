@@ -59,11 +59,12 @@ router.post("/shot-plan/preview", (req, res) => {
 
 router.post("/plan", (req, res) => {
   try {
-    const { brief, title } = req.body;
-    if (!brief || typeof brief !== "string") {
-      return res.status(400).json({ error: "brief is required" });
-    }
-    const plan = planFromBrief(brief, title);
+    const { brief, title, project } = req.body;
+    const plan = planFromBrief(
+      typeof brief === "string" ? brief : "",
+      title,
+      project
+    );
     res.json(plan);
   } catch (err) {
     res.status(500).json({ error: String(err) });
@@ -72,9 +73,10 @@ router.post("/plan", (req, res) => {
 
 router.post("/compose", (req, res) => {
   try {
-    const { brief, title, preview, renderFinal, theme, templateId } = req.body;
-    if (!brief || typeof brief !== "string") {
-      return res.status(400).json({ error: "brief is required" });
+    const { brief, title, project, preview, renderFinal, theme, templateId } = req.body;
+    const briefText = typeof brief === "string" ? brief : "";
+    if (!briefText.trim() && !project?.shots?.length) {
+      return res.status(400).json({ error: "brief or project.shots is required" });
     }
 
     const willRenderFinal = renderFinal !== false;
@@ -82,8 +84,9 @@ router.post("/compose", (req, res) => {
       kind: "compose",
       status: "pending",
       payload: JSON.stringify({
-        brief,
+        brief: briefText,
         title,
+        project,
         preview: preview ?? true,
         renderFinal: willRenderFinal,
         theme,

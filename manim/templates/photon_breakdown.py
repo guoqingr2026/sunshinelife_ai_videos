@@ -1,4 +1,5 @@
 from manim import *
+from templates._text import mk_text
 
 
 class PhotonBreakdown(Scene):
@@ -13,7 +14,7 @@ class PhotonBreakdown(Scene):
             color=GREEN,
             buff=0.1,
         )
-        photon_label = Text("hν", font_size=24, color=GREEN).next_to(photon, LEFT)
+        photon_label = mk_text("hν", font_size=24, color=GREEN).next_to(photon, LEFT)
 
         self.play(Create(atom), FadeIn(nucleus), FadeIn(electron))
         self.play(GrowArrow(photon), Write(photon_label))

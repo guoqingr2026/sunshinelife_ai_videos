@@ -43,7 +43,7 @@ export async function renderCompose(
   let theme = payload.theme;
 
   if (!timeline || !manimJobs) {
-    const plan = planFromBrief(payload.brief, payload.title);
+    const plan = planFromBrief(payload.brief, payload.title, payload.project);
     timeline = plan.timeline;
     manimJobs = plan.manimJobs;
     theme = plan.theme;

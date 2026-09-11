@@ -23,6 +23,12 @@ export const MANIM_TYPE_ALIASES: Record<string, string> = {
   learning_tips: "typewriter_text",
   knowledge_tree: "concept_network",
   mind_map: "concept_network",
+  concept_tree: "concept_network",
+  interleave: "flowchart",
+  deep_work: "keyword_pop",
+  exam_simulation: "timeline_horizontal",
+  study_group: "concept_network",
+  brain_health: "learning_curve",
 };
 
 /** GPT 常编造的非 Manim 类型 → Remotion 模块 */
@@ -33,7 +39,9 @@ export const REMOTION_TYPE_ALIASES: Record<string, string> = {
   subtitle: "subtitle",
   quote: "quote",
   title_card: "title",
+  title: "title",
   outro: "fade_text",
+  manim_clip: "fade_text",
 };
 
 export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
