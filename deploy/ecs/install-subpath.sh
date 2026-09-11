@@ -37,7 +37,11 @@ fi
 
 if [[ -d "$APP_DIR/.git" ]]; then
   cd "$APP_DIR"
-  git pull --ff-only
+  if git symbolic-ref -q HEAD >/dev/null 2>&1; then
+    git pull --ff-only
+  else
+    echo "当前为 detached HEAD（$(git describe --tags --always)），跳过 git pull"
+  fi
 elif [[ -f "$SCRIPT_DIR/../../package.json" ]]; then
   APP_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
   cd "$APP_DIR"

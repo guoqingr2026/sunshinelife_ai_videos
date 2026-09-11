@@ -6,7 +6,12 @@ APP_DIR="/opt/sunshinelife_ai_videos"
 BASE_PATH="/sunshinelife_ai_videos"
 
 cd "$APP_DIR"
-git pull --ff-only
+if git symbolic-ref -q HEAD >/dev/null 2>&1; then
+  git pull --ff-only
+else
+  git fetch --tags
+  echo "detached HEAD，未执行 pull。可执行: git checkout main && git pull"
+fi
 
 export VITE_BASE_PATH="${BASE_PATH}/"
 export VITE_API_BASE="${BASE_PATH}"
