@@ -8,6 +8,34 @@ export interface ManimTypeSpec {
   keywords: string[];
 }
 
+const VALID_MANIM_IDS = new Set<string>();
+
+export const MANIM_TYPE_ALIASES: Record<string, string> = {
+  memory_recall: "concept_network",
+  active_recall: "typewriter_text",
+  neural_connection: "concept_network",
+  concept_simplify: "formula_steps",
+  feynman: "concept_network",
+  feynman_technique: "concept_network",
+  spaced_repetition: "forgetting_curve",
+  ebbinghaus: "forgetting_curve",
+  spaced_repetition_curve: "forgetting_curve",
+  learning_tips: "typewriter_text",
+  knowledge_tree: "concept_network",
+  mind_map: "concept_network",
+};
+
+/** GPT 常编造的非 Manim 类型 → Remotion 模块 */
+export const REMOTION_TYPE_ALIASES: Record<string, string> = {
+  cornell_notes: "bullet_list",
+  cornell: "bullet_list",
+  notes: "bullet_list",
+  subtitle: "subtitle",
+  quote: "quote",
+  title_card: "title",
+  outro: "fade_text",
+};
+
 export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
   // 工程 / 物理 / 电气
   { id: "pn_junction", label: "PN 结", category: "工程", desc: "N/P 型、耗尽层、电流方向", keywords: ["pn结", "pn", "耗尽层", "二极管", "扩散"] },
@@ -39,6 +67,32 @@ export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
   { id: "isometric_stack", label: "层叠结构", category: "结构", desc: "PCB/能带层叠伪3D", keywords: ["层叠", "pcb", "叠层", "多层结构"] },
   { id: "orbit_paths", label: "轨道路径", category: "结构", desc: "旋转轨道示意", keywords: ["轨道", "旋转", "路径", "圆周", "公转"] },
 ];
+
+for (const spec of MANIM_TYPE_SPECS) {
+  VALID_MANIM_IDS.add(spec.id);
+}
+
+export function isValidManimType(type: string): boolean {
+  return VALID_MANIM_IDS.has(type);
+}
+
+export function resolveManimType(type: string): string | null {
+  const t = type.trim().toLowerCase();
+  if (VALID_MANIM_IDS.has(t)) return t;
+  const alias = MANIM_TYPE_ALIASES[t];
+  if (alias && VALID_MANIM_IDS.has(alias)) return alias;
+  return null;
+}
+
+export function resolveRemotionType(type: string): string | null {
+  const t = type.trim().toLowerCase();
+  const remotionTypes = new Set([
+    "title", "chapter", "params", "bullet_list", "subtitle", "fade_text",
+    "compare", "arrow", "quote", "stat", "flow_steps", "timeline_bar", "formula_card",
+  ]);
+  if (remotionTypes.has(t)) return t;
+  return REMOTION_TYPE_ALIASES[t] || null;
+}
 
 function ruleLine(spec: ManimTypeSpec): string {
   return `${spec.keywords.join(", ")} → ${spec.id} | ${spec.label}`;

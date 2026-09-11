@@ -88,7 +88,9 @@ export default function AutoVideoPage() {
               placeholder="描述你想讲什么，可写关键词如：PN结、遗忘曲线、MOSFET、学习技巧…"
             />
             <p className="text-xs text-gray-500 mt-1">
-              支持关键词自动匹配 Manim 类型；用「-」开头的行会识别为要点列表。
+              可直接粘贴 GPT 分镜行（<code>类型 | 标签</code>），如{" "}
+              <code>forgetting_curve | 间隔重复</code>；也支持 JSON 或纯文字关键词。
+              完整规格见「镜头规划」页。
             </p>
           </div>
 

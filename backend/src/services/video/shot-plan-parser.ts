@@ -97,13 +97,17 @@ function parseRuleLine(line: string): ManimRule | null {
 }
 
 /** 镜头行: 1. type_id | 标签  或  manim: type_id | 标签 */
-function parseShotLine(line: string): ShotSpec | null {
+export function parseShotLine(line: string): ShotSpec | null {
   const trimmed = line.trim();
   if (!trimmed) return null;
+  if (trimmed.startsWith("#") || trimmed.startsWith("//")) return null;
 
-  const numbered = trimmed.match(/^(?:\d+[.)]\s*|[-*•]\s*|manim[:：]\s*)?([^\s|]+)\s*\|\s*(.+)$/i);
+  const numbered = trimmed.match(
+    /^(?:\d+[.)]\s*|[-*•]\s*|manim[:：]\s*)?([a-z_][a-z0-9_]*)\s*\|\s*(.+)$/i
+  );
   if (numbered) {
-    return { type: numbered[1].trim(), label: numbered[2].trim() };
+    const label = numbered[2].replace(/[（(].*[）)]\s*$/, "").trim();
+    return { type: numbered[1].trim().toLowerCase(), label };
   }
 
   const simple = trimmed.match(/^(?:\d+[.)]\s*|[-*•]\s*)?([a-z_]+)\s*$/i);

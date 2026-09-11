@@ -1,5 +1,6 @@
-import { ManimRule } from "./shot-plan-parser";
+import { ManimRule, parseShotLine, parseShotPlanArticle } from "./shot-plan-parser";
 import { getActiveManimRules, getFixedShots } from "./shot-plan-store";
+import { resolveManimType, resolveRemotionType } from "./shot-plan-spec";
 
 export interface ThemeConfig {
   primaryColor: string;
@@ -126,10 +127,72 @@ function pickTheme(brief: string): ThemeConfig {
   return THEMES[2];
 }
 
+interface SequenceItem {
+  kind: "manim" | "remotion";
+  type: string;
+  label: string;
+  params?: Record<string, unknown>;
+}
+
+/** 从「视频要求」正文解析 GPT 分镜行（type | 标签） */
+function parseBriefSequence(brief: string): SequenceItem[] {
+  const fromArticle = parseShotPlanArticle(brief);
+  if (fromArticle.shots.length > 0) {
+    return fromArticle.shots
+      .map((s) => {
+        const manim = resolveManimType(s.type);
+        if (manim) return { kind: "manim" as const, type: manim, label: s.label, params: s.params };
+        const remotion = resolveRemotionType(s.type);
+        if (remotion) return { kind: "remotion" as const, type: remotion, label: s.label, params: s.params };
+        return null;
+      })
+      .filter(Boolean) as SequenceItem[];
+  }
+
+  const items: SequenceItem[] = [];
+  for (const line of brief.split(/\n/)) {
+    const shot = parseShotLine(line);
+    if (!shot) continue;
+    const manim = resolveManimType(shot.type);
+    if (manim) {
+      items.push({ kind: "manim", type: manim, label: shot.label, params: shot.params });
+      continue;
+    }
+    const remotion = resolveRemotionType(shot.type);
+    if (remotion) {
+      items.push({ kind: "remotion", type: remotion, label: shot.label, params: shot.params });
+    }
+  }
+  return items;
+}
+
+function remotionItemFromSequence(item: SequenceItem): TimelineItem {
+  switch (item.type) {
+    case "chapter":
+      return { type: "chapter", durationInFrames: 90, title: item.label };
+    case "bullet_list":
+      return {
+        type: "bullet_list",
+        durationInFrames: 120,
+        title: item.label,
+        items: ["要点一", "要点二", "要点三"],
+      };
+    case "flow_steps":
+      return { type: "flow_steps", durationInFrames: 150, steps: ["输入", "理解", "输出"] };
+    case "quote":
+      return { type: "quote", durationInFrames: 100, quote: item.label, author: "" };
+    case "fade_text":
+      return { type: "fade_text", durationInFrames: 90, text: item.label };
+    default:
+      return { type: "chapter", durationInFrames: 90, title: item.label };
+  }
+}
+
 export function planFromBrief(brief: string, title?: string): VideoPlan {
   const videoTitle = extractTitle(brief, title);
   const rules = getActiveManimRules();
   const fixedShots = getFixedShots();
+  const briefSequence = parseBriefSequence(brief);
   const timeline: TimelineItem[] = [];
   const manimJobs: ManimJob[] = [];
 
@@ -141,44 +204,68 @@ export function planFromBrief(brief: string, title?: string): VideoPlan {
     author: "",
   });
 
-  const typesToRender: ManimRule[] =
-    fixedShots.length > 0
-      ? fixedShots.map((s) => ({
-          keywords: [],
-          type: s.type,
-          label: s.label,
-          params: s.params,
-        }))
-      : detectManimTypes(brief, rules).length > 0
-        ? detectManimTypes(brief, rules)
-        : [
-            {
-              keywords: [],
-              type: "concept_network",
-              label: "核心概念",
-              params: {
-                center: videoTitle.slice(0, 10),
-                nodes: ["背景", "原理", "应用", "总结"],
+  if (briefSequence.length > 0) {
+    for (const item of briefSequence) {
+      if (item.kind === "remotion") {
+        timeline.push(remotionItemFromSequence(item));
+        continue;
+      }
+      timeline.push({ type: "chapter", durationInFrames: 90, title: item.label });
+      const idx = timeline.length;
+      timeline.push({
+        type: "manim_placeholder",
+        durationInFrames: 150,
+        title: item.label,
+        manimType: item.type,
+        _autoManim: true,
+      });
+      manimJobs.push({
+        timelineIndex: idx,
+        type: item.type,
+        label: item.label,
+        params: item.params,
+      });
+    }
+  } else {
+    const typesToRender: ManimRule[] =
+      fixedShots.length > 0
+        ? fixedShots.map((s) => ({
+            keywords: [],
+            type: resolveManimType(s.type) || s.type,
+            label: s.label,
+            params: s.params,
+          }))
+        : detectManimTypes(brief, rules).length > 0
+          ? detectManimTypes(brief, rules)
+          : [
+              {
+                keywords: [],
+                type: "concept_network",
+                label: "核心概念",
+                params: {
+                  center: videoTitle.slice(0, 10),
+                  nodes: ["背景", "原理", "应用", "总结"],
+                },
               },
-            },
-          ];
+            ];
 
-  for (const m of typesToRender) {
-    timeline.push({ type: "chapter", durationInFrames: 90, title: m.label });
-    const idx = timeline.length;
-    timeline.push({
-      type: "manim_placeholder",
-      durationInFrames: 150,
-      title: m.label,
-      manimType: m.type,
-      _autoManim: true,
-    });
-    manimJobs.push({
-      timelineIndex: idx,
-      type: m.type,
-      label: m.label,
-      params: m.params,
-    });
+    for (const m of typesToRender) {
+      timeline.push({ type: "chapter", durationInFrames: 90, title: m.label });
+      const idx = timeline.length;
+      timeline.push({
+        type: "manim_placeholder",
+        durationInFrames: 150,
+        title: m.label,
+        manimType: m.type,
+        _autoManim: true,
+      });
+      manimJobs.push({
+        timelineIndex: idx,
+        type: m.type,
+        label: m.label,
+        params: m.params,
+      });
+    }
   }
 
   const bullets = extractBullets(brief);
