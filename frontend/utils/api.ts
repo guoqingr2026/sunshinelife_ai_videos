@@ -24,6 +24,32 @@ export interface Subtitle {
   createdAt: string;
 }
 
+export interface ShotPlanRule {
+  keywords: string[];
+  type: string;
+  label: string;
+  params?: Record<string, unknown>;
+}
+
+export interface ShotPlanShot {
+  type: string;
+  label: string;
+  params?: Record<string, unknown>;
+}
+
+export interface ShotPlanConfig {
+  article: string;
+  rules: ShotPlanRule[];
+  shots: ShotPlanShot[];
+  updatedAt: string;
+}
+
+export interface ShotPlanPreview {
+  rules: ShotPlanRule[];
+  shots: ShotPlanShot[];
+  errors: string[];
+}
+
 export interface ComposePayload {
   brief: string;
   title?: string;
@@ -128,6 +154,20 @@ export const api = {
     }),
 
   getComposeTask: (id: string) => request<ComposeTask>(`/api/video/compose/${id}`),
+
+  getShotPlan: () => request<ShotPlanConfig>("/api/video/shot-plan"),
+
+  saveShotPlan: (article: string) =>
+    request<ShotPlanConfig>("/api/video/shot-plan", {
+      method: "POST",
+      body: JSON.stringify({ article }),
+    }),
+
+  previewShotPlan: (article: string) =>
+    request<ShotPlanPreview>("/api/video/shot-plan/preview", {
+      method: "POST",
+      body: JSON.stringify({ article }),
+    }),
 
   createRemotionTask: (data: {
     templateId: string;

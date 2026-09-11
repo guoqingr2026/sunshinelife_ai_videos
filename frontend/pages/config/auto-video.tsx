@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api, ComposeTask } from "../../utils/api";
 
 const EXAMPLE_BRIEF = `PN结原理科普
@@ -58,7 +59,11 @@ export default function AutoVideoPage() {
       <h1 className="text-2xl font-bold mb-2">一键自动成片</h1>
       <p className="text-gray-400 text-sm mb-6">
         只需填写<strong className="text-white">视频要求</strong>，系统会自动：规划时间轴 → 渲染 Manim → 填入 JSON → 合成成片。
-        无需手动复制地址或改时间轴。
+        镜头规则可在
+        <Link to="/config/shot-plan" className="text-primary underline mx-1">
+          镜头规划
+        </Link>
+        页粘贴 GPT 分镜并保存，无需改代码。
       </p>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">

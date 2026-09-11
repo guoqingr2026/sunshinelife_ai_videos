@@ -8,6 +8,7 @@ import ManimConfig from "../pages/config/manim";
 import HyperFramesConfig from "../pages/config/hyperframes";
 import RemotionConfig from "../pages/config/remotion";
 import AutoVideoPage from "../pages/config/auto-video";
+import ShotPlanPage from "../pages/config/shot-plan";
 import BilibiliPackagingPage from "../pages/packaging/bilibili";
 import TasksPage from "../pages/tasks/index";
 import "../styles/globals.css";
@@ -25,6 +26,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/config/hyperframes" element={<HyperFramesConfig />} />
           <Route path="/config/remotion" element={<RemotionConfig />} />
           <Route path="/config/auto-video" element={<AutoVideoPage />} />
+          <Route path="/config/shot-plan" element={<ShotPlanPage />} />
           <Route path="/packaging/bilibili" element={<BilibiliPackagingPage />} />
           <Route path="/tasks" element={<TasksPage />} />
         </Routes>

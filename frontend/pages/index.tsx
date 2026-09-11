@@ -7,6 +7,11 @@ const modules = [
     desc: "填写要求 → 自动 Manim + 时间轴 + 合成",
   },
   {
+    href: "/config/shot-plan",
+    title: "镜头规划文章",
+    desc: "粘贴 GPT 分镜 → 自动解析生效",
+  },
+  {
     href: "/editor/subtitle",
     title: "字幕编辑",
     desc: "上传 SRT/TXT，自动断句修复",

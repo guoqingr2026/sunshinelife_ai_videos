@@ -1,8 +1,47 @@
 import { Router } from "express";
 import { db } from "../lib/db";
 import { planFromBrief } from "../services/video/plan-timeline";
+import { parseShotPlanArticle } from "../services/video/shot-plan-parser";
+import {
+  getShotPlanConfig,
+  saveShotPlanArticle,
+  DEFAULT_SHOT_PLAN_ARTICLE,
+} from "../services/video/shot-plan-store";
 
 const router = Router();
+
+router.get("/shot-plan", (_req, res) => {
+  try {
+    const config = getShotPlanConfig();
+    res.json(config);
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+router.post("/shot-plan", (req, res) => {
+  try {
+    const { article } = req.body;
+    if (!article || typeof article !== "string") {
+      return res.status(400).json({ error: "article is required" });
+    }
+    const config = saveShotPlanArticle(article);
+    res.json(config);
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+router.post("/shot-plan/preview", (req, res) => {
+  try {
+    const { article } = req.body;
+    const text = typeof article === "string" ? article : DEFAULT_SHOT_PLAN_ARTICLE;
+    const parsed = parseShotPlanArticle(text);
+    res.json(parsed);
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
 
 router.post("/plan", (req, res) => {
   try {

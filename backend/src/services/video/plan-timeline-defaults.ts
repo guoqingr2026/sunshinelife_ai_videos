@@ -1,0 +1,47 @@
+import { ManimRule } from "./shot-plan-parser";
+
+export const DEFAULT_MANIM_RULES: ManimRule[] = [
+  { keywords: ["pn结", "pn 结", "pn"], type: "pn_junction", label: "PN 结" },
+  { keywords: ["能带", "导带", "价带"], type: "band_structure", label: "能带结构" },
+  { keywords: ["mosfet", "沟道", "场效应"], type: "mosfet_channel", label: "MOSFET" },
+  { keywords: ["buck", "降压", "开关电源"], type: "buck_converter", label: "Buck 拓扑" },
+  { keywords: ["llc", "谐振"], type: "llc_resonant", label: "LLC 谐振" },
+  { keywords: ["电流", "电阻", "欧姆", "电路"], type: "current_arrow", label: "电路电流" },
+  { keywords: ["波形", "正弦", "频率", "hz"], type: "sine_waveform", label: "波形" },
+  { keywords: ["光子", "击穿"], type: "photon_breakdown", label: "光子激发" },
+  { keywords: ["半导体层", "多层"], type: "semiconductor_layers", label: "半导体层" },
+  { keywords: ["遗忘", "艾宾浩斯", "记忆曲线"], type: "forgetting_curve", label: "遗忘曲线" },
+  { keywords: ["学习效率", "学习曲线", "留存"], type: "learning_curve", label: "学习效率" },
+  {
+    keywords: ["间隔重复", "主动回忆", "费曼"],
+    type: "typewriter_text",
+    label: "学习技巧",
+    params: { text: "主动回忆 · 间隔重复", subtitle: "学习技巧" },
+  },
+  {
+    keywords: ["流程", "步骤"],
+    type: "flowchart",
+    label: "流程图",
+    params: { steps: ["输入", "理解", "回忆", "输出"] },
+  },
+  {
+    keywords: ["时间轴", "时间线"],
+    type: "timeline_horizontal",
+    label: "时间轴",
+    params: { events: ["第1天", "第3天", "第7天", "第30天"] },
+  },
+  { keywords: ["概念", "知识树", "知识网络", "结构图"], type: "concept_network", label: "概念网络" },
+  { keywords: ["函数", "sin", "曲线", "图像"], type: "function_graph", label: "函数曲线" },
+  { keywords: ["向量", "合成"], type: "vector_sum", label: "向量" },
+  { keywords: ["坐标", "坐标系"], type: "coordinate_grid", label: "坐标系" },
+  { keywords: ["柱状", "统计", "图表"], type: "bar_chart", label: "数据统计" },
+  {
+    keywords: ["公式", "拆解"],
+    type: "formula_steps",
+    label: "公式拆解",
+    params: { steps: ["P = V × I", "V = I × R", "P = I² × R"] },
+  },
+  { keywords: ["关键词", "高亮"], type: "keyword_pop", label: "关键词" },
+  { keywords: ["层叠", "pcb", "结构"], type: "isometric_stack", label: "层叠结构" },
+  { keywords: ["轨道", "旋转", "路径"], type: "orbit_paths", label: "轨道路径" },
+];
