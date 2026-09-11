@@ -169,6 +169,19 @@ export const api = {
       body: JSON.stringify({ article }),
     }),
 
+  getShotPlanSpec: () =>
+    request<{
+      types: Array<{
+        id: string;
+        label: string;
+        category: string;
+        desc: string;
+        keywords: string[];
+      }>;
+      gptPrompt: string;
+      defaultArticle: string;
+    }>("/api/video/shot-plan/spec"),
+
   createRemotionTask: (data: {
     templateId: string;
     timeline: Array<Record<string, unknown>>;

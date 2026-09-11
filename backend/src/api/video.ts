@@ -7,8 +7,21 @@ import {
   saveShotPlanArticle,
   DEFAULT_SHOT_PLAN_ARTICLE,
 } from "../services/video/shot-plan-store";
+import {
+  MANIM_TYPE_SPECS,
+  buildGptPrompt,
+  buildDefaultShotPlanArticle,
+} from "../services/video/shot-plan-spec";
 
 const router = Router();
+
+router.get("/shot-plan/spec", (_req, res) => {
+  res.json({
+    types: MANIM_TYPE_SPECS,
+    gptPrompt: buildGptPrompt(),
+    defaultArticle: buildDefaultShotPlanArticle(),
+  });
+});
 
 router.get("/shot-plan", (_req, res) => {
   try {
