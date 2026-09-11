@@ -1,7 +1,9 @@
 import json
 import sys
 import os
+import shutil
 import subprocess
+import glob
 
 TEMPLATES = {
     "pn_junction": "templates.pn_junction.PNJunction",
@@ -10,6 +12,13 @@ TEMPLATES = {
     "photon_breakdown": "templates.photon_breakdown.PhotonBreakdown",
     "semiconductor_layers": "templates.semiconductor_layers.SemiconductorLayers",
 }
+
+
+def find_manim_cmd():
+    import shutil as sh
+    if sh.which("manim"):
+        return ["manim"]
+    return [sys.executable, "-m", "manim"]
 
 
 def main():
@@ -27,26 +36,51 @@ def main():
     output_dir = os.path.dirname(output_path)
     os.makedirs(output_dir, exist_ok=True)
 
+    root = os.path.dirname(os.path.abspath(__file__))
+    media_dir = os.path.join(root, "media")
+    if os.path.exists(media_dir):
+        shutil.rmtree(media_dir, ignore_errors=True)
+
+    script_file = f"{module_path.replace('.', '/')}.py"
+    out_name = os.path.splitext(os.path.basename(output_path))[0]
+
     cmd = [
-        sys.executable, "-m", "manim", "-ql", "--format=mp4",
-        "-o", os.path.splitext(os.path.basename(output_path))[0],
-        f"{module_path.replace('.', '/')}.py",
+        *find_manim_cmd(),
+        "-ql",
+        "--format=mp4",
+        "-o",
+        out_name,
+        script_file,
         class_name,
     ]
 
-    result = subprocess.run(cmd, cwd=os.path.dirname(os.path.abspath(__file__)))
+    result = subprocess.run(
+        cmd,
+        cwd=root,
+        capture_output=True,
+        text=True,
+    )
 
-    media_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "media", "videos")
-    if os.path.exists(media_dir):
-        for root, _, files in os.walk(media_dir):
-            for f in files:
-                if f.endswith(".mp4"):
-                    src = os.path.join(root, f)
-                    import shutil
-                    shutil.copy2(src, output_path)
-                    sys.exit(0)
+    if result.returncode != 0:
+        sys.stderr.write(result.stderr or "")
+        sys.stderr.write(result.stdout or "")
+        sys.exit(result.returncode)
 
-    sys.exit(result.returncode)
+    media_videos = os.path.join(root, "media", "videos")
+    mp4_files = glob.glob(os.path.join(media_videos, "**", "*.mp4"), recursive=True)
+    if not mp4_files:
+        sys.stderr.write("No mp4 found under media/videos\n")
+        sys.stderr.write(result.stderr or "")
+        sys.exit(1)
+
+    newest = max(mp4_files, key=os.path.getmtime)
+    shutil.copy2(newest, output_path)
+
+    if os.path.getsize(output_path) < 2048:
+        sys.stderr.write(f"Output too small: {output_path}\n")
+        sys.exit(1)
+
+    sys.exit(0)
 
 
 if __name__ == "__main__":

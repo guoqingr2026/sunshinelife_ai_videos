@@ -190,7 +190,11 @@ export default function ManimConfig() {
                     )}
                   </>
                 )}
-                {task.error && <p className="text-red-400">{task.error}</p>}
+                {task.error && (
+                  <p className={task.status === "success" ? "text-yellow-400 text-xs" : "text-red-400"}>
+                    {task.error}
+                  </p>
+                )}
               </div>
             ) : (
               <p className="text-gray-500">提交后在此预览</p>

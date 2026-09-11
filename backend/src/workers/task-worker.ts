@@ -28,6 +28,7 @@ async function processNextTask() {
       db.task.update({ id: task.id }, {
         status: "success",
         outputUrl: result.outputUrl,
+        error: result.warning,
       });
     } else if (task.kind === "remotion") {
       const result = await renderRemotion(task.id, payload);

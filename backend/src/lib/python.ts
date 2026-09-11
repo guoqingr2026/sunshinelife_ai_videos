@@ -31,5 +31,8 @@ export async function checkPythonAvailable(): Promise<boolean> {
 
 export async function checkManimModule(): Promise<boolean> {
   const { command, args } = getPythonLauncher();
-  return checkCmd(command, [...args, "-m", "manim", "--version"]);
+  if (await checkCmd(command, [...args, "-m", "manim", "--version"])) {
+    return true;
+  }
+  return checkCmd("manim", ["--version"]);
 }
