@@ -1,0 +1,7 @@
+packages:
+  - "frontend"
+  - "backend"
+  - "remotion"
+
+allowBuilds:
+  esbuild: true
