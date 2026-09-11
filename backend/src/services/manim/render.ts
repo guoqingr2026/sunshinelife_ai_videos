@@ -46,9 +46,14 @@ export async function renderManim(
   const payloadJson = JSON.stringify({ taskId, ...payload, outputPath });
   let stderr = "";
 
+  const pyPath = process.env.PYTHONPATH
+    ? `${MANIM_ROOT}${path.delimiter}${process.env.PYTHONPATH}`
+    : MANIM_ROOT;
+
   const exitCode = await new Promise<number>((resolve, reject) => {
     const proc = spawnPythonStdin(RENDER_SCRIPT, payloadJson, {
       cwd: MANIM_ROOT,
+      env: { ...process.env, PYTHONPATH: pyPath },
     });
 
     proc.stderr?.on("data", (d) => {

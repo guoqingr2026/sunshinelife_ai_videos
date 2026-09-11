@@ -9,7 +9,18 @@ from template_catalog import TEMPLATES
 
 
 def find_manim_cmd():
+    """优先用当前 Python 的 -m manim，确保 PYTHONPATH 与子进程一致。"""
     import shutil as sh
+    try:
+        r = subprocess.run(
+            [sys.executable, "-m", "manim", "--version"],
+            capture_output=True,
+            text=True,
+        )
+        if r.returncode == 0:
+            return [sys.executable, "-m", "manim"]
+    except OSError:
+        pass
     if sh.which("manim"):
         return ["manim"]
     return [sys.executable, "-m", "manim"]
@@ -84,6 +95,8 @@ def main():
 
     if not last_result or last_result.returncode != 0:
         sys.stderr.write(f"CMD: {' '.join(build_commands(base, script_file, class_name, out_name)[0])}\n")
+        sys.stderr.write(f"PYTHONPATH={env.get('PYTHONPATH', '')}\n")
+        sys.stderr.write(f"MANIM_ROOT={root}\n")
         sys.stderr.write(last_result.stderr if last_result else "no result\n")
         sys.stderr.write(last_result.stdout if last_result else "")
         sys.exit(last_result.returncode if last_result else 1)

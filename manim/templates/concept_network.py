@@ -1,3 +1,9 @@
+import importlib.util
+import os
+_spec = importlib.util.spec_from_file_location('templates._path', os.path.join(os.path.dirname(__file__), '_path.py'))
+_path_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_path_mod)
+
 import numpy as np
 from manim import *
 from templates._text import mk_text
