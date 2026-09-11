@@ -65,6 +65,9 @@ def main():
 
     env = os.environ.copy()
     env["MANIM_RENDERER"] = "cairo"
+    # Manim 按文件路径加载 templates/*.py，需把 manim 根目录加入 PYTHONPATH
+    py_path = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = root + (os.pathsep + py_path if py_path else "")
 
     base = find_manim_cmd()
     last_result = None
