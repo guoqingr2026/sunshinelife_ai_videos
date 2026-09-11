@@ -1,44 +1,63 @@
 # 阿里云 ECS 部署 — sunshinelife_ai_videos
 
-## 前置条件
+## 场景 A：与 englishlearn 等同域共存（推荐）
 
-- 阿里云 ECS（推荐 Ubuntu 22.04，2核4G+）
-- 安全组放行 **80**（HTTP）、如需直连 API 可放行 **3001**
-- 已创建 GitHub 仓库并推送代码
+访问地址：`http://<你的ECS公网IP>/sunshinelife_ai_videos/`
 
-## 首次安装（在 ECS 上执行）
+后端独立端口 **3012**（不影响 englishlearn 的 3001 等端口）。
+
+### 首次安装
 
 ```bash
-# SSH 登录 ECS 后
-sudo bash -c "$(curl -fsSL https://raw.githubusercontent.com/你的用户名/sunshinelife_ai_videos/v1.0/deploy/ecs/install.sh)" \
-  -- https://github.com/你的用户名/sunshinelife_ai_videos.git
+# SSH 登录 ECS
+sudo git clone https://github.com/guoqingr2026/sunshinelife_ai_videos.git /opt/sunshinelife_ai_videos
+cd /opt/sunshinelife_ai_videos
+sudo git checkout v1.0.1   # 或 main
+sudo bash deploy/ecs/install-subpath.sh
 ```
 
-或克隆后本地执行：
+### 配置 Nginx（只需做一次）
+
+安装脚本会把片段写到 `/etc/nginx/snippets/sunshinelife_ai_videos.conf`。
+
+在 **englishlearn 正在使用的** `server { }` 块内添加：
+
+```nginx
+include /etc/nginx/snippets/sunshinelife_ai_videos.conf;
+```
+
+常见配置文件：
+
+- `/etc/nginx/sites-enabled/default`
+- `/etc/nginx/conf.d/englishlearn.conf`（以你实际文件名为准）
+
+然后：
 
 ```bash
-git clone https://github.com/你的用户名/sunshinelife_ai_videos.git /opt/sunshinelife_ai_videos
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+### 日常更新
+
+```bash
+cd /opt/sunshinelife_ai_videos
+sudo bash deploy/ecs/update-subpath.sh
+```
+
+---
+
+## 场景 B：独占整站（根路径 `/`）
+
+```bash
+sudo git clone https://github.com/guoqingr2026/sunshinelife_ai_videos.git /opt/sunshinelife_ai_videos
 cd /opt/sunshinelife_ai_videos
 sudo bash deploy/ecs/install.sh
 ```
 
-安装脚本会完成：Node/pnpm、Nginx、FFmpeg、Chromium、构建、PM2 守护、Manim（尽力安装）。
+访问：`http://<ECS公网IP>/`
 
-## 日常更新
-
-```bash
-cd /opt/sunshinelife_ai_videos
-sudo bash deploy/ecs/update.sh
-```
-
-或切换到指定版本：
-
-```bash
-cd /opt/sunshinelife_ai_videos
-git fetch --tags
-git checkout v1.0
-sudo bash deploy/ecs/update.sh
-```
+---
 
 ## 常用命令
 
@@ -46,15 +65,9 @@ sudo bash deploy/ecs/update.sh
 |------|------|
 | `pm2 status` | 查看后端进程 |
 | `pm2 logs sunshinelife-videos-api` | 查看日志 |
-| `curl localhost:3001/api/health` | 健康检查 |
-| `nginx -t && systemctl reload nginx` | 重载 Nginx |
+| `curl http://localhost:3012/api/health` | 子路径模式健康检查 |
+| `curl http://<IP>/sunshinelife_ai_videos/api/health` | 经 Nginx 检查 |
 
 ## 环境变量
 
 编辑 `/opt/sunshinelife_ai_videos/.env`，参考 `deploy/ecs/env.example`。
-
-## Nginx
-
-配置文件：`deploy/ecs/nginx.conf`  
-部署后位于：`/etc/nginx/conf.d/sunshinelife_ai_videos.conf`  
-请将 `YOUR_DOMAIN` 改为 ECS 公网 IP 或域名。

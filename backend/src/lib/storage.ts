@@ -40,7 +40,8 @@ export function getHyperFramesVideoPath(taskId: string) {
 }
 
 export function toPublicUrl(relativePath: string): string {
+  const base = (process.env.PUBLIC_BASE_PATH || "").replace(/\/$/, "");
   const normalized = relativePath.replace(/\\/g, "/");
-  if (normalized.startsWith("/")) return normalized;
-  return `/${normalized}`;
+  const pathPart = normalized.startsWith("/") ? normalized : `/${normalized}`;
+  return `${base}${pathPart}`;
 }

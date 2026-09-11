@@ -11,9 +11,11 @@ import BilibiliPackagingPage from "../pages/packaging/bilibili";
 import TasksPage from "../pages/tasks/index";
 import "../styles/globals.css";
 
+const basename = (import.meta.env.VITE_BASE_PATH || "/").replace(/\/$/, "") || undefined;
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Layout>
         <Routes>
           <Route path="/" element={<Home />} />
