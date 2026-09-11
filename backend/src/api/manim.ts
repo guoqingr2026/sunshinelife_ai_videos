@@ -1,6 +1,9 @@
 import { Router } from "express";
+import fs from "fs";
+import path from "path";
 import { db } from "../lib/db";
 import { checkCmd, checkManimModule, checkPythonAvailable } from "../lib/python";
+import { getManimOutputPath } from "../lib/storage";
 
 const router = Router();
 
@@ -59,9 +62,18 @@ router.get("/task/:id", async (req, res) => {
   try {
     const task = db.task.findFirst({ id: req.params.id, kind: "manim" });
     if (!task) return res.status(404).json({ error: "Not found" });
+
+    const logPath = getManimOutputPath(req.params.id).replace(/\.mp4$/, ".log");
+    let renderLog: string | undefined;
+    if (fs.existsSync(logPath)) {
+      const raw = fs.readFileSync(logPath, "utf-8");
+      renderLog = raw.slice(-4000);
+    }
+
     res.json({
       ...task,
       payload: JSON.parse(task.payload),
+      renderLog,
     });
   } catch (err) {
     res.status(500).json({ error: String(err) });

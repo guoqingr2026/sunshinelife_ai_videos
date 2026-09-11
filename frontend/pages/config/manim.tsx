@@ -195,6 +195,14 @@ export default function ManimConfig() {
                     {task.error}
                   </p>
                 )}
+                {task.renderLog && (
+                  <details className="text-xs text-gray-500 mt-2">
+                    <summary className="cursor-pointer text-gray-400">渲染日志</summary>
+                    <pre className="mt-1 p-2 bg-black/40 rounded overflow-x-auto max-h-40 whitespace-pre-wrap">
+                      {task.renderLog}
+                    </pre>
+                  </details>
+                )}
               </div>
             ) : (
               <p className="text-gray-500">提交后在此预览</p>

@@ -32,6 +32,7 @@ export interface Task {
   outputUrl?: string;
   framesUrl?: string;
   error?: string;
+  renderLog?: string;
   createdAt: string;
   updatedAt: string;
 }

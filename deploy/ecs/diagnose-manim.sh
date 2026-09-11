@@ -2,6 +2,9 @@
 # Manim 环境诊断
 set -uo pipefail
 
+echo "=== 字体（Text 渲染需要）==="
+apt-get install -y fonts-dejavu-core fontconfig 2>/dev/null || true
+
 echo "=== ffmpeg ==="
 ffmpeg -version 2>&1 | head -1 || echo "未安装 ffmpeg"
 
