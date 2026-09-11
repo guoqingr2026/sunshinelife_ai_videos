@@ -51,7 +51,7 @@ export default function RemotionConfig() {
   };
 
   const loadSaved = (t: RemotionTemplate) => {
-    setTheme(t.theme as ThemeConfig);
+    setTheme({ ...COLOR_SCHEMES[0], ...t.theme });
     setTimelineJson(JSON.stringify(t.timeline, null, 2));
   };
 

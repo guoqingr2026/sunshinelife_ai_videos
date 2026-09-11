@@ -1,3 +1,5 @@
+import type { ThemeConfig } from "./remotion-presets";
+
 const API_BASE = import.meta.env.VITE_API_BASE || "";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -39,7 +41,7 @@ export interface RemotionTemplate {
   name: string;
   templateId: string;
   timeline: unknown[];
-  theme: Record<string, unknown>;
+  theme: ThemeConfig;
   createdAt: string;
 }
 
@@ -86,7 +88,7 @@ export const api = {
   createRemotionTask: (data: {
     templateId: string;
     timeline: Array<Record<string, unknown>>;
-    theme?: Record<string, unknown>;
+    theme?: ThemeConfig;
     preview?: boolean;
   }) =>
     request<{ taskId: string; status: string }>("/api/remotion/task", {
@@ -102,7 +104,7 @@ export const api = {
     name: string;
     templateId: string;
     timeline: unknown[];
-    theme: Record<string, unknown>;
+    theme: ThemeConfig;
   }) =>
     request<RemotionTemplate>("/api/remotion/templates", {
       method: "POST",
