@@ -18,6 +18,6 @@ echo "=== 试渲染 photon_breakdown（约 1～2 分钟）==="
 cd /opt/sunshinelife_ai_videos/manim
 OUT=/tmp/manim-test.mp4
 rm -f "$OUT"
-python3 render_task.py "{\"type\":\"photon_breakdown\",\"outputPath\":\"$OUT\"}" 2>&1 | tail -20
+echo '{"type":"photon_breakdown","outputPath":"'"$OUT"'"}' | python3 render_task.py --stdin 2>&1 | tail -20
 ls -lh "$OUT" 2>/dev/null || echo "未生成 $OUT"
 file "$OUT" 2>/dev/null || true

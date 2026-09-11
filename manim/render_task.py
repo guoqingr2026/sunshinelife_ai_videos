@@ -32,8 +32,16 @@ def build_commands(base_cmd, script_file, class_name, out_name):
     ]
 
 
+def load_payload():
+    if len(sys.argv) > 1 and sys.argv[1] == "--stdin":
+        return json.loads(sys.stdin.read())
+    if len(sys.argv) > 1:
+        return json.loads(sys.argv[1])
+    return json.loads(sys.stdin.read())
+
+
 def main():
-    payload = json.loads(sys.argv[1])
+    payload = load_payload()
     task_type = payload.get("type", "pn_junction")
     output_path = payload.get("outputPath", "output.mp4")
     params = payload.get("params", {})

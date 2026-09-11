@@ -1,7 +1,7 @@
 import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
-import { checkManimModule, spawnPython } from "../../lib/python";
+import { checkManimModule, spawnPythonStdin } from "../../lib/python";
 import { getManimOutputPath, toPublicUrl } from "../../lib/storage";
 import { isPlayableMp4 } from "../../lib/video-utils";
 
@@ -47,7 +47,7 @@ export async function renderManim(
   let stderr = "";
 
   const exitCode = await new Promise<number>((resolve, reject) => {
-    const proc = spawnPython([RENDER_SCRIPT, payloadJson], {
+    const proc = spawnPythonStdin(RENDER_SCRIPT, payloadJson, {
       cwd: MANIM_ROOT,
     });
 
