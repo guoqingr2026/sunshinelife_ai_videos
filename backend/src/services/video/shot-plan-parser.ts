@@ -17,24 +17,6 @@ export interface ParsedShotPlan {
   errors: string[];
 }
 
-/** 从文章正文中解析 JSON 代码块 */
-function parseJsonBlock(article: string): ParsedShotPlan | null {
-  const match = article.match(/```json\s*([\s\S]*?)```/i);
-  if (!match) return null;
-  try {
-    const data = JSON.parse(match[1]);
-    const rules: ManimRule[] = Array.isArray(data.rules)
-      ? data.rules.map(normalizeRule).filter(Boolean) as ManimRule[]
-      : [];
-    const shots: ShotSpec[] = Array.isArray(data.shots)
-      ? data.shots.map(normalizeShot).filter(Boolean) as ShotSpec[]
-      : [];
-    return { rules, shots, errors: [] };
-  } catch (e) {
-    return { rules: [], shots: [], errors: [`JSON 解析失败: ${e}`] };
-  }
-}
-
 function normalizeRule(raw: unknown): ManimRule | null {
   if (!raw || typeof raw !== "object") return null;
   const r = raw as Record<string, unknown>;
@@ -68,10 +50,97 @@ function normalizeShot(raw: unknown): ShotSpec | null {
   };
 }
 
+/** 从文本中提取 JSON 字符串（兼容 GPT 多种粘贴格式） */
+function extractJsonString(article: string): string | null {
+  const trimmed = article.trim();
+  if (!trimmed) return null;
+
+  // ```json ... ``` 或 ``` ... ```
+  const fenceMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenceMatch?.[1]?.trim()) return fenceMatch[1].trim();
+
+  // 单独一行 json 后接对象（GPT 常见）
+  const jsonLabelMatch = trimmed.match(/^json\s*[\r\n]+([\s\S]+)$/i);
+  if (jsonLabelMatch?.[1]?.trim()) return jsonLabelMatch[1].trim();
+
+  // 全文以 { 开头
+  if (trimmed.startsWith("{")) return trimmed;
+
+  // 文中嵌入的第一个完整 JSON 对象
+  const start = trimmed.indexOf("{");
+  if (start >= 0) {
+    const block = extractBalancedBraces(trimmed, start);
+    if (block) return block;
+  }
+
+  return null;
+}
+
+function extractBalancedBraces(text: string, start: number): string | null {
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = start; i < text.length; i++) {
+    const c = text[i];
+    if (escape) {
+      escape = false;
+      continue;
+    }
+    if (c === "\\" && inString) {
+      escape = true;
+      continue;
+    }
+    if (c === '"') {
+      inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (c === "{") depth++;
+    if (c === "}") {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return null;
+}
+
+function parseJsonPayload(jsonStr: string): ParsedShotPlan {
+  try {
+    const data = JSON.parse(jsonStr);
+    if (!data || typeof data !== "object") {
+      return { rules: [], shots: [], errors: ["JSON 根节点必须是对象"] };
+    }
+    const rules: ManimRule[] = Array.isArray(data.rules)
+      ? (data.rules.map(normalizeRule).filter(Boolean) as ManimRule[])
+      : [];
+    const shots: ShotSpec[] = Array.isArray(data.shots)
+      ? (data.shots.map(normalizeShot).filter(Boolean) as ShotSpec[])
+      : [];
+    if (rules.length === 0 && shots.length === 0) {
+      return {
+        rules,
+        shots,
+        errors: ["JSON 已识别，但 rules / shots 为空或格式不对"],
+      };
+    }
+    return { rules, shots, errors: [] };
+  } catch (e) {
+    return { rules: [], shots: [], errors: [`JSON 语法错误: ${e}`] };
+  }
+}
+
+function parseJsonFromArticle(article: string): ParsedShotPlan | null {
+  const jsonStr = extractJsonString(article);
+  if (!jsonStr) return null;
+  return parseJsonPayload(jsonStr);
+}
+
 /** 行格式: 关键词1, 关键词2 → type_id | 标签 */
 function parseRuleLine(line: string): ManimRule | null {
   const trimmed = line.trim();
   if (!trimmed || trimmed.startsWith("#") || trimmed.startsWith("//")) return null;
+  if (trimmed.startsWith("{") || trimmed.startsWith("}")) return null;
 
   const arrowMatch = trimmed.match(/^(.+?)\s*→\s*([^\s|]+)\s*(?:\|\s*(.+))?$/);
   if (arrowMatch) {
@@ -101,6 +170,7 @@ export function parseShotLine(line: string): ShotSpec | null {
   const trimmed = line.trim();
   if (!trimmed) return null;
   if (trimmed.startsWith("#") || trimmed.startsWith("//")) return null;
+  if (trimmed.startsWith("{") || trimmed.startsWith("}") || trimmed.startsWith('"')) return null;
 
   const numbered = trimmed.match(
     /^(?:\d+[.)]\s*|[-*•]\s*|manim[:：]\s*)?([a-z_][a-z0-9_]*)\s*\|\s*(.+)$/i
@@ -140,8 +210,8 @@ function extractSection(article: string, headers: string[]): string {
 
 /** 解析 Markdown 文章为规则与镜头序列 */
 export function parseShotPlanArticle(article: string): ParsedShotPlan {
-  const jsonResult = parseJsonBlock(article);
-  if (jsonResult && (jsonResult.rules.length > 0 || jsonResult.shots.length > 0)) {
+  const jsonResult = parseJsonFromArticle(article);
+  if (jsonResult) {
     return jsonResult;
   }
 
@@ -166,7 +236,9 @@ export function parseShotPlanArticle(article: string): ParsedShotPlan {
   }
 
   if (rules.length === 0 && shots.length === 0) {
-    errors.push("未解析到规则或镜头，请检查格式（见页面说明）");
+    errors.push(
+      "未解析到规则或镜头。支持：① ```json``` 代码块 ② 纯 JSON 对象 ③ 行格式「关键词 → type | 标签」"
+    );
   }
 
   return { rules, shots, errors };

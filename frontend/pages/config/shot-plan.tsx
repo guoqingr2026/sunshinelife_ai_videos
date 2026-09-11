@@ -159,17 +159,11 @@ pn结, pn → pn_junction | PN 结
                 </pre>
               </div>
               <div>
-                <p className="text-gray-300 font-medium mb-1">3. JSON 整段（推荐 GPT 直接输出）</p>
-                <pre className="bg-black/40 p-2 rounded overflow-x-auto whitespace-pre-wrap">
-{`{
-  "rules": [
-    { "keywords": ["pn结"], "type": "pn_junction", "label": "PN 结" }
-  ],
-  "shots": [
-    { "type": "pn_junction", "label": "PN 结原理" },
-    { "type": "forgetting_curve", "label": "遗忘曲线" }
-  ]
-}`}
+                <p className="text-gray-300 font-medium mb-1">3. JSON 整段（推荐，三种粘贴方式均可）</p>
+                <pre className="bg-black/40 p-2 rounded overflow-x-auto whitespace-pre-wrap text-[11px]">
+{`方式A: \`\`\`json { "rules":[], "shots":[] } \`\`\`
+方式B: 直接粘贴 { "rules":[], "shots":[] }
+方式C: GPT 输出 "json" 换行后接 { ... }`}
                 </pre>
               </div>
             </div>
