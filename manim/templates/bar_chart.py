@@ -5,6 +5,9 @@ _path_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_path_mod)
 
 from manim import *
+from templates._no_tex import apply_no_tex
+apply_no_tex()
+
 from templates._params import get_params
 from templates._layout import mk_title, drop_content
 from templates._axes import make_bar_chart
@@ -19,13 +22,11 @@ class BarChartScene(Scene):
         title = mk_title(p["title"])
         chart = make_bar_chart(
             values,
-            bar_names=names,
-            y_range=[0, ymax, ymax / 4],
-            y_length=4,
-            x_length=8,
-            bar_colors=[BLUE, GREEN, YELLOW, RED, TEAL],
+            names=names,
+            y_max=ymax,
+            colors=["#3b82f6", "#22c55e", "#eab308", "#ef4444", "#14b8a6"],
         )
         drop_content(chart)
         self.play(Write(title))
-        self.play(Create(chart))
+        self.play(LaggedStart(*[FadeIn(b) for b in chart], lag_ratio=0.1))
         self.wait(1)

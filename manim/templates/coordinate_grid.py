@@ -5,16 +5,20 @@ _path_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_path_mod)
 
 from manim import *
+from templates._no_tex import apply_no_tex
+apply_no_tex()
+
 from templates._text import mk_text
 from templates._params import get_params
 from templates._layout import mk_title, drop_content
+from templates._axes import make_number_plane
 
 
 class CoordinateGrid(Scene):
     def construct(self):
         p = get_params({"title": "Coordinate Grid"})
         title = mk_title(p["title"])
-        plane = NumberPlane(
+        plane = make_number_plane(
             x_range=[-5, 5, 1],
             y_range=[-3, 3, 1],
             background_line_style={"stroke_opacity": 0.35},

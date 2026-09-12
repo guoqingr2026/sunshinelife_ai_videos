@@ -6,6 +6,9 @@ _spec.loader.exec_module(_path_mod)
 
 import numpy as np
 from manim import *
+from templates._no_tex import apply_no_tex
+apply_no_tex()
+
 from templates._text import mk_text
 from templates._params import get_params
 from templates._layout import mk_title, drop_content
