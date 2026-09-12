@@ -12,7 +12,7 @@ from templates._layout import mk_title
 
 class ChapterBanner(Scene):
     def construct(self):
-        p = get_params({"chapter": "???", "title": "?????"})
+        p = get_params({"chapter": "Chapter 1", "title": "Semiconductor Basics"})
         title = mk_title(p["chapter"], font_size=28)
         bar = Rectangle(width=10, height=1.0, color=BLUE, fill_opacity=0.35)
         bar.next_to(title, DOWN, buff=0.35)

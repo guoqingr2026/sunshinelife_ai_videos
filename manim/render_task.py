@@ -58,6 +58,7 @@ def main():
     scene_class = TEMPLATES[task_type]
     module_path, class_name = scene_class.rsplit(".", 1)
 
+    os.environ["MANIM_TEMPLATE_ID"] = task_type
     os.environ["MANIM_PARAMS"] = json.dumps(params)
     os.environ["MANIM_OUTPUT"] = output_path
     os.environ["MANIM_RENDERER"] = "cairo"

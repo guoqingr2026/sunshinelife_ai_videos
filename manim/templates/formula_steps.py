@@ -12,8 +12,8 @@ from templates._layout import mk_title
 
 class FormulaSteps(Scene):
     def construct(self):
-        p = get_params({"steps": ["P = V × I", "V = I × R", "P = I² × R"]})
-        title = mk_title("公式拆解")
+        p = get_params({"steps": ["P = V * I", "V = I * R", "P = I^2 * R"], "title": "Formulas"})
+        title = mk_title(p["title"])
         items = VGroup()
         for i, s in enumerate(p["steps"]):
             t = mk_text(str(s), font_size=32, color=YELLOW if i == len(p["steps"]) - 1 else WHITE)

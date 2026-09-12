@@ -6,10 +6,14 @@ _spec.loader.exec_module(_path_mod)
 
 from manim import *
 from templates._text import mk_text
+from templates._params import get_params
+from templates._layout import mk_title, drop_content
 
 
 class MosfetChannel(Scene):
     def construct(self):
+        p = get_params({"title": "MOSFET Channel"})
+        title = mk_title(p["title"])
         gate = Rectangle(width=1.2, height=3, color=YELLOW, fill_opacity=0.3)
         source = Rectangle(width=2, height=0.4, color=BLUE, fill_opacity=0.5).next_to(gate, LEFT, buff=0)
         drain = Rectangle(width=2, height=0.4, color=BLUE, fill_opacity=0.5).next_to(gate, RIGHT, buff=0)
@@ -19,7 +23,8 @@ class MosfetChannel(Scene):
             mk_text("S", font_size=24).next_to(source, LEFT),
             mk_text("D", font_size=24).next_to(drain, RIGHT),
         )
-        title = mk_text("MOSFET 沟道", font_size=28).to_edge(UP)
+        body = VGroup(gate, source, drain, channel, labels)
+        drop_content(body)
         self.play(Write(title))
         self.play(FadeIn(gate), FadeIn(source), FadeIn(drain), FadeIn(channel))
         self.play(Write(labels))

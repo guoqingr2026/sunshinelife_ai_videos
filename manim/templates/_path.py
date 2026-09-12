@@ -1,4 +1,4 @@
-"""Manim CLI 按文件加载场景时，确保 templates 包可导入。"""
+"""Ensure templates package imports work when Manim loads scene files."""
 import os
 import sys
 

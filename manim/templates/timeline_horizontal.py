@@ -12,9 +12,9 @@ from templates._layout import mk_title, drop_content
 
 class TimelineHorizontal(Scene):
     def construct(self):
-        p = get_params({"events": ["??", "??1", "??2", "??"]})
+        p = get_params({"events": ["Start", "Phase 1", "Phase 2", "End"], "title": "Timeline"})
         events = p["events"]
-        title = mk_title("???")
+        title = mk_title(p["title"])
         line = Line(LEFT * 5, RIGHT * 5, color=WHITE)
         dots = VGroup()
         labels = VGroup()

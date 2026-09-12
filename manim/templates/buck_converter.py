@@ -6,23 +6,28 @@ _spec.loader.exec_module(_path_mod)
 
 from manim import *
 from templates._text import mk_text
+from templates._params import get_params
+from templates._layout import mk_title, drop_content
 
 
 class BuckConverter(Scene):
     def construct(self):
-        vin = mk_text("Vin", font_size=24).shift(LEFT * 5 + UP)
+        p = get_params({"title": "Buck Converter"})
+        title = mk_title(p["title"])
+        vin = mk_text("Vin", font_size=24).shift(LEFT * 5 + UP * 0.2)
         sw = Square(side_length=0.6, color=YELLOW).shift(LEFT * 2)
-        l = mk_text("L", font_size=28, color=GREEN).shift(ORIGIN)
-        c = mk_text("C", font_size=28, color=BLUE).shift(RIGHT * 2)
-        vout = mk_text("Vout", font_size=24).shift(RIGHT * 5 + DOWN)
+        inductor = mk_text("L", font_size=28, color=GREEN).shift(ORIGIN)
+        cap = mk_text("C", font_size=28, color=BLUE).shift(RIGHT * 2)
+        vout = mk_text("Vout", font_size=24).shift(RIGHT * 5 + DOWN * 0.2)
         path = VGroup(
             Line(vin.get_center(), sw.get_center(), color=WHITE),
-            Line(sw.get_center(), l.get_center(), color=WHITE),
-            Line(l.get_center(), c.get_center(), color=WHITE),
-            Line(c.get_center(), vout.get_center(), color=WHITE),
+            Line(sw.get_center(), inductor.get_center(), color=WHITE),
+            Line(inductor.get_center(), cap.get_center(), color=WHITE),
+            Line(cap.get_center(), vout.get_center(), color=WHITE),
         )
-        title = mk_text("Buck 降压拓扑", font_size=28).to_edge(UP)
+        body = VGroup(vin, sw, inductor, cap, vout, path)
+        drop_content(body)
         self.play(Write(title))
-        self.play(Write(vin), FadeIn(sw), Write(l), Write(c), Write(vout))
+        self.play(Write(vin), FadeIn(sw), Write(inductor), Write(cap), Write(vout))
         self.play(Create(path))
         self.wait(1)

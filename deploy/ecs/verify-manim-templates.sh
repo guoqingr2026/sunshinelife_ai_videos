@@ -11,6 +11,10 @@ for f in *.py; do
     fail=1
   fi
 done
+if ! python3 -c "import json; json.load(open('$ROOT/manim/locale/zh.json', encoding='utf-8'))"; then
+  echo "locale/zh.json invalid"
+  fail=1
+fi
 if [[ $fail -eq 0 ]]; then
   echo "All Manim templates OK"
 else

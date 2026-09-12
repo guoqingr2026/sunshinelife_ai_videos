@@ -5,14 +5,14 @@ _path_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_path_mod)
 
 from manim import *
+from templates._params import get_params
 from templates._layout import mk_title, drop_content
 
 
 class IsometricStack(Scene):
-    """? 3D ?????cairo ???"""
-
     def construct(self):
-        title = mk_title("???? (PCB/??)", font_size=28)
+        p = get_params({"title": "Layer Stack"})
+        title = mk_title(p["title"], font_size=28)
         layers = VGroup()
         colors = [BLUE, GREEN, YELLOW, RED]
         for i, c in enumerate(colors):

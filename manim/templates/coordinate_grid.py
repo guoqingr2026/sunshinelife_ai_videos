@@ -12,7 +12,7 @@ from templates._layout import mk_title, drop_content
 
 class CoordinateGrid(Scene):
     def construct(self):
-        p = get_params({"title": "???"})
+        p = get_params({"title": "Coordinate Grid"})
         title = mk_title(p["title"])
         plane = NumberPlane(
             x_range=[-5, 5, 1],

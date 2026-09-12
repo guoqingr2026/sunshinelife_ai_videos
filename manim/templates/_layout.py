@@ -1,4 +1,4 @@
-"""Scene layout helpers — keep titles clear of main content."""
+"""Layout helpers to avoid title/content overlap."""
 from templates._text import mk_text
 
 TITLE_BUFF = 0.55

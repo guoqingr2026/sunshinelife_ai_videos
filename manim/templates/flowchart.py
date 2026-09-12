@@ -12,9 +12,9 @@ from templates._layout import mk_title, drop_content
 
 class FlowchartSimple(Scene):
     def construct(self):
-        p = get_params({"steps": ["??", "??", "??"]})
+        p = get_params({"steps": ["Input", "Process", "Output"], "title": "Flowchart"})
         steps = p["steps"]
-        title = mk_title("???")
+        title = mk_title(p["title"])
         boxes = VGroup()
         for i, s in enumerate(steps):
             box = RoundedRectangle(width=2.4, height=0.9, corner_radius=0.15, color=BLUE, fill_opacity=0.2)

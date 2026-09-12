@@ -12,8 +12,8 @@ from templates._layout import mk_title
 
 class KeywordPop(Scene):
     def construct(self):
-        p = get_params({"keywords": ["??", "??", "??", "??"]})
-        title = mk_title("?????", font_size=28)
+        p = get_params({"keywords": ["A", "B", "C", "D"], "title": "Keywords"})
+        title = mk_title(p["title"], font_size=28)
         words = VGroup()
         colors = [YELLOW, GREEN, BLUE, RED]
         positions = [LEFT * 2.5, LEFT * 0.8, RIGHT * 0.8, RIGHT * 2.5]

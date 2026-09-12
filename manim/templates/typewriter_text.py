@@ -12,7 +12,7 @@ from templates._layout import mk_title
 
 class TypewriterText(Scene):
     def construct(self):
-        p = get_params({"text": "???? ? ????", "subtitle": "????"})
+        p = get_params({"text": "Active Recall", "subtitle": "Learning"})
         title = mk_title(p["subtitle"], font_size=28)
         body = mk_text(p["text"], font_size=40).shift(DOWN * 0.4)
         self.play(Write(title))

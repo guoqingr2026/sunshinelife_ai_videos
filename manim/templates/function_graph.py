@@ -8,13 +8,14 @@ from manim import *
 from templates._text import mk_text
 from templates._params import get_params
 from templates._layout import mk_title, drop_content
+from templates._axes import make_axes
 
 
 class FunctionGraphScene(Scene):
     def construct(self):
         p = get_params({"title": "y = sin(x)", "label": "sin(x)"})
         title = mk_title(p["title"])
-        axes = Axes(x_range=[-3, 3, 1], y_range=[-1.5, 1.5, 0.5], x_length=9, y_length=5)
+        axes = make_axes(x_range=[-3, 3, 1], y_range=[-1.5, 1.5, 0.5], x_length=9, y_length=5)
         graph = axes.plot(lambda x: __import__("math").sin(x), color=YELLOW)
         label = mk_text(p["label"], font_size=26, color=YELLOW)
         chart = VGroup(axes, graph)

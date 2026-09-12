@@ -20,7 +20,7 @@ def get_cjk_font() -> str | None:
 
 
 def mk_text(content, font_size=36, color=WHITE, **kwargs):
-    """支持中文的 Text；ECS 需安装 fonts-noto-cjk"""
+    """CJK-capable Text (requires fonts-noto-cjk on ECS)."""
     text = str(content)
     font = get_cjk_font()
     if font:

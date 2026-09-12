@@ -13,8 +13,8 @@ from templates._layout import mk_title, drop_content
 
 class ConceptNetwork(Scene):
     def construct(self):
-        p = get_params({"center": "核心概念", "nodes": ["A", "B", "C", "D"]})
-        title = mk_title("概念网络")
+        p = get_params({"center": "Core", "nodes": ["A", "B", "C", "D"], "title": "Concept Network"})
+        title = mk_title(p["title"])
         center = Circle(radius=0.6, color=YELLOW, fill_opacity=0.3)
         c_txt = mk_text(p["center"], font_size=18).move_to(center)
         nodes = VGroup()

@@ -12,7 +12,7 @@ from templates._layout import mk_title, drop_content
 
 class VectorSum(Scene):
     def construct(self):
-        p = get_params({"title": "向量合成"})
+        p = get_params({"title": "Vector Sum"})
         title = mk_title(p["title"])
         o = ORIGIN
         v1_end = RIGHT * 2 + UP * 0.8
