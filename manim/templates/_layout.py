@@ -1,4 +1,5 @@
 """Layout helpers to avoid title/content overlap."""
+from manim import DOWN, UP
 from templates._text import mk_text
 
 TITLE_BUFF = 0.55
