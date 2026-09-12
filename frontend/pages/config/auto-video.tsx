@@ -10,6 +10,7 @@ const PHASE_LABELS: Record<string, string> = {
   manim: "Manim 渲染",
   timeline_ready: "时间轴就绪",
   remotion: "合成成片",
+  bundle: "导出工程包",
   done: "已完成",
   failed: "失败",
 };
@@ -150,7 +151,7 @@ export default function AutoVideoPage() {
       <h1 className="text-2xl font-bold mb-2">一键成片（MVP）</h1>
       <p className="text-gray-400 text-sm mb-4">
         只需填写下方<strong className="text-white">项目 JSON</strong>，系统按固定流程执行：
-        规划时间轴 → 渲染 Manim → 写入 timeline → Remotion 合成。
+        规划时间轴 → 渲染 Manim → 写入 timeline → Remotion 合成 → 自动导出 <code className="text-primary">output</code> 工程包（可下载到本地）。
       </p>
 
       <div className="bg-darker border border-gray-700 rounded-lg p-4 mb-6 text-sm text-gray-300 font-mono leading-relaxed">
@@ -368,11 +369,44 @@ export default function AutoVideoPage() {
 
                 {task.error && <p className="text-red-400 text-sm">{task.error}</p>}
 
+                {task.status === "success" && (task.outputUrl || payload?.bundleZipUrl) && (
+                  <>
+                    <div className="flex flex-wrap gap-3 text-sm">
+                      {task.outputUrl && (
+                        <a href={task.outputUrl} download className="text-primary underline">
+                          下载成片 MP4
+                        </a>
+                      )}
+                      {payload?.bundleZipUrl && (
+                        <a
+                          href={api.getComposeBundleUrl(task.id)}
+                          download
+                          className="text-green-400 underline font-medium"
+                        >
+                          下载 output 工程包 (.zip)
+                        </a>
+                      )}
+                      {payload?.bundleDirUrl && (
+                        <a
+                          href={payload.bundleDirUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-gray-400 underline text-xs"
+                        >
+                          浏览服务器 output 目录
+                        </a>
+                      )}
+                    </div>
+                    {payload?.bundleZipUrl && (
+                      <p className="text-xs text-gray-500 mt-1">
+                        工程包含：project.json、timeline、Manim 素材、成片、README 与制作日志，解压后可在本地二次开发。
+                      </p>
+                    )}
+                  </>
+                )}
+
                 {task.outputUrl && task.status === "success" && (
                   <>
-                    <a href={task.outputUrl} download className="text-primary underline text-sm">
-                      下载成片
-                    </a>
                     <video
                       src={task.outputUrl}
                       controls

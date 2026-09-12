@@ -10,6 +10,7 @@ export function ensureStorageDirs() {
     STORAGE_ROOT,
     path.join(STORAGE_ROOT, "files", "manim"),
     path.join(STORAGE_ROOT, "files", "remotion"),
+    path.join(STORAGE_ROOT, "files", "output"),
     path.join(STORAGE_ROOT, "frames"),
     path.join(STORAGE_ROOT, "video"),
     path.join(STORAGE_ROOT, "uploads"),
@@ -29,6 +30,14 @@ export function getManimOutputPath(taskId: string) {
 
 export function getRemotionOutputPath(taskId: string) {
   return path.join(STORAGE_ROOT, "files", "remotion", `${taskId}.mp4`);
+}
+
+export function getOutputBundleDir(taskId: string) {
+  return path.join(STORAGE_ROOT, "files", "output", taskId);
+}
+
+export function getOutputBundleZipPath(taskId: string) {
+  return path.join(STORAGE_ROOT, "files", "output", `${taskId}.zip`);
 }
 
 export function getFramesDir(taskId: string) {

@@ -13,6 +13,8 @@ import {
   buildDefaultShotPlanArticle,
 } from "../services/video/shot-plan-spec";
 import { initComposeProgress } from "../services/video/compose-progress";
+import { getOutputBundleZipPath } from "../lib/storage";
+import fs from "fs";
 
 const router = Router();
 
@@ -114,6 +116,25 @@ router.get("/compose/:id", (req, res) => {
       ...task,
       payload: JSON.parse(task.payload),
     });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+router.get("/compose/:id/bundle", (req, res) => {
+  try {
+    const task = db.task.findFirst({ id: req.params.id, kind: "compose" });
+    if (!task) return res.status(404).json({ error: "Task not found" });
+
+    const zipPath = getOutputBundleZipPath(req.params.id);
+    if (!fs.existsSync(zipPath)) {
+      return res.status(404).json({ error: "Bundle not ready. Wait for compose to finish." });
+    }
+
+    const payload = JSON.parse(task.payload) as { title?: string; project?: { title?: string } };
+    const rawTitle = payload.title || payload.project?.title || "video";
+    const safeName = rawTitle.replace(/[^\w\u4e00-\u9fff-]+/g, "_").slice(0, 40);
+    res.download(zipPath, `output-${safeName}-${req.params.id.slice(0, 8)}.zip`);
   } catch (err) {
     res.status(500).json({ error: String(err) });
   }

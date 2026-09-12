@@ -86,6 +86,8 @@ export interface ComposePayload {
   manimJobs?: Array<{ timelineIndex: number; type: string; label: string }>;
   manimResults?: Array<{ timelineIndex: number; type: string; outputUrl: string; mode: string }>;
   theme?: ThemeConfig;
+  bundleZipUrl?: string;
+  bundleDirUrl?: string;
 }
 
 export interface ComposeTask {
@@ -194,6 +196,9 @@ export const api = {
     }),
 
   getComposeTask: (id: string) => request<ComposeTask>(`/api/video/compose/${id}`),
+
+  getComposeBundleUrl: (taskId: string) =>
+    `${API_BASE}/api/video/compose/${taskId}/bundle`,
 
   getShotPlan: () => request<ShotPlanConfig>("/api/video/shot-plan"),
 

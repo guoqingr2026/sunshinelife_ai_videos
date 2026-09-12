@@ -482,7 +482,31 @@ LaTeX 在 JSON 中转义：`"\\frac{V}{R}"`
 
 ---
 
-## 十一、相关文件
+## 十一、output 工程包（一键成片自动导出）
+
+每次「一键成片」完成后，系统自动在服务器生成：
+
+```
+storage/files/output/{taskId}/     # 可浏览的目录
+storage/files/output/{taskId}.zip  # 下载到本地（ZIP 内根目录为 output/）
+```
+
+| 文件 | 说明 |
+|------|------|
+| `README.md` | 人类可读说明 |
+| `project.json` | 原始分镜，可再次粘贴成片 |
+| `timeline.json` | Remotion 时间轴 |
+| `theme.json` | 配色主题 |
+| `workflow.json` | 流程与步骤 |
+| `assets/final.mp4` | 成片 |
+| `assets/manim/*.mp4` | Manim 片段 |
+| `logs/compose.log` | 制作日志 |
+
+下载：`GET /api/video/compose/{taskId}/bundle` 或一键成片页「下载 output 工程包」。
+
+---
+
+## 十二、相关文件
 
 | 文件 | 用途 |
 |------|------|

@@ -6,6 +6,7 @@ import {
   patchComposeProgress,
 } from "./compose-progress";
 import type { ComposePayload } from "./compose-progress";
+import { createComposeOutputBundle } from "./output-bundle";
 
 export type { ComposePayload };
 
@@ -25,7 +26,7 @@ function toRemotionMediaUrl(publicUrl: string): string {
 export async function renderCompose(
   taskId: string,
   payload: ComposePayload
-): Promise<{ outputUrl?: string; timeline: TimelineItem[] }> {
+): Promise<{ outputUrl?: string; timeline: TimelineItem[]; bundleZipUrl?: string }> {
   const renderFinal = payload.renderFinal !== false;
   const templateId = payload.templateId || "simple-electric";
   const preview = payload.preview ?? true;
@@ -129,13 +130,16 @@ export async function renderCompose(
 
   if (!renderFinal) {
     markComposeStep(taskId, "remotion", "skipped");
+    const bundle = await exportOutputBundle(taskId, payload, timeline!, undefined);
     markComposeStep(taskId, "done", "done", "任务完成（未合成成片）");
     patchComposeProgress(taskId, {
       phase: "done",
-      progress: "时间轴 + Manim 已生成（跳过成片合成）",
+      progress: `时间轴 + Manim 已生成；工程包已导出`,
       progressPercent: 100,
+      bundleZipUrl: bundle.bundleZipUrl,
+      bundleDirUrl: bundle.bundleDirUrl,
     });
-    return { timeline: timeline! };
+    return { timeline: timeline!, bundleZipUrl: bundle.bundleZipUrl };
   }
 
   markComposeStep(taskId, "remotion", "running");
@@ -153,18 +157,57 @@ export async function renderCompose(
   });
 
   markComposeStep(taskId, "remotion", "done");
-  markComposeStep(taskId, "done", "done", "成片已生成");
+
+  const bundle = await exportOutputBundle(
+    taskId,
+    payload,
+    timeline!,
+    remotionResult.outputUrl
+  );
+
+  markComposeStep(taskId, "done", "done", "成片与工程包已生成");
   patchComposeProgress(taskId, {
     phase: "done",
-    progress: "全部完成！可预览或下载成片",
+    progress: "全部完成！可下载成片或 output 工程包",
     progressPercent: 100,
     timeline,
-    log: `成片地址：${remotionResult.outputUrl}`,
+    bundleZipUrl: bundle.bundleZipUrl,
+    bundleDirUrl: bundle.bundleDirUrl,
+    log: `成片：${remotionResult.outputUrl} · 工程包：${bundle.bundleZipUrl}`,
     logLevel: "success",
   });
 
   return {
     outputUrl: remotionResult.outputUrl,
     timeline: timeline!,
+    bundleZipUrl: bundle.bundleZipUrl,
   };
+}
+
+async function exportOutputBundle(
+  taskId: string,
+  _payload: ComposePayload,
+  timeline: TimelineItem[],
+  outputUrl?: string
+) {
+  markComposeStep(taskId, "bundle", "running");
+  patchComposeProgress(taskId, {
+    phase: "bundle",
+    progress: "正在打包 output 工程（素材、脚本、流程说明）…",
+    log: "开始导出 output 文件夹与 ZIP",
+  });
+
+  const { db } = await import("../../lib/db");
+  const row = db.task.findFirst({ id: taskId });
+  const latest = row ? (JSON.parse(row.payload) as ComposePayload) : _payload;
+
+  const bundle = await createComposeOutputBundle(taskId, latest, timeline, outputUrl);
+
+  markComposeStep(taskId, "bundle", "done");
+  patchComposeProgress(taskId, {
+    log: `工程包已生成：${bundle.bundleZipUrl}`,
+    logLevel: "success",
+  });
+
+  return bundle;
 }

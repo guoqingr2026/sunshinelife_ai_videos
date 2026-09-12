@@ -43,6 +43,8 @@ export interface ComposePayload {
     outputUrl: string;
     mode: string;
   }>;
+  bundleZipUrl?: string;
+  bundleDirUrl?: string;
 }
 
 const DEFAULT_STEPS: ComposeStep[] = [
@@ -51,6 +53,7 @@ const DEFAULT_STEPS: ComposeStep[] = [
   { id: "manim", label: "渲染 Manim 动画", status: "pending" },
   { id: "timeline", label: "写入时间轴 JSON", status: "pending" },
   { id: "remotion", label: "Remotion 合成成片", status: "pending" },
+  { id: "bundle", label: "导出工程包 (output)", status: "pending" },
   { id: "done", label: "完成", status: "pending" },
 ];
 
@@ -71,7 +74,8 @@ function calcPercent(payload: ComposePayload): number {
     return Math.min(85, Math.round(manimDone + cur * manimSlice));
   }
 
-  if (payload.phase === "remotion") return 90;
+  if (payload.phase === "remotion") return 88;
+  if (payload.phase === "bundle") return 95;
   if (payload.phase === "done") return 100;
   if (payload.phase === "failed") return payload.progressPercent || 0;
 

@@ -15,7 +15,7 @@ export const MVP_PROJECT_JSON = JSON.stringify(MVP_LEARNING_PROJECT, null, 2);
 
 export const MVP_WORKFLOW_HELP = `
 【唯一有效 JSON】一键成片页「项目 JSON」框内的内容即为最终分镜。
-系统流程：项目 JSON → 规划时间轴 → 逐个 Manim 渲染 → 写入 timeline → Remotion 合成。
+系统流程：项目 JSON → 规划时间轴 → Manim 渲染 → Remotion 合成 → 自动打包 output 工程（ZIP 可下载到本地）。
 
 type 说明：
 - Manim：forgetting_curve, typewriter_text, concept_network, learning_curve, flowchart 等（见镜头规划规格表）
