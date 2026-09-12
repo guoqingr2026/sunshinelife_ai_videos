@@ -3,13 +3,15 @@ import { api, ManimStatus, Task } from "../../utils/api";
 import {
   MANIM_CATEGORIES,
   MANIM_TEMPLATES,
-  getDefaultParams,
+  getExampleParams,
   getManimTemplate,
 } from "../../utils/manim-catalog";
 
+type LayerFilter = "all" | 1 | 2 | 3;
+
 export default function ManimConfig() {
   const [type, setType] = useState("pn_junction");
-  const [params, setParams] = useState<Record<string, unknown>>(() => getDefaultParams("pn_junction"));
+  const [layerFilter, setLayerFilter] = useState<LayerFilter>("all");
   const [paramsJson, setParamsJson] = useState("");
   const [task, setTask] = useState<Task | null>(null);
   const [status, setStatus] = useState<ManimStatus | null>(null);
@@ -17,17 +19,13 @@ export default function ManimConfig() {
   const [videoError, setVideoError] = useState(false);
 
   const selected = getManimTemplate(type);
-  const hasParamFields = Boolean(selected?.paramFields?.length);
-  const hasComplexParams = Boolean(selected?.defaultParams) && !hasParamFields;
 
   useEffect(() => {
     api.getManimStatus().then(setStatus).catch(() => {});
   }, []);
 
   useEffect(() => {
-    const defaults = getDefaultParams(type);
-    setParams(defaults);
-    setParamsJson(JSON.stringify(defaults, null, 2));
+    setParamsJson(JSON.stringify(getExampleParams(type), null, 2));
   }, [type]);
 
   useEffect(() => {
@@ -42,26 +40,30 @@ export default function ManimConfig() {
     return () => clearInterval(timer);
   }, [task]);
 
+  const filteredTemplates = useMemo(() => {
+    if (layerFilter === "all") return MANIM_TEMPLATES;
+    return MANIM_TEMPLATES.filter((t) => t.layer === layerFilter);
+  }, [layerFilter]);
+
   const grouped = useMemo(() => {
+    const ids = new Set(filteredTemplates.map((t) => t.id));
     return MANIM_CATEGORIES.map((cat) => ({
       ...cat,
-      items: MANIM_TEMPLATES.filter((t) => t.category === cat.id),
+      items: filteredTemplates.filter((t) => t.category === cat.id && ids.has(t.id)),
     })).filter((g) => g.items.length > 0);
-  }, []);
+  }, [filteredTemplates]);
 
   const handleSubmit = async () => {
     setLoading(true);
     setVideoError(false);
     try {
-      let finalParams = params;
-      if (hasComplexParams) {
-        try {
-          finalParams = JSON.parse(paramsJson);
-        } catch {
-          alert("参数 JSON 格式错误");
-          setLoading(false);
-          return;
-        }
+      let finalParams: Record<string, unknown>;
+      try {
+        finalParams = JSON.parse(paramsJson);
+      } catch {
+        alert("参数 JSON 格式错误");
+        setLoading(false);
+        return;
       }
       const result = await api.createManimTask({ type, params: finalParams });
       setTask(await api.getManimTask(result.taskId));
@@ -70,19 +72,11 @@ export default function ManimConfig() {
     }
   };
 
-  const copyClipUrl = () => {
-    if (!task?.outputUrl) return;
-    navigator.clipboard.writeText(task.outputUrl);
-  };
+  const fillExample = () => setParamsJson(JSON.stringify(getExampleParams(type), null, 2));
 
-  const copyClipJson = () => {
-    if (!task?.clipJson) return;
-    navigator.clipboard.writeText(JSON.stringify(task.clipJson, null, 2));
-  };
-
-  const clipJsonText = task?.clipJson
-    ? JSON.stringify(task.clipJson, null, 2)
-    : "";
+  const copyClipUrl = () => task?.outputUrl && navigator.clipboard.writeText(task.outputUrl);
+  const copyClipJson = () => task?.clipJson && navigator.clipboard.writeText(JSON.stringify(task.clipJson, null, 2));
+  const clipJsonText = task?.clipJson ? JSON.stringify(task.clipJson, null, 2) : "";
 
   const statusColor = {
     pending: "text-yellow-400",
@@ -95,8 +89,8 @@ export default function ManimConfig() {
     <div>
       <h1 className="text-2xl font-bold mb-2">Manim 动画引擎</h1>
       <p className="text-gray-400 text-sm mb-4">
-        支持 <strong className="text-white">工程示意、数学图表、信息图、文本动画、结构轨道</strong> 等 {MANIM_TEMPLATES.length} 种场景。
-        生成后会同时产出 <code className="text-primary">.mp4</code> 与 <code className="text-primary">.json</code>（Remotion <code className="text-primary">manim_clip</code> 片段配置）。
+        三层能力：<strong className="text-white">L1</strong> 预设模板 · <strong className="text-white">L2</strong> 扩展图表/3D/变换 · <strong className="text-white">L3</strong> JSON DSL / 自定义 Python。
+        生成 <code className="text-primary">.mp4</code> + Remotion <code className="text-primary">manim_clip</code> <code className="text-primary">.json</code>。
       </p>
 
       {status && (
@@ -108,16 +102,41 @@ export default function ManimConfig() {
           }`}
         >
           <p className="font-medium">
-            {status.manimInstalled ? "✓ 已安装 Manim — 将生成真实动画" : "⚠ 未安装 Manim — 当前为占位视频"}
+            {status.manimInstalled ? "✓ 已安装 Manim" : "⚠ 未安装 Manim（占位视频）"}
           </p>
-          <p className="text-xs mt-1 opacity-80">{status.hint}</p>
+          <p className="text-xs mt-1 opacity-80">
+            共 {MANIM_TEMPLATES.length} 种场景 · 参考{" "}
+            <a
+              href="https://docs.manim.community/en/stable/examples.html"
+              target="_blank"
+              rel="noreferrer"
+              className="underline"
+            >
+              Manim 官方示例库
+            </a>
+          </p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="flex flex-wrap gap-2 mb-4 text-xs">
+        {(["all", 1, 2, 3] as LayerFilter[]).map((l) => (
+          <button
+            key={String(l)}
+            type="button"
+            onClick={() => setLayerFilter(l)}
+            className={`px-3 py-1 rounded-full border ${
+              layerFilter === l ? "bg-primary border-primary text-white" : "border-gray-600 text-gray-400"
+            }`}
+          >
+            {l === "all" ? "全部" : `L${l}`}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">动画类型（{MANIM_TEMPLATES.length} 种）</label>
+            <label className="block text-sm text-gray-400 mb-2">场景类型</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
@@ -126,66 +145,79 @@ export default function ManimConfig() {
               {grouped.map((g) => (
                 <optgroup key={g.id} label={g.label}>
                   {g.items.map((t) => (
-                    <option key={t.id} value={t.id}>{t.label}</option>
+                    <option key={t.id} value={t.id}>
+                      [L{t.layer}] {t.label}
+                    </option>
                   ))}
                 </optgroup>
               ))}
             </select>
-            {selected && (
-              <p className="text-xs text-gray-500 mt-1">{selected.desc}</p>
-            )}
           </div>
 
-          {hasParamFields && selected?.paramFields && (
-            <div className="grid grid-cols-1 gap-3">
-              {selected.paramFields.map((f) => (
-                <div key={f.key}>
-                  <label className="block text-sm text-gray-400 mb-1">{f.label}</label>
-                  <input
-                    type={f.type === "number" ? "number" : "text"}
-                    value={String(params[f.key] ?? "")}
-                    onChange={(e) =>
-                      setParams({
-                        ...params,
-                        [f.key]: f.type === "number" ? Number(e.target.value) : e.target.value,
-                      })
-                    }
-                    className="w-full bg-darker border border-gray-600 rounded-lg p-2"
-                  />
+          {selected && (
+            <div className="bg-darker border border-gray-700 rounded-lg p-4 text-sm space-y-3">
+              <div className="flex justify-between items-start gap-2">
+                <div>
+                  <p className="font-semibold">{selected.label}</p>
+                  <p className="text-gray-500 text-xs mt-1">{selected.desc}</p>
                 </div>
-              ))}
+                <span className="text-xs px-2 py-0.5 rounded bg-gray-800 text-gray-300 shrink-0">
+                  L{selected.layer}
+                </span>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 mb-1">Manim 原语（能力索引）</p>
+                <div className="flex flex-wrap gap-1">
+                  {selected.primitives.map((p) => (
+                    <span key={p} className="text-xs px-2 py-0.5 rounded bg-gray-800 text-blue-300 font-mono">
+                      {p}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {selected.officialExample && (
+                <p className="text-xs">
+                  官方参考：{" "}
+                  <a href={selected.officialExample.url} target="_blank" rel="noreferrer" className="text-primary underline">
+                    {selected.officialExample.title}
+                  </a>
+                </p>
+              )}
+              {Object.keys(selected.paramHelp).length > 0 && (
+                <ul className="text-xs text-gray-500 space-y-0.5">
+                  {Object.entries(selected.paramHelp).map(([k, v]) => (
+                    <li key={k}><code className="text-gray-400">{k}</code> — {v}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
 
-          {hasComplexParams && (
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">参数 JSON（数组/对象）</label>
-              <textarea
-                value={paramsJson}
-                onChange={(e) => setParamsJson(e.target.value)}
-                rows={6}
-                className="w-full bg-darker border border-gray-600 rounded-lg p-2 font-mono text-xs"
-              />
+          <div>
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-sm text-gray-400">参数 JSON</label>
+              <button type="button" onClick={fillExample} className="text-xs text-primary hover:underline">
+                一键填充示例
+              </button>
             </div>
-          )}
-
-          {!hasParamFields && !hasComplexParams && type === "current_arrow" && (
-            <div className="grid grid-cols-3 gap-3">
-              {(["voltage", "current", "resistance"] as const).map((key) => (
-                <div key={key}>
-                  <label className="block text-sm text-gray-400 mb-1">
-                    {key === "voltage" ? "电压 (V)" : key === "current" ? "电流 (A)" : "阻值 (Ω)"}
-                  </label>
-                  <input
-                    type="number"
-                    value={Number(params[key] ?? 0)}
-                    onChange={(e) => setParams({ ...params, [key]: Number(e.target.value) })}
-                    className="w-full bg-darker border border-gray-600 rounded-lg p-2"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
+            <textarea
+              value={paramsJson}
+              onChange={(e) => setParamsJson(e.target.value)}
+              rows={type === "custom_python" ? 14 : 10}
+              spellCheck={false}
+              className="w-full bg-darker border border-gray-600 rounded-lg p-3 font-mono text-xs"
+            />
+            {type === "custom_python" && (
+              <p className="text-xs text-yellow-500/90 mt-1">
+                粘贴 Manim 官方示例中的 Scene 类代码。ECS 无 LaTeX，请避免 MathTex/Tex。
+              </p>
+            )}
+            {type === "custom_dsl" && (
+              <p className="text-xs text-gray-500 mt-1">
+                objects: circle|rect|text|arrow|dot · timeline: create|fade_in|write|grow_arrow|wait|transform
+              </p>
+            )}
+          </div>
 
           <button
             onClick={handleSubmit}
@@ -199,92 +231,41 @@ export default function ManimConfig() {
         <div className="space-y-4">
           <div className="bg-darker rounded-lg border border-gray-700 p-4">
             <h3 className="font-semibold mb-3">预览</h3>
-            {task ? (
+            {!task ? (
+              <p className="text-gray-500 text-sm">提交后在此预览</p>
+            ) : (
               <div className="space-y-2 text-sm">
                 <p>类型: <code className="text-gray-300">{String(task.payload?.type ?? type)}</code></p>
-                <p>ID: <code className="text-gray-300 break-all">{task.id}</code></p>
-                <p>
-                  状态: <span className={statusColor[task.status]}>{task.status}</span>
-                </p>
+                <p>状态: <span className={statusColor[task.status]}>{task.status}</span></p>
                 {task.outputUrl && task.status === "success" && (
                   <>
-                    <p className="text-xs text-gray-400 break-all">{task.outputUrl}</p>
-                    {task.clipJsonUrl && (
-                      <p className="text-xs text-gray-500 break-all">{task.clipJsonUrl}</p>
-                    )}
-                    <div className="flex flex-wrap gap-2">
-                      <button onClick={copyClipUrl} className="text-primary text-sm underline">
-                        复制 MP4 地址
-                      </button>
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <button onClick={copyClipUrl} className="text-primary underline">复制 MP4</button>
                       {task.clipJson && (
-                        <button onClick={copyClipJson} className="text-primary text-sm underline">
-                          复制 Remotion JSON
-                        </button>
+                        <button onClick={copyClipJson} className="text-primary underline">复制 JSON</button>
                       )}
-                      <a href={task.outputUrl} download className="text-sm text-gray-400 underline">
-                        下载 MP4
-                      </a>
-                      {task.clipJsonUrl && (
-                        <a href={task.clipJsonUrl} download className="text-sm text-gray-400 underline">
-                          下载 JSON
-                        </a>
-                      )}
+                      <a href={task.outputUrl} download className="text-gray-400 underline">下载 MP4</a>
                     </div>
                     {clipJsonText && (
-                      <details className="text-xs mt-2">
-                        <summary className="cursor-pointer text-gray-400">Remotion manim_clip JSON</summary>
-                        <pre className="mt-1 p-2 bg-black/40 rounded overflow-x-auto max-h-40 whitespace-pre-wrap text-gray-300">
-                          {clipJsonText}
-                        </pre>
+                      <details className="text-xs">
+                        <summary className="cursor-pointer text-gray-400">manim_clip JSON</summary>
+                        <pre className="mt-1 p-2 bg-black/40 rounded overflow-auto max-h-32">{clipJsonText}</pre>
                       </details>
                     )}
-                    <video
-                      src={task.outputUrl}
-                      controls
-                      className="w-full rounded mt-2 bg-black"
-                      onError={() => setVideoError(true)}
-                    />
-                    {videoError && (
-                      <p className="text-yellow-400 text-xs">视频无法播放，请检查 Manim/ffmpeg 安装。</p>
-                    )}
+                    <video src={task.outputUrl} controls className="w-full rounded bg-black" onError={() => setVideoError(true)} />
+                    {videoError && <p className="text-yellow-400 text-xs">播放失败，请下载查看</p>}
                   </>
                 )}
-                {task.error && (
-                  <p className={task.status === "success" ? "text-yellow-400 text-xs" : "text-red-400"}>
-                    {task.error}
-                  </p>
-                )}
+                {task.error && <p className="text-yellow-400 text-xs">{task.error}</p>}
                 {task.renderLog && (
-                  <details className="text-xs text-gray-500 mt-2">
+                  <details className="text-xs">
                     <summary className="cursor-pointer text-gray-400">渲染日志</summary>
-                    <pre className="mt-1 p-2 bg-black/40 rounded overflow-x-auto max-h-40 whitespace-pre-wrap">
-                      {task.renderLog}
-                    </pre>
+                    <pre className="mt-1 p-2 bg-black/40 rounded overflow-auto max-h-40 whitespace-pre-wrap">{task.renderLog}</pre>
                   </details>
                 )}
               </div>
-            ) : (
-              <p className="text-gray-500">提交后在此预览</p>
             )}
           </div>
-
-          {status?.recentTasks && status.recentTasks.length > 0 && (
-            <div className="bg-darker rounded-lg border border-gray-700 p-4">
-              <h3 className="font-semibold mb-2 text-sm">最近任务</h3>
-              <div className="space-y-1 max-h-48 overflow-y-auto">
-                {status.recentTasks.map((t) => (
-                  <button
-                    key={t.id}
-                    onClick={() => t.outputUrl && navigator.clipboard.writeText(t.outputUrl)}
-                    className="w-full text-left text-xs px-2 py-1 rounded hover:bg-gray-800 truncate"
-                    title="点击复制地址"
-                  >
-                    {t.type} — {t.status}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -22,5 +22,14 @@
   "formula_steps": { "steps": ["P = V * I", "V = I * R", "P = I^2 * R"], "title": "\u516c\u5f0f\u62c6\u89e3" },
   "chapter_banner": { "chapter": "\u7b2c\u4e00\u7ae0", "title": "\u534a\u5bfc\u4f53\u57fa\u7840" },
   "isometric_stack": { "title": "\u5c42\u53e0\u7ed3\u6784 (PCB/\u80fd\u5e26)" },
-  "orbit_paths": { "title": "\u8f68\u9053 / \u65cb\u8f6c\u8def\u5f84" }
+  "orbit_paths": { "title": "\u8f68\u9053 / \u65cb\u8f6c\u8def\u5f84" },
+  "pie_chart": { "title": "\u6570\u636e\u5360\u6bd4", "values": [30, 25, 20, 25], "labels": ["A", "B", "C", "D"] },
+  "line_chart_compare": { "title": "\u8d8b\u52bf\u5bf9\u6bd4", "series": [{ "name": "A", "values": [1, 3, 2, 5, 4] }, { "name": "B", "values": [2, 2, 4, 3, 6] }] },
+  "circuit_loop": { "title": "\u5b8c\u6574\u7535\u8def", "voltage": "12V", "component": "R1" },
+  "band_temperature": { "title": "\u80fd\u5e26\u4e0e\u6e29\u5ea6", "temp_start": "300K", "temp_end": "400K" },
+  "crystal_lattice": { "title": "\u6676\u4f53\u70b9\u9635", "rows": 4, "cols": 4 },
+  "code_highlight": { "title": "\u4ee3\u7801\u793a\u4f8b", "lines": ["def learn():", "    return 'active recall'", "learn()"], "highlight_line": 2 },
+  "transform_demo": { "title": "\u53d8\u6362\u6f14\u793a", "from_shape": "square", "to_shape": "circle" },
+  "custom_dsl": { "title": "JSON \u573a\u666f", "objects": [{ "id": "c1", "type": "circle", "radius": 1, "color": "BLUE" }], "timeline": [{ "action": "create", "target": "c1" }] },
+  "custom_python": { "class_name": "CustomScene", "code": "class CustomScene(Scene):\n    def construct(self):\n        c = Circle()\n        self.play(Create(c))\n        self.wait(1)\n" }
 }

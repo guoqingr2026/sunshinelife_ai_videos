@@ -7,6 +7,22 @@ import { getManimOutputPath } from "../lib/storage";
 
 const router = Router();
 
+router.get("/catalog", (_req, res) => {
+  try {
+    const manimRoot = path.resolve(__dirname, "../../../manim");
+    const localePath = path.join(manimRoot, "locale", "zh.json");
+    const locale = fs.existsSync(localePath)
+      ? JSON.parse(fs.readFileSync(localePath, "utf-8"))
+      : {};
+    const catalogPath = path.join(manimRoot, "template_catalog.py");
+    const raw = fs.readFileSync(catalogPath, "utf-8");
+    const types = [...raw.matchAll(/"([a-z_]+)":\s*"templates\./g)].map((m) => m[1]);
+    res.json({ types, locale, customTypes: ["custom_python"] });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
 router.get("/status", async (_req, res) => {
   const manimOk = await checkManimModule();
   const pythonOk = await checkPythonAvailable();
@@ -29,7 +45,7 @@ router.get("/status", async (_req, res) => {
     ffmpegInstalled: ffmpegOk,
     mode: manimOk ? "real" : "placeholder",
     hint: manimOk
-      ? "支持 24+ 种场景：工程示意、数学图表、信息图、文本动画、结构轨道"
+      ? "支持 30+ 种场景 + JSON DSL / 自定义 Python（L1/L2/L3）"
       : "未检测到 Manim，将生成占位视频。安装: py -3 -m pip install manim",
     recentTasks: recent,
   });

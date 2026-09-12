@@ -1,7 +1,7 @@
-"""Manim 场景注册表 — render_task.py 与前端 catalog 保持一致"""
+"""Manim scene registry — keep in sync with frontend/utils/manim-capabilities.ts"""
 
 TEMPLATES = {
-    # 工程 / 物理 / 电气
+    # Layer 1 — engineering
     "pn_junction": "templates.pn_junction.PNJunction",
     "band_structure": "templates.band_structure.BandStructure",
     "current_arrow": "templates.current_arrow.CurrentArrow",
@@ -11,23 +11,34 @@ TEMPLATES = {
     "buck_converter": "templates.buck_converter.BuckConverter",
     "sine_waveform": "templates.sine_waveform.SineWaveform",
     "llc_resonant": "templates.llc_resonant.LLCResonant",
-    # 数学 / 几何
+    # Layer 1 — math
     "function_graph": "templates.function_graph.FunctionGraphScene",
     "coordinate_grid": "templates.coordinate_grid.CoordinateGrid",
     "vector_sum": "templates.vector_sum.VectorSum",
     "bar_chart": "templates.bar_chart.BarChartScene",
-    # 信息图表
+    # Layer 2 — math / charts
+    "pie_chart": "templates.pie_chart.PieChartScene",
+    "line_chart_compare": "templates.line_chart_compare.LineChartCompare",
+    # Layer 1 — infographic
     "timeline_horizontal": "templates.timeline_horizontal.TimelineHorizontal",
     "flowchart": "templates.flowchart.FlowchartSimple",
     "forgetting_curve": "templates.forgetting_curve.ForgettingCurve",
     "concept_network": "templates.concept_network.ConceptNetwork",
     "learning_curve": "templates.learning_curve.LearningCurve",
-    # 文本动画
+    # Layer 1 — text
     "typewriter_text": "templates.typewriter_text.TypewriterText",
     "keyword_pop": "templates.keyword_pop.KeywordPop",
     "formula_steps": "templates.formula_steps.FormulaSteps",
     "chapter_banner": "templates.chapter_banner.ChapterBanner",
-    # 伪 3D / 结构
+    # Layer 1 — structure
     "isometric_stack": "templates.isometric_stack.IsometricStack",
     "orbit_paths": "templates.orbit_paths.OrbitPaths",
+    # Layer 2 — engineering / structure / advanced anim
+    "circuit_loop": "templates.circuit_loop.CircuitLoop",
+    "band_temperature": "templates.band_temperature.BandTemperature",
+    "crystal_lattice": "templates.crystal_lattice.CrystalLattice",
+    "code_highlight": "templates.code_highlight.CodeHighlight",
+    "transform_demo": "templates.transform_demo.TransformDemo",
+    # Layer 3 — custom
+    "custom_dsl": "templates.custom_dsl.CustomDSLScene",
 }

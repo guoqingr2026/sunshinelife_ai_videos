@@ -74,6 +74,14 @@ export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
   // 结构
   { id: "isometric_stack", label: "层叠结构", category: "结构", desc: "PCB/能带层叠伪3D", keywords: ["层叠", "pcb", "叠层", "多层结构"] },
   { id: "orbit_paths", label: "轨道路径", category: "结构", desc: "旋转轨道示意", keywords: ["轨道", "旋转", "路径", "圆周", "公转"] },
+  { id: "pie_chart", label: "饼图", category: "数学", desc: "占比扇形图", keywords: ["饼图", "占比", "比例", "扇形"] },
+  { id: "line_chart_compare", label: "折线对比", category: "数学", desc: "双系列折线对比", keywords: ["折线", "对比", "趋势", "曲线对比"] },
+  { id: "circuit_loop", label: "电路回路", category: "工程", desc: "闭合电路回路", keywords: ["电路", "回路", "闭合", "电源"] },
+  { id: "band_temperature", label: "能带温度", category: "工程", desc: "能带随温度变化", keywords: ["能带", "温度", "禁带", "热激发"] },
+  { id: "crystal_lattice", label: "晶体点阵", category: "结构", desc: "晶格点阵伪3D", keywords: ["晶体", "点阵", "晶格", "lattice"] },
+  { id: "code_highlight", label: "代码高亮", category: "文本", desc: "代码逐行展示", keywords: ["代码", "编程", "高亮", "python"] },
+  { id: "transform_demo", label: "变换动画", category: "结构", desc: "Transform 形变", keywords: ["变换", "transform", "形变", "转换"] },
+  { id: "custom_dsl", label: "JSON场景", category: "结构", desc: "JSON DSL 自定义", keywords: ["dsl", "json", "自定义"] },
 ];
 
 for (const spec of MANIM_TYPE_SPECS) {
