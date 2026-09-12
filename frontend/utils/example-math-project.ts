@@ -113,7 +113,52 @@ export const MATH_EXPONENTIAL_PROJECT = {
   ],
 };
 
+/** 快速版：仅用 L1 模板，6 个 Manim，与 MVP 同样稳定（推荐 ECS 首次试跑） */
+export const MATH_EXPONENTIAL_PROJECT_LITE = {
+  title: "指数方程 2^t = t^32（快速版）",
+  shots: [
+    { type: "chapter_banner", label: "开场", params: { chapter: "数学妙解", title: "指数方程 2^t = t^32" } },
+    {
+      type: "mathtex_formula",
+      label: "原方程",
+      params: { title: "原方程", formula: "2^t = t^{32}", caption: "求 t" },
+    },
+    {
+      type: "formula_steps",
+      label: "第一步",
+      params: {
+        title: "取 1/t 次方",
+        steps: ["2^t = t^32", "(2^t)^(1/t) = (t^32)^(1/t)", "2 = t^(32/t)"],
+      },
+    },
+    {
+      type: "formula_steps",
+      label: "第二步",
+      params: {
+        title: "取 1/32 次方",
+        steps: ["2 = t^(32/t)", "2^(1/32) = t^(1/t)"],
+      },
+    },
+    {
+      type: "mathtex_formula",
+      label: "答案",
+      params: { title: "解", formula: "t = 256", caption: "代入可验证" },
+    },
+    {
+      type: "formula_steps",
+      label: "验证",
+      params: {
+        title: "验算",
+        steps: ["2^256 = (2^8)^32 = 256^32", "左右相等"],
+      },
+    },
+    { type: "keyword_pop", label: "总结", params: { title: "要点", keywords: ["取次方", "指数法则", "t=256", "验算"] } },
+    { type: "fade_text", label: "感谢观看" },
+  ],
+};
+
 export const MATH_EXPONENTIAL_PROJECT_JSON = JSON.stringify(MATH_EXPONENTIAL_PROJECT, null, 2);
+export const MATH_EXPONENTIAL_PROJECT_LITE_JSON = JSON.stringify(MATH_EXPONENTIAL_PROJECT_LITE, null, 2);
 
 export const MATH_ACADEMIC_THEME = {
   primaryColor: "#a855f7",

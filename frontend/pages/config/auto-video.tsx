@@ -1,7 +1,30 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, ComposePayload, ComposeTask } from "../../utils/api";
 import { MVP_PROJECT_JSON, MVP_WORKFLOW_HELP } from "../../utils/mvp-project";
-import { MATH_EXPONENTIAL_PROJECT_JSON } from "../../utils/example-math-project";
+import {
+  MATH_EXPONENTIAL_PROJECT_JSON,
+  MATH_EXPONENTIAL_PROJECT_LITE_JSON,
+} from "../../utils/example-math-project";
+import { MANIM_TEMPLATES } from "../../utils/manim-catalog";
+
+const REMOTION_SHOT_TYPES = new Set([
+  "title", "chapter", "bullet_list", "fade_text", "subtitle", "quote",
+  "flow_steps", "timeline_bar", "formula_card", "compare", "arrow", "stat", "params",
+]);
+const MANIM_IDS = new Set(MANIM_TEMPLATES.map((t) => t.id));
+
+function analyzeShots(shots: Array<{ type: string }> | undefined) {
+  if (!shots?.length) return { manim: 0, remotion: 0, unknown: [] as string[] };
+  let manim = 0;
+  let remotion = 0;
+  const unknown: string[] = [];
+  for (const s of shots) {
+    if (MANIM_IDS.has(s.type)) manim++;
+    else if (REMOTION_SHOT_TYPES.has(s.type)) remotion++;
+    else unknown.push(s.type);
+  }
+  return { manim, remotion, unknown };
+}
 
 const PHASE_LABELS: Record<string, string> = {
   pending: "排队中",
@@ -59,13 +82,21 @@ export default function AutoVideoPage() {
   const [task, setTask] = useState<ComposeTask | null>(null);
   const [loading, setLoading] = useState(false);
   const [planning, setPlanning] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [videoError, setVideoError] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
 
   const project = useMemo(() => parseProjectJson(projectJson), [projectJson]);
   const jsonValid = project !== null && (project.shots?.length ?? 0) > 0;
+  const shotStats = useMemo(() => analyzeShots(project?.shots), [project?.shots]);
 
   const isActive = task && task.status !== "success" && task.status !== "failed";
+
+  const resetLocalTask = () => {
+    setTask(null);
+    setSubmitError("");
+    setVideoError(false);
+  };
 
   useEffect(() => {
     if (!isActive) return;
@@ -109,6 +140,8 @@ export default function AutoVideoPage() {
     if (!project?.shots?.length) return;
     setLoading(true);
     setVideoError(false);
+    setSubmitError("");
+    setTask(null);
     try {
       const { taskId } = await api.createComposeTask({
         brief: "",
@@ -118,6 +151,12 @@ export default function AutoVideoPage() {
         renderFinal,
       });
       setTask(await api.getComposeTask(taskId));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      setSubmitError(
+        `提交失败：${msg}。请确认 API 已启动（pm2 logs sunshinelife-videos-api），且 ECS 已 git pull + pnpm --filter frontend build。`
+      );
+      console.error("compose start failed", e);
     } finally {
       setLoading(false);
     }
@@ -167,23 +206,39 @@ export default function AutoVideoPage() {
               <div className="flex gap-3">
                 <button
                   type="button"
-                  onClick={() => setProjectJson(MVP_PROJECT_JSON)}
-                  disabled={!!isActive}
-                  className="text-xs text-primary hover:underline disabled:opacity-50"
+                  onClick={() => {
+                    resetLocalTask();
+                    setProjectJson(MVP_PROJECT_JSON);
+                    setPreviewPlan(null);
+                    setPlanError("");
+                  }}
+                  className="text-xs text-primary hover:underline"
                 >
                   学习 MVP
                 </button>
                 <button
                   type="button"
                   onClick={() => {
+                    resetLocalTask();
+                    setProjectJson(MATH_EXPONENTIAL_PROJECT_LITE_JSON);
+                    setPreviewPlan(null);
+                    setPlanError("");
+                  }}
+                  className="text-xs text-green-400 hover:underline"
+                >
+                  数学题·快速版
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetLocalTask();
                     setProjectJson(MATH_EXPONENTIAL_PROJECT_JSON);
                     setPreviewPlan(null);
                     setPlanError("");
                   }}
-                  disabled={!!isActive}
-                  className="text-xs text-green-400 hover:underline disabled:opacity-50"
+                  className="text-xs text-amber-400 hover:underline"
                 >
-                  数学题示例 2^t=t^32
+                  数学题·完整版
                 </button>
               </div>
             </div>
@@ -205,9 +260,26 @@ export default function AutoVideoPage() {
               <p className="text-red-400 text-xs mt-1">JSON 格式错误或 shots 为空</p>
             )}
             {jsonValid && project && (
-              <p className="text-green-500/80 text-xs mt-1">
-                已识别 {project.shots!.length} 个镜头
-                {project.title ? ` · 标题「${project.title}」` : ""}
+              <div className="text-xs mt-1 space-y-0.5">
+                <p className="text-green-500/80">
+                  已识别 {project.shots!.length} 个镜头（Manim {shotStats.manim} · Remotion {shotStats.remotion})
+                  {project.title ? ` · 「${project.title}」` : ""}
+                </p>
+                {shotStats.manim > 8 && (
+                  <p className="text-amber-400/90">
+                    含 {shotStats.manim} 个 Manim，全片约 20–40 分钟；建议先用「快速版」或取消「自动合成成片」。
+                  </p>
+                )}
+                {shotStats.unknown.length > 0 && (
+                  <p className="text-red-400">
+                    未知镜头类型：{shotStats.unknown.join(", ")} — 请 git pull 更新 ECS 后重试。
+                  </p>
+                )}
+              </div>
+            )}
+            {isActive && (
+              <p className="text-yellow-500/90 text-xs mt-1">
+                有任务进行中。可先点「重置界面状态」再换示例；或等待当前任务结束。
               </p>
             )}
           </div>
@@ -223,11 +295,20 @@ export default function AutoVideoPage() {
             </button>
             <button
               onClick={handleStart}
-              disabled={loading || !!isActive || !jsonValid}
+              disabled={loading || !!isActive || !jsonValid || shotStats.unknown.length > 0}
               className="px-6 py-2 bg-primary rounded-lg font-semibold hover:bg-red-600 disabled:opacity-50"
             >
               {loading ? "提交中…" : isActive ? "生成进行中…" : "一键生成视频"}
             </button>
+            {(isActive || task) && (
+              <button
+                type="button"
+                onClick={resetLocalTask}
+                className="px-4 py-2 border border-gray-600 rounded-lg text-sm text-gray-400 hover:bg-gray-800"
+              >
+                重置界面状态
+              </button>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-4 text-sm">
@@ -252,6 +333,7 @@ export default function AutoVideoPage() {
           </div>
 
           {planError && <p className="text-red-400 text-sm">{planError}</p>}
+          {submitError && <p className="text-red-400 text-sm">{submitError}</p>}
 
           {previewPlan && (
             <div className="bg-darker border border-gray-700 rounded-lg p-4 text-sm space-y-2">
@@ -285,7 +367,9 @@ export default function AutoVideoPage() {
               )}
             </div>
 
-            {!task ? (
+            {loading ? (
+              <p className="text-blue-300 text-sm">正在提交任务…</p>
+            ) : !task ? (
               <p className="text-gray-500 text-sm">点击「一键生成视频」后开始</p>
             ) : (
               <div className="space-y-4 text-sm">
