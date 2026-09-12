@@ -14,10 +14,42 @@ export interface ManimPayload {
   subtitleId?: string;
 }
 
+export interface ManimClipJson {
+  type: "manim_clip";
+  durationInFrames: number;
+  title: string;
+  manimType: string;
+  sourceUrl: string;
+  params: Record<string, unknown>;
+}
+
 export interface ManimRenderResult {
   outputUrl: string;
+  clipJsonUrl?: string;
   mode: "real" | "mock";
   warning?: string;
+}
+
+function buildClipJson(payload: ManimPayload, outputUrl: string): ManimClipJson {
+  const params = payload.params ?? {};
+  const title =
+    (typeof params.title === "string" && params.title) ||
+    (typeof params.subtitle === "string" && params.subtitle) ||
+    payload.type;
+  return {
+    type: "manim_clip",
+    durationInFrames: 150,
+    title,
+    manimType: payload.type,
+    sourceUrl: outputUrl,
+    params,
+  };
+}
+
+function writeClipJson(taskId: string, clip: ManimClipJson): string {
+  const jsonPath = path.join(path.dirname(getManimOutputPath(taskId)), `${taskId}.json`);
+  fs.writeFileSync(jsonPath, JSON.stringify(clip, null, 2), "utf-8");
+  return toPublicUrl(`files/manim/${taskId}.json`);
 }
 
 export async function renderManim(
@@ -36,8 +68,11 @@ export async function renderManim(
         "Manim 未安装且占位视频生成失败。请在 ECS 执行: apt install ffmpeg && pip install manim"
       );
     }
+    const outputUrl = toPublicUrl(`files/manim/${taskId}.mp4`);
+    const clipJsonUrl = writeClipJson(taskId, buildClipJson(payload, outputUrl));
     return {
-      outputUrl: toPublicUrl(`files/manim/${taskId}.mp4`),
+      outputUrl,
+      clipJsonUrl,
       mode: "mock",
       warning: "Manim 未安装，输出为占位视频",
     };
@@ -80,15 +115,21 @@ export async function renderManim(
         `Manim 渲染失败 (code=${exitCode})。日志: files/manim/${taskId}.log`
       );
     }
+    const outputUrl = toPublicUrl(`files/manim/${taskId}.mp4`);
+    const clipJsonUrl = writeClipJson(taskId, buildClipJson(payload, outputUrl));
     return {
-      outputUrl: toPublicUrl(`files/manim/${taskId}.mp4`),
+      outputUrl,
+      clipJsonUrl,
       mode: "mock",
       warning: `Manim 渲染失败，已生成占位视频。详见 files/manim/${taskId}.log`,
     };
   }
 
+  const outputUrl = toPublicUrl(`files/manim/${taskId}.mp4`);
+  const clipJsonUrl = writeClipJson(taskId, buildClipJson(payload, outputUrl));
   return {
-    outputUrl: toPublicUrl(`files/manim/${taskId}.mp4`),
+    outputUrl,
+    clipJsonUrl,
     mode: "real",
   };
 }

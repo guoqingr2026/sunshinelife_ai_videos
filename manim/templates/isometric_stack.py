@@ -5,13 +5,14 @@ _path_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_path_mod)
 
 from manim import *
-from templates._text import mk_text
+from templates._layout import mk_title, drop_content
 
 
 class IsometricStack(Scene):
-    """�?3D 层叠结构（cairo 友好�?""
+    """? 3D ?????cairo ???"""
 
     def construct(self):
+        title = mk_title("???? (PCB/??)", font_size=28)
         layers = VGroup()
         colors = [BLUE, GREEN, YELLOW, RED]
         for i, c in enumerate(colors):
@@ -25,7 +26,7 @@ class IsometricStack(Scene):
                 fill_opacity=0.5,
             )
             layers.add(rect)
-        title = mk_text("层叠结构 (PCB/能带)", font_size=28).to_edge(UP)
+        drop_content(layers)
         self.play(Write(title))
         self.play(LaggedStart(*[FadeIn(l, shift=UP * 0.2) for l in layers], lag_ratio=0.25))
         self.wait(1)

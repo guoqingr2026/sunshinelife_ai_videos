@@ -7,16 +7,17 @@ _spec.loader.exec_module(_path_mod)
 from manim import *
 from templates._text import mk_text
 from templates._params import get_params
+from templates._layout import mk_title
 
 
 class FormulaSteps(Scene):
     def construct(self):
         p = get_params({"steps": ["P = V × I", "V = I × R", "P = I² × R"]})
-        title = mk_text("公式拆解", font_size=32).to_edge(UP)
+        title = mk_title("公式拆解")
         items = VGroup()
         for i, s in enumerate(p["steps"]):
             t = mk_text(str(s), font_size=32, color=YELLOW if i == len(p["steps"]) - 1 else WHITE)
-            t.shift(DOWN * i * 0.9)
+            t.shift(DOWN * (i * 0.9 + 0.5))
             items.add(t)
         self.play(Write(title))
         for t in items:

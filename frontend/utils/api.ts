@@ -99,6 +99,15 @@ export interface ComposeTask {
   updatedAt: string;
 }
 
+export interface ManimClipJson {
+  type: "manim_clip";
+  durationInFrames: number;
+  title: string;
+  manimType: string;
+  sourceUrl: string;
+  params: Record<string, unknown>;
+}
+
 export interface Task {
   id: string;
   kind: "manim" | "remotion" | "hyperframes" | "compose";
@@ -108,6 +117,8 @@ export interface Task {
   framesUrl?: string;
   error?: string;
   renderLog?: string;
+  clipJson?: ManimClipJson;
+  clipJsonUrl?: string;
   createdAt: string;
   updatedAt: string;
 }

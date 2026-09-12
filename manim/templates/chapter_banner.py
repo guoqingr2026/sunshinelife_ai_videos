@@ -7,14 +7,16 @@ _spec.loader.exec_module(_path_mod)
 from manim import *
 from templates._text import mk_text
 from templates._params import get_params
+from templates._layout import mk_title
 
 
 class ChapterBanner(Scene):
     def construct(self):
-        p = get_params({"chapter": "第一�?, "title": "半导体基础"})
-        bar = Rectangle(width=12, height=1.2, color=BLUE, fill_opacity=0.4).to_edge(UP, buff=1)
-        ch = mk_text(p["chapter"], font_size=28, color=YELLOW).move_to(bar)
-        main = mk_text(p["title"], font_size=48).shift(DOWN * 0.5)
-        self.play(FadeIn(bar), Write(ch))
+        p = get_params({"chapter": "???", "title": "?????"})
+        title = mk_title(p["chapter"], font_size=28)
+        bar = Rectangle(width=10, height=1.0, color=BLUE, fill_opacity=0.35)
+        bar.next_to(title, DOWN, buff=0.35)
+        main = mk_text(p["title"], font_size=44).next_to(bar, DOWN, buff=0.5)
+        self.play(Write(title), FadeIn(bar))
         self.play(Write(main))
         self.wait(1)

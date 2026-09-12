@@ -75,6 +75,15 @@ export default function ManimConfig() {
     navigator.clipboard.writeText(task.outputUrl);
   };
 
+  const copyClipJson = () => {
+    if (!task?.clipJson) return;
+    navigator.clipboard.writeText(JSON.stringify(task.clipJson, null, 2));
+  };
+
+  const clipJsonText = task?.clipJson
+    ? JSON.stringify(task.clipJson, null, 2)
+    : "";
+
   const statusColor = {
     pending: "text-yellow-400",
     running: "text-blue-400",
@@ -87,7 +96,7 @@ export default function ManimConfig() {
       <h1 className="text-2xl font-bold mb-2">Manim 动画引擎</h1>
       <p className="text-gray-400 text-sm mb-4">
         支持 <strong className="text-white">工程示意、数学图表、信息图、文本动画、结构轨道</strong> 等 {MANIM_TEMPLATES.length} 种场景。
-        生成后复制地址，在 Remotion 时间轴用 <code className="text-primary">manim_clip</code> 插入，组合成完整视频。
+        生成后会同时产出 <code className="text-primary">.mp4</code> 与 <code className="text-primary">.json</code>（Remotion <code className="text-primary">manim_clip</code> 片段配置）。
       </p>
 
       {status && (
@@ -200,14 +209,35 @@ export default function ManimConfig() {
                 {task.outputUrl && task.status === "success" && (
                   <>
                     <p className="text-xs text-gray-400 break-all">{task.outputUrl}</p>
-                    <div className="flex gap-2">
+                    {task.clipJsonUrl && (
+                      <p className="text-xs text-gray-500 break-all">{task.clipJsonUrl}</p>
+                    )}
+                    <div className="flex flex-wrap gap-2">
                       <button onClick={copyClipUrl} className="text-primary text-sm underline">
-                        复制片段地址（用于 Remotion）
+                        复制 MP4 地址
                       </button>
+                      {task.clipJson && (
+                        <button onClick={copyClipJson} className="text-primary text-sm underline">
+                          复制 Remotion JSON
+                        </button>
+                      )}
                       <a href={task.outputUrl} download className="text-sm text-gray-400 underline">
-                        下载
+                        下载 MP4
                       </a>
+                      {task.clipJsonUrl && (
+                        <a href={task.clipJsonUrl} download className="text-sm text-gray-400 underline">
+                          下载 JSON
+                        </a>
+                      )}
                     </div>
+                    {clipJsonText && (
+                      <details className="text-xs mt-2">
+                        <summary className="cursor-pointer text-gray-400">Remotion manim_clip JSON</summary>
+                        <pre className="mt-1 p-2 bg-black/40 rounded overflow-x-auto max-h-40 whitespace-pre-wrap text-gray-300">
+                          {clipJsonText}
+                        </pre>
+                      </details>
+                    )}
                     <video
                       src={task.outputUrl}
                       controls

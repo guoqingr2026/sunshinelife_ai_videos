@@ -63,17 +63,27 @@ router.get("/task/:id", async (req, res) => {
     const task = db.task.findFirst({ id: req.params.id, kind: "manim" });
     if (!task) return res.status(404).json({ error: "Not found" });
 
-    const logPath = getManimOutputPath(req.params.id).replace(/\.mp4$/, ".log");
+    const basePath = getManimOutputPath(req.params.id).replace(/\.mp4$/, "");
+    const logPath = `${basePath}.log`;
+    const jsonPath = `${basePath}.json`;
     let renderLog: string | undefined;
+    let clipJson: Record<string, unknown> | undefined;
+    let clipJsonUrl: string | undefined;
     if (fs.existsSync(logPath)) {
       const raw = fs.readFileSync(logPath, "utf-8");
       renderLog = raw.slice(-4000);
+    }
+    if (fs.existsSync(jsonPath)) {
+      clipJson = JSON.parse(fs.readFileSync(jsonPath, "utf-8"));
+      clipJsonUrl = `/files/manim/${req.params.id}.json`;
     }
 
     res.json({
       ...task,
       payload: JSON.parse(task.payload),
       renderLog,
+      clipJson,
+      clipJsonUrl,
     });
   } catch (err) {
     res.status(500).json({ error: String(err) });

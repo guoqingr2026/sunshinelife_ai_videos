@@ -7,15 +7,19 @@ _spec.loader.exec_module(_path_mod)
 from manim import *
 from templates._text import mk_text
 from templates._params import get_params
+from templates._layout import mk_title, drop_content
 
 
 class FunctionGraphScene(Scene):
     def construct(self):
         p = get_params({"title": "y = sin(x)", "label": "sin(x)"})
+        title = mk_title(p["title"])
         axes = Axes(x_range=[-3, 3, 1], y_range=[-1.5, 1.5, 0.5], x_length=9, y_length=5)
         graph = axes.plot(lambda x: __import__("math").sin(x), color=YELLOW)
-        label = mk_text(p["label"], font_size=28, color=YELLOW).to_corner(UR)
-        title = mk_text(p["title"], font_size=32).to_edge(UP)
+        label = mk_text(p["label"], font_size=26, color=YELLOW)
+        chart = VGroup(axes, graph)
+        drop_content(chart)
+        label.next_to(graph, UR, buff=0.2)
         self.play(Write(title), Create(axes))
         self.play(Create(graph), FadeIn(label))
         self.wait(1)

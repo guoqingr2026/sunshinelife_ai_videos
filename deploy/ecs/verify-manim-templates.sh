@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+# 校验所有 Manim 模板 Python 语法（部署后快速自检）
+set -euo pipefail
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+cd "$ROOT/manim/templates"
+fail=0
+for f in *.py; do
+  [[ "$f" == __* ]] && continue
+  if ! python3 -m py_compile "$f"; then
+    echo "SYNTAX ERROR: $f"
+    fail=1
+  fi
+done
+if [[ $fail -eq 0 ]]; then
+  echo "All Manim templates OK"
+else
+  exit 1
+fi

@@ -7,20 +7,22 @@ _spec.loader.exec_module(_path_mod)
 from manim import *
 from templates._text import mk_text
 from templates._params import get_params
+from templates._layout import mk_title
 
 
 class KeywordPop(Scene):
     def construct(self):
-        p = get_params({"keywords": ["理解", "记忆", "应用", "反馈"]})
+        p = get_params({"keywords": ["??", "??", "??", "??"]})
+        title = mk_title("?????", font_size=28)
         words = VGroup()
         colors = [YELLOW, GREEN, BLUE, RED]
-        for i, kw in enumerate(p["keywords"]):
-            w = mk_text(str(kw), font_size=36, color=colors[i % len(colors)])
-            w.shift(UP * (1.5 - i * 1))
+        positions = [LEFT * 2.5, LEFT * 0.8, RIGHT * 0.8, RIGHT * 2.5]
+        for i, kw in enumerate(p["keywords"][:4]):
+            w = mk_text(str(kw), font_size=34, color=colors[i % len(colors)])
+            w.move_to(positions[i] + DOWN * 0.3)
             words.add(w)
-        title = mk_text("关键词高�?, font_size=28).to_edge(UP)
         self.play(Write(title))
         for w in words:
-            self.play(FadeIn(w, scale=0.5), w.animate.scale(1.1), run_time=0.5)
-            self.play(w.animate.scale(1 / 1.1), run_time=0.2)
+            self.play(FadeIn(w, scale=0.5), w.animate.scale(1.08), run_time=0.45)
+            self.play(w.animate.scale(1 / 1.08), run_time=0.15)
         self.wait(0.5)
