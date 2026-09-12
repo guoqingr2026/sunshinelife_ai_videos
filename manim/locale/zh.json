@@ -31,5 +31,15 @@
   "code_highlight": { "title": "\u4ee3\u7801\u793a\u4f8b", "lines": ["def learn():", "    return 'active recall'", "learn()"], "highlight_line": 2 },
   "transform_demo": { "title": "\u53d8\u6362\u6f14\u793a", "from_shape": "square", "to_shape": "circle" },
   "custom_dsl": { "title": "JSON \u573a\u666f", "objects": [{ "id": "c1", "type": "circle", "radius": 1, "color": "BLUE" }], "timeline": [{ "action": "create", "target": "c1" }] },
-  "custom_python": { "class_name": "CustomScene", "code": "class CustomScene(Scene):\n    def construct(self):\n        c = Circle()\n        self.play(Create(c))\n        self.wait(1)\n" }
+  "custom_python": { "class_name": "CustomScene", "code": "class CustomScene(Scene):\n    def construct(self):\n        c = Circle()\n        self.play(Create(c))\n        self.wait(1)\n" },
+  "mathtex_formula": { "title": "\u516c\u5f0f", "formula": "E = mc^2", "caption": "\u8d28\u80fd\u7b49\u4ef7" },
+  "mathtex_derivation": { "title": "\u516c\u5f0f\u63a8\u5bfc", "steps": ["V = IR", "I = V/R", "P = VI"] },
+  "scene_3d_surface": { "title": "3D \u66f2\u9762" },
+  "scene_3d_orbit": { "title": "3D \u8f68\u9053", "label": "\u8f68\u9053\u8fd0\u52a8" },
+  "image_focus": { "title": "\u56fe\u7247\u5c55\u793a", "imagePath": "icon.svg", "caption": "" },
+  "svg_icon": { "title": "SVG \u56fe\u6807", "svgPath": "icon.svg", "scale": 2.5 },
+  "video_embed": { "title": "\u89c6\u9891\u7247\u6bb5", "videoPath": "", "max_duration": 3 },
+  "vocab_card": { "title": "\u5355\u8bcd\u5361", "word": "recall", "phonetic": "/rI'ko:l/", "meaning": "\u56de\u60f3\u3001\u56de\u60f6", "example": "Active recall improves memory." },
+  "grammar_highlight": { "title": "\u8bed\u6cd5", "pattern": "S + V + O", "sentence": "I love learning English.", "highlight": "love" },
+  "dialogue_scene": { "title": "\u5bf9\u8bdd", "lines": [{ "speaker": "A", "text": "How do you study vocabulary?" }, { "speaker": "B", "text": "I use active recall and spaced repetition." }] }
 }

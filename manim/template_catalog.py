@@ -39,6 +39,20 @@ TEMPLATES = {
     "crystal_lattice": "templates.crystal_lattice.CrystalLattice",
     "code_highlight": "templates.code_highlight.CodeHighlight",
     "transform_demo": "templates.transform_demo.TransformDemo",
+    # Layer 2 — MathTex (texlive optional, text fallback on ECS)
+    "mathtex_formula": "templates.mathtex_formula.MathTexFormula",
+    "mathtex_derivation": "templates.mathtex_derivation.MathTexDerivation",
+    # Layer 2 — 3D (OpenGL + xvfb on headless)
+    "scene_3d_surface": "templates.scene_3d_surface.Scene3DSurface",
+    "scene_3d_orbit": "templates.scene_3d_orbit.Scene3DOrbit",
+    # Layer 2 — media (SVG / image / video)
+    "image_focus": "templates.image_focus.ImageFocus",
+    "svg_icon": "templates.svg_icon.SvgIcon",
+    "video_embed": "templates.video_embed.VideoEmbed",
+    # Layer 2 — English learning
+    "vocab_card": "templates.vocab_card.VocabCard",
+    "grammar_highlight": "templates.grammar_highlight.GrammarHighlight",
+    "dialogue_scene": "templates.dialogue_scene.DialogueScene",
     # Layer 3 — custom
     "custom_dsl": "templates.custom_dsl.CustomDSLScene",
 }

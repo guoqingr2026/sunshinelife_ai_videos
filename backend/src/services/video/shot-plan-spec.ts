@@ -29,6 +29,22 @@ export const MANIM_TYPE_ALIASES: Record<string, string> = {
   exam_simulation: "timeline_horizontal",
   study_group: "concept_network",
   brain_health: "learning_curve",
+  vocabulary: "vocab_card",
+  vocab: "vocab_card",
+  grammar: "grammar_highlight",
+  dialogue: "dialogue_scene",
+  conversation: "dialogue_scene",
+  mathtex: "mathtex_formula",
+  latex_formula: "mathtex_formula",
+  derivation: "mathtex_derivation",
+  formula_derivation: "mathtex_derivation",
+  "3d_surface": "scene_3d_surface",
+  "3d_orbit": "scene_3d_orbit",
+  three_d: "scene_3d_surface",
+  image: "image_focus",
+  picture: "image_focus",
+  svg: "svg_icon",
+  video_clip: "video_embed",
 };
 
 /** GPT 常编造的非 Manim 类型 → Remotion 模块 */
@@ -81,7 +97,21 @@ export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
   { id: "crystal_lattice", label: "晶体点阵", category: "结构", desc: "晶格点阵伪3D", keywords: ["晶体", "点阵", "晶格", "lattice"] },
   { id: "code_highlight", label: "代码高亮", category: "文本", desc: "代码逐行展示", keywords: ["代码", "编程", "高亮", "python"] },
   { id: "transform_demo", label: "变换动画", category: "结构", desc: "Transform 形变", keywords: ["变换", "transform", "形变", "转换"] },
-  { id: "custom_dsl", label: "JSON场景", category: "结构", desc: "JSON DSL 自定义", keywords: ["dsl", "json", "自定义"] },
+  // 英语
+  { id: "vocab_card", label: "单词卡", category: "英语", desc: "词汇、音标、释义、例句", keywords: ["单词", "词汇", "vocabulary", "音标", "背单词", "英语单词"] },
+  { id: "grammar_highlight", label: "语法高亮", category: "英语", desc: "句型模式与例句强调", keywords: ["语法", "grammar", "句型", "时态", "从句", "语法点"] },
+  { id: "dialogue_scene", label: "对话场景", category: "英语", desc: "双人气泡对话", keywords: ["对话", "口语", "情景对话", "conversation", "dialogue", "交流"] },
+  // 媒体 / 公式 / 3D
+  { id: "mathtex_formula", label: "MathTex公式", category: "媒体", desc: "LaTeX 公式展示", keywords: ["公式", "latex", "mathtex", "方程", "等式", "数学公式"] },
+  { id: "mathtex_derivation", label: "公式推导", category: "媒体", desc: "分步 MathTex 推导", keywords: ["推导", "证明", "derivation", "化简", "公式推导"] },
+  { id: "scene_3d_surface", label: "3D曲面", category: "媒体", desc: "ThreeDScene 曲面环绕", keywords: ["3d", "三维", "曲面", "立体", "surface"] },
+  { id: "scene_3d_orbit", label: "3D轨道", category: "媒体", desc: "ThreeDScene 轨道运动", keywords: ["3d轨道", "环绕", "orbit", "旋转", "公转"] },
+  { id: "image_focus", label: "图片聚焦", category: "媒体", desc: "图片/SVG 展示缩放", keywords: ["图片", "配图", "示意图", "image", "插图", "照片"] },
+  { id: "svg_icon", label: "SVG图标", category: "媒体", desc: "矢量图标动画", keywords: ["svg", "图标", "矢量", "icon"] },
+  { id: "video_embed", label: "视频嵌入", category: "媒体", desc: "VideoMobject 片段", keywords: ["视频", "录像", "片段", "video", "实拍"] },
+  // 高级
+  { id: "custom_dsl", label: "JSON场景", category: "高级", desc: "JSON DSL 自定义", keywords: ["dsl", "json", "自定义场景"] },
+  { id: "custom_python", label: "自定义Python", category: "高级", desc: "粘贴 Manim Scene 代码", keywords: ["python", "自定义代码", "scene", "manim代码"] },
 ];
 
 for (const spec of MANIM_TYPE_SPECS) {
@@ -115,7 +145,7 @@ function ruleLine(spec: ManimTypeSpec): string {
 }
 
 export function buildKeywordRulesSection(): string {
-  const groups = ["工程", "数学", "信息图", "文本", "结构"];
+  const groups = ["工程", "数学", "信息图", "文本", "结构", "英语", "媒体", "高级"];
   const lines: string[] = [];
   for (const g of groups) {
     lines.push(`### ${g}`);
@@ -181,7 +211,7 @@ pn结, pn → pn_junction | PN 结
 
 ---
 
-## 全部 Manim 类型与推荐关键词（24 种）
+## 全部 Manim 类型与推荐关键词（${MANIM_TYPE_SPECS.length} 种）
 
 ${buildKeywordRulesSection()}
 
@@ -247,10 +277,13 @@ ${typeTable}
 
 ## 规划建议
 
-1. 科普/学习类：开场用 concept_network 或 chapter_banner，原理用工程/数学类，技巧用 forgetting_curve / learning_curve / typewriter_text
-2. 半导体/电路类：pn_junction → band_structure → mosfet_channel → current_arrow
-3. 每个视频 shots 建议 2～4 个 Manim 镜头，不要过多
-4. label 用中文简短标题，不超过 12 字
+1. 科普/学习类：开场 concept_network 或 chapter_banner，原理用工程/数学类，技巧用 forgetting_curve / typewriter_text
+2. 半导体/电路：pn_junction → band_structure → mosfet_channel → current_arrow
+3. 数学：mathtex_formula → function_graph → mathtex_derivation
+4. 英语：vocab_card → grammar_highlight → dialogue_scene
+5. 每个视频 shots 建议 2～5 个 Manim 镜头；避免 scene_3d_*（需 OpenGL）除非用户明确要求
+6. label 中文 ≤12 字；配色/背景由 Remotion theme 处理，不在 Manim params 里设置
+7. 完整参数手册见仓库 docs/manim-automation-guide.md
 
 请根据用户描述，直接输出 JSON 代码块，不要多余解释。`;
 }

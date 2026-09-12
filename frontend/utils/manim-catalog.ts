@@ -1,13 +1,24 @@
 import {
   MANIM_CAPABILITIES,
   MANIM_CAPABILITY_CATEGORIES,
+  MANIM_DOMAINS,
   getCapability,
+  getCapabilitiesByDomain,
   getExampleParams,
+  getTemplateDomain,
   type ManimCapability,
+  type ManimDomain,
 } from "./manim-capabilities";
 
-export type { ManimCapability };
-export { MANIM_CAPABILITY_CATEGORIES as MANIM_CATEGORIES, getCapability, getExampleParams };
+export type { ManimCapability, ManimDomain };
+export {
+  MANIM_CAPABILITY_CATEGORIES as MANIM_CATEGORIES,
+  MANIM_DOMAINS,
+  getCapability,
+  getCapabilitiesByDomain,
+  getExampleParams,
+  getTemplateDomain,
+};
 
 export interface ManimParamField {
   key: string;

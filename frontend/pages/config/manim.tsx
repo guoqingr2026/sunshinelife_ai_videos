@@ -2,16 +2,21 @@ import { useEffect, useMemo, useState } from "react";
 import { api, ManimStatus, Task } from "../../utils/api";
 import {
   MANIM_CATEGORIES,
+  MANIM_DOMAINS,
   MANIM_TEMPLATES,
   getExampleParams,
   getManimTemplate,
+  getTemplateDomain,
+  type ManimDomain,
 } from "../../utils/manim-catalog";
 
 type LayerFilter = "all" | 1 | 2 | 3;
+type DomainFilter = "all" | ManimDomain;
 
 export default function ManimConfig() {
   const [type, setType] = useState("pn_junction");
   const [layerFilter, setLayerFilter] = useState<LayerFilter>("all");
+  const [domainFilter, setDomainFilter] = useState<DomainFilter>("all");
   const [paramsJson, setParamsJson] = useState("");
   const [task, setTask] = useState<Task | null>(null);
   const [status, setStatus] = useState<ManimStatus | null>(null);
@@ -41,9 +46,15 @@ export default function ManimConfig() {
   }, [task]);
 
   const filteredTemplates = useMemo(() => {
-    if (layerFilter === "all") return MANIM_TEMPLATES;
-    return MANIM_TEMPLATES.filter((t) => t.layer === layerFilter);
-  }, [layerFilter]);
+    let list = MANIM_TEMPLATES;
+    if (domainFilter !== "all") {
+      list = list.filter((t) => getTemplateDomain(t.id) === domainFilter);
+    }
+    if (layerFilter !== "all") {
+      list = list.filter((t) => t.layer === layerFilter);
+    }
+    return list;
+  }, [layerFilter, domainFilter]);
 
   const grouped = useMemo(() => {
     const ids = new Set(filteredTemplates.map((t) => t.id));
@@ -89,7 +100,8 @@ export default function ManimConfig() {
     <div>
       <h1 className="text-2xl font-bold mb-2">Manim 动画引擎</h1>
       <p className="text-gray-400 text-sm mb-4">
-        三层能力：<strong className="text-white">L1</strong> 预设模板 · <strong className="text-white">L2</strong> 扩展图表/3D/变换 · <strong className="text-white">L3</strong> JSON DSL / 自定义 Python。
+        四域应用：<strong className="text-white">半导体</strong> · <strong className="text-white">学习</strong> · <strong className="text-white">英语</strong> · <strong className="text-white">媒体/3D</strong>。
+        三层能力 L1/L2/L3；覆盖 MathTex（texlive 可选）、ThreeDScene（OpenGL）、SVG/图片/视频。
         生成 <code className="text-primary">.mp4</code> + Remotion <code className="text-primary">manim_clip</code> <code className="text-primary">.json</code>。
       </p>
 
@@ -104,20 +116,37 @@ export default function ManimConfig() {
           <p className="font-medium">
             {status.manimInstalled ? "✓ 已安装 Manim" : "⚠ 未安装 Manim（占位视频）"}
           </p>
-          <p className="text-xs mt-1 opacity-80">
-            共 {MANIM_TEMPLATES.length} 种场景 · 参考{" "}
+          <p className="text-xs mt-1 opacity-80">{status.hint}</p>
+          <p className="text-xs mt-1 opacity-70">
+            共 {MANIM_TEMPLATES.length} 种场景 · 自动化手册{" "}
+            <code className="text-gray-400">docs/manim-automation-guide.md</code>
+            · 配色/背景由 Remotion theme 统一 ·{" "}
             <a
               href="https://docs.manim.community/en/stable/examples.html"
               target="_blank"
               rel="noreferrer"
               className="underline"
             >
-              Manim 官方示例库
+              Manim 官方示例
             </a>
           </p>
         </div>
       )}
 
+      <div className="flex flex-wrap gap-2 mb-2 text-xs">
+        {(["all", ...MANIM_DOMAINS.map((d) => d.id)] as DomainFilter[]).map((d) => (
+          <button
+            key={d}
+            type="button"
+            onClick={() => setDomainFilter(d)}
+            className={`px-3 py-1 rounded-full border ${
+              domainFilter === d ? "bg-primary border-primary text-white" : "border-gray-600 text-gray-400"
+            }`}
+          >
+            {d === "all" ? "全部域" : MANIM_DOMAINS.find((x) => x.id === d)?.label ?? d}
+          </button>
+        ))}
+      </div>
       <div className="flex flex-wrap gap-2 mb-4 text-xs">
         {(["all", 1, 2, 3] as LayerFilter[]).map((l) => (
           <button
@@ -125,10 +154,10 @@ export default function ManimConfig() {
             type="button"
             onClick={() => setLayerFilter(l)}
             className={`px-3 py-1 rounded-full border ${
-              layerFilter === l ? "bg-primary border-primary text-white" : "border-gray-600 text-gray-400"
+              layerFilter === l ? "bg-gray-700 border-gray-500 text-white" : "border-gray-600 text-gray-400"
             }`}
           >
-            {l === "all" ? "全部" : `L${l}`}
+            {l === "all" ? "全部层" : `L${l}`}
           </button>
         ))}
       </div>
@@ -161,9 +190,14 @@ export default function ManimConfig() {
                   <p className="font-semibold">{selected.label}</p>
                   <p className="text-gray-500 text-xs mt-1">{selected.desc}</p>
                 </div>
-                <span className="text-xs px-2 py-0.5 rounded bg-gray-800 text-gray-300 shrink-0">
-                  L{selected.layer}
-                </span>
+                <div className="flex flex-col gap-1 items-end shrink-0">
+                  <span className="text-xs px-2 py-0.5 rounded bg-gray-800 text-gray-300">
+                    L{selected.layer}
+                  </span>
+                  <span className="text-xs px-2 py-0.5 rounded bg-gray-800 text-amber-300/90">
+                    {MANIM_DOMAINS.find((d) => d.id === getTemplateDomain(selected.id))?.label}
+                  </span>
+                </div>
               </div>
               <div>
                 <p className="text-xs text-gray-500 mb-1">Manim 原语（能力索引）</p>
@@ -209,7 +243,17 @@ export default function ManimConfig() {
             />
             {type === "custom_python" && (
               <p className="text-xs text-yellow-500/90 mt-1">
-                粘贴 Manim 官方示例中的 Scene 类代码。ECS 无 LaTeX，请避免 MathTex/Tex。
+                粘贴 Manim 官方 Scene 代码。MathTex 需 ECS 安装 texlive；3D 需 install-opengl-deps.sh。
+              </p>
+            )}
+            {(type === "scene_3d_surface" || type === "scene_3d_orbit") && (
+              <p className="text-xs text-yellow-500/90 mt-1">
+                无显示器环境需 xvfb + Mesa（deploy/ecs/install-opengl-deps.sh）。
+              </p>
+            )}
+            {(type === "mathtex_formula" || type === "mathtex_derivation") && (
+              <p className="text-xs text-gray-500 mt-1">
+                未装 texlive 时自动文本降级；完整 LaTeX 请运行 install-texlive-optional.sh。
               </p>
             )}
             {type === "custom_dsl" && (

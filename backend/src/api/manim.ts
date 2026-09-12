@@ -45,8 +45,8 @@ router.get("/status", async (_req, res) => {
     ffmpegInstalled: ffmpegOk,
     mode: manimOk ? "real" : "placeholder",
     hint: manimOk
-      ? "支持 30+ 种场景 + JSON DSL / 自定义 Python（L1/L2/L3）"
-      : "未检测到 Manim，将生成占位视频。安装: py -3 -m pip install manim",
+      ? "42 种注册场景 + custom_python（L3）。可选: install-texlive-optional.sh（MathTex）、install-opengl-deps.sh（3D）。手册: docs/manim-automation-guide.md"
+      : "未检测到 Manim，将生成占位视频。本地: pip install manim · ECS: deploy/ecs/update-manim.sh",
     recentTasks: recent,
   });
 });

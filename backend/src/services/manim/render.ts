@@ -2,7 +2,7 @@ import { spawn } from "child_process";
 import fs from "fs";
 import path from "path";
 import { checkManimModule, spawnPythonStdin } from "../../lib/python";
-import { getManimOutputPath, toPublicUrl } from "../../lib/storage";
+import { getManimOutputPath, getStorageRoot, toPublicUrl } from "../../lib/storage";
 import { isPlayableMp4 } from "../../lib/video-utils";
 
 const MANIM_ROOT = path.resolve(__dirname, "../../../../manim");
@@ -78,7 +78,12 @@ export async function renderManim(
     };
   }
 
-  const payloadJson = JSON.stringify({ taskId, ...payload, outputPath });
+  const payloadJson = JSON.stringify({
+    taskId,
+    ...payload,
+    outputPath,
+    storageRoot: getStorageRoot(),
+  });
   let stderr = "";
 
   const pyPath = process.env.PYTHONPATH

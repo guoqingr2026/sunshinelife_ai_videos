@@ -15,8 +15,9 @@ if ! python3 -c "import json; json.load(open('$ROOT/manim/locale/zh.json', encod
   echo "locale/zh.json invalid"
   fail=1
 fi
+count=$(python3 -c "from template_catalog import TEMPLATES; print(len(TEMPLATES))" 2>/dev/null || echo "?")
 if [[ $fail -eq 0 ]]; then
-  echo "All Manim templates OK"
+  echo "All Manim templates OK (registered: $count)"
 else
   exit 1
 fi

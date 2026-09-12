@@ -1,10 +1,14 @@
-"""Headless ECS: stub LaTeX compile so Manim never requires texlive."""
+"""Stub LaTeX only when texlive is missing (allows MathTex when installed)."""
+import shutil
+
 _APPLIED = False
 
 
 def apply_no_tex():
     global _APPLIED
     if _APPLIED:
+        return
+    if shutil.which("latex"):
         return
     try:
         import manim.utils.tex_file_writing as tw

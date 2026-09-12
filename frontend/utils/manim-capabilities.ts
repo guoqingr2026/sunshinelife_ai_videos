@@ -18,8 +18,70 @@ export const MANIM_CAPABILITY_CATEGORIES = [
   { id: "infographic", label: "信息图表" },
   { id: "text", label: "文本动画" },
   { id: "structure", label: "结构 / 轨道" },
+  { id: "english", label: "英语学习" },
+  { id: "media", label: "媒体 / 公式 / 3D" },
   { id: "advanced", label: "高级 / 自定义" },
 ] as const;
+
+export type ManimDomain = "semiconductor" | "learning" | "english" | "media";
+
+export const MANIM_DOMAINS = [
+  { id: "semiconductor" as const, label: "半导体 / 工程" },
+  { id: "learning" as const, label: "学习 / 记忆" },
+  { id: "english" as const, label: "英语学习" },
+  { id: "media" as const, label: "媒体 / 公式 / 3D" },
+];
+
+/** 成熟应用场景四分类 — 与模板 ID 映射 */
+export const TEMPLATE_DOMAIN: Record<string, ManimDomain> = {
+  pn_junction: "semiconductor",
+  band_structure: "semiconductor",
+  current_arrow: "semiconductor",
+  photon_breakdown: "semiconductor",
+  semiconductor_layers: "semiconductor",
+  mosfet_channel: "semiconductor",
+  buck_converter: "semiconductor",
+  sine_waveform: "semiconductor",
+  llc_resonant: "semiconductor",
+  circuit_loop: "semiconductor",
+  band_temperature: "semiconductor",
+  crystal_lattice: "semiconductor",
+  isometric_stack: "semiconductor",
+  function_graph: "learning",
+  coordinate_grid: "learning",
+  vector_sum: "learning",
+  bar_chart: "learning",
+  pie_chart: "learning",
+  line_chart_compare: "learning",
+  timeline_horizontal: "learning",
+  flowchart: "learning",
+  forgetting_curve: "learning",
+  concept_network: "learning",
+  learning_curve: "learning",
+  typewriter_text: "learning",
+  keyword_pop: "learning",
+  formula_steps: "learning",
+  chapter_banner: "learning",
+  code_highlight: "learning",
+  transform_demo: "learning",
+  orbit_paths: "learning",
+  custom_dsl: "learning",
+  custom_python: "learning",
+  vocab_card: "english",
+  grammar_highlight: "english",
+  dialogue_scene: "english",
+  mathtex_formula: "media",
+  mathtex_derivation: "media",
+  scene_3d_surface: "media",
+  scene_3d_orbit: "media",
+  image_focus: "media",
+  svg_icon: "media",
+  video_embed: "media",
+};
+
+export function getTemplateDomain(id: string): ManimDomain {
+  return TEMPLATE_DOMAIN[id] ?? "learning";
+}
 
 const DOC = "https://docs.manim.community/en/stable/examples.html";
 
@@ -352,6 +414,124 @@ export const MANIM_CAPABILITIES: ManimCapability[] = [
     paramHelp: { title: "标题", from_shape: "square|circle", to_shape: "square|circle" },
   },
   {
+    id: "mathtex_formula",
+    label: "MathTex 公式",
+    desc: "LaTeX 公式展示；无 texlive 时自动文本降级",
+    category: "media",
+    layer: 2,
+    primitives: ["MathTex", "mk_mathtex", "Write"],
+    officialExample: { title: "MathTex", url: `${DOC}#mathtex` },
+    defaultParams: { title: "Formula", formula: "E = mc^2", caption: "" },
+    paramHelp: { title: "标题", formula: "LaTeX 公式", caption: "底部说明（可选）" },
+  },
+  {
+    id: "mathtex_derivation",
+    label: "公式推导",
+    desc: "分步 MathTex 推导链",
+    category: "media",
+    layer: 2,
+    primitives: ["MathTex", "mk_mathtex", "Write", "VGroup"],
+    defaultParams: { title: "Derivation", steps: ["V = IR", "I = \\frac{V}{R}", "P = VI"] },
+    paramHelp: { title: "标题", steps: "LaTeX 步骤数组" },
+  },
+  {
+    id: "scene_3d_surface",
+    label: "3D 曲面",
+    desc: "ThreeDScene 曲面 + 相机环绕（需 OpenGL/xvfb）",
+    category: "media",
+    layer: 2,
+    primitives: ["ThreeDScene", "Surface", "ThreeDAxes", "ambient_camera_rotation"],
+    defaultParams: { title: "3D Surface" },
+    paramHelp: { title: "标题" },
+  },
+  {
+    id: "scene_3d_orbit",
+    label: "3D 轨道运动",
+    desc: "ThreeDScene 中 MoveAlongPath 轨道演示",
+    category: "media",
+    layer: 2,
+    primitives: ["ThreeDScene", "Dot3D", "MoveAlongPath", "Circle"],
+    defaultParams: { title: "3D Orbit", label: "Orbit" },
+    paramHelp: { title: "标题", label: "角标文字" },
+  },
+  {
+    id: "image_focus",
+    label: "图片聚焦",
+    desc: "ImageMobject / SVG 图片展示与缩放",
+    category: "media",
+    layer: 2,
+    primitives: ["ImageMobject", "SVGMobject", "FadeIn", "animate.scale"],
+    defaultParams: { title: "Image", imagePath: "icon.svg", caption: "" },
+    paramHelp: { title: "标题", imagePath: "相对路径或 /files/... URL", caption: "说明文字" },
+  },
+  {
+    id: "svg_icon",
+    label: "SVG 图标",
+    desc: "SVGMobject 矢量图标动画",
+    category: "media",
+    layer: 2,
+    primitives: ["SVGMobject", "FadeIn", "animate.scale"],
+    defaultParams: { title: "SVG", svgPath: "icon.svg", scale: 2.5 },
+    paramHelp: { title: "标题", svgPath: "SVG 路径", scale: "缩放倍数" },
+  },
+  {
+    id: "video_embed",
+    label: "视频嵌入",
+    desc: "VideoMobject 片段嵌入场景",
+    category: "media",
+    layer: 2,
+    primitives: ["VideoMobject", "FadeIn"],
+    defaultParams: { title: "Video Clip", videoPath: "", max_duration: 3 },
+    paramHelp: { title: "标题", videoPath: "视频路径", max_duration: "最长播放秒数" },
+  },
+  {
+    id: "vocab_card",
+    label: "单词卡",
+    desc: "词汇、音标、释义与例句卡片",
+    category: "english",
+    layer: 2,
+    primitives: ["RoundedRectangle", "AddTextLetterByLetter", "Write"],
+    defaultParams: {
+      title: "Vocabulary",
+      word: "recall",
+      phonetic: "/rI'ko:l/",
+      meaning: "to remember",
+      example: "Active recall improves memory.",
+    },
+    paramHelp: { title: "标题", word: "单词", phonetic: "音标", meaning: "释义", example: "例句" },
+  },
+  {
+    id: "grammar_highlight",
+    label: "语法高亮",
+    desc: "句型模式 + 例句 + 关键词强调",
+    category: "english",
+    layer: 2,
+    primitives: ["SurroundingRectangle", "Indicate", "Write"],
+    defaultParams: {
+      title: "Grammar",
+      pattern: "S + V + O",
+      sentence: "I love learning English.",
+      highlight: "love",
+    },
+    paramHelp: { title: "标题", pattern: "句型", sentence: "例句", highlight: "高亮词" },
+  },
+  {
+    id: "dialogue_scene",
+    label: "对话场景",
+    desc: "双人气泡对话逐条出现",
+    category: "english",
+    layer: 2,
+    primitives: ["RoundedRectangle", "FadeIn", "Write"],
+    defaultParams: {
+      title: "Dialogue",
+      lines: [
+        { speaker: "A", text: "How do you study vocabulary?" },
+        { speaker: "B", text: "I use active recall and spaced repetition." },
+      ],
+    },
+    paramHelp: { title: "标题", lines: "对话数组 {speaker, text}" },
+  },
+  {
     id: "custom_dsl",
     label: "JSON 场景 DSL",
     desc: "用 JSON 描述对象与动画序列（第三层）",
@@ -403,4 +583,10 @@ export function getCapability(id: string): ManimCapability | undefined {
 export function getExampleParams(id: string): Record<string, unknown> {
   const cap = getCapability(id);
   return cap ? JSON.parse(JSON.stringify(cap.defaultParams)) : {};
+}
+
+/** 按成熟应用场景筛选模板 */
+export function getCapabilitiesByDomain(domain: ManimDomain | "all"): ManimCapability[] {
+  if (domain === "all") return MANIM_CAPABILITIES;
+  return MANIM_CAPABILITIES.filter((c) => getTemplateDomain(c.id) === domain);
 }
