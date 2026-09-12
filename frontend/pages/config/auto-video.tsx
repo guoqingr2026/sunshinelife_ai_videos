@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api, ComposePayload, ComposeTask } from "../../utils/api";
 import { MVP_PROJECT_JSON, MVP_WORKFLOW_HELP } from "../../utils/mvp-project";
+import { MATH_EXPONENTIAL_PROJECT_JSON } from "../../utils/example-math-project";
 
 const PHASE_LABELS: Record<string, string> = {
   pending: "排队中",
@@ -163,14 +164,28 @@ export default function AutoVideoPage() {
           <div>
             <div className="flex justify-between items-center mb-1">
               <label className="text-sm text-gray-400">项目 JSON（唯一分镜来源）</label>
-              <button
-                type="button"
-                onClick={() => setProjectJson(MVP_PROJECT_JSON)}
-                disabled={!!isActive}
-                className="text-xs text-primary hover:underline disabled:opacity-50"
-              >
-                加载 MVP 模板
-              </button>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setProjectJson(MVP_PROJECT_JSON)}
+                  disabled={!!isActive}
+                  className="text-xs text-primary hover:underline disabled:opacity-50"
+                >
+                  学习 MVP
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProjectJson(MATH_EXPONENTIAL_PROJECT_JSON);
+                    setPreviewPlan(null);
+                    setPlanError("");
+                  }}
+                  disabled={!!isActive}
+                  className="text-xs text-green-400 hover:underline disabled:opacity-50"
+                >
+                  数学题示例 2^t=t^32
+                </button>
+              </div>
             </div>
             <textarea
               value={projectJson}

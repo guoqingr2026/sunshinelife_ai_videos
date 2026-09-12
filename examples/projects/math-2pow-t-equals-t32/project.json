@@ -1,0 +1,158 @@
+{
+  "title": "指数方程 2^t = t^32",
+  "shots": [
+    {
+      "type": "title",
+      "label": "指数方程巧解"
+    },
+    {
+      "type": "chapter",
+      "label": "01 题目"
+    },
+    {
+      "type": "image_focus",
+      "label": "题目展示",
+      "params": {
+        "title": "今日题目",
+        "imagePath": "math-problem-t32.png",
+        "caption": "2^t = t^32，求 t = ?"
+      }
+    },
+    {
+      "type": "mathtex_formula",
+      "label": "原方程",
+      "params": {
+        "title": "原方程",
+        "formula": "2^t = t^{32}",
+        "caption": "一道经典的指数方程（网红奥数题）"
+      }
+    },
+    {
+      "type": "typewriter_text",
+      "label": "解题思路",
+      "params": {
+        "text": "关键：两边取有理数次方，化简指数",
+        "subtitle": "不用猜根，用指数法则降维"
+      }
+    },
+    {
+      "type": "chapter",
+      "label": "02 推导"
+    },
+    {
+      "type": "mathtex_derivation",
+      "label": "取 1/t 次方",
+      "params": {
+        "title": "第一步：两边取 1/t 次方",
+        "steps": [
+          "2^t = t^{32}",
+          "(2^t)^{1/t} = (t^{32})^{1/t}",
+          "2 = t^{32/t}"
+        ]
+      }
+    },
+    {
+      "type": "mathtex_derivation",
+      "label": "取 1/32 次方",
+      "params": {
+        "title": "第二步：两边再取 1/32 次方",
+        "steps": [
+          "2 = t^{32/t}",
+          "2^{1/32} = (t^{32/t})^{1/32}",
+          "2^{1/32} = t^{1/t}"
+        ]
+      }
+    },
+    {
+      "type": "formula_steps",
+      "label": "指数法则",
+      "params": {
+        "title": "用到的指数法则",
+        "steps": [
+          "(a^n)^m = a^{nm}",
+          "a^{n}/a^{m} = a^{n-m}",
+          "左右两边指数结构对应"
+        ]
+      }
+    },
+    {
+      "type": "mathtex_formula",
+      "label": "关键形式",
+      "params": {
+        "title": "化简后的关键式",
+        "formula": "2^{1/32} = t^{1/t}",
+        "caption": "左边是常数，右边仍含 t"
+      }
+    },
+    {
+      "type": "flowchart",
+      "label": "凑幂次链",
+      "params": {
+        "title": "指数递推观察",
+        "steps": [
+          "2^{1/32} = t^{1/t}",
+          "试 t = 2, 4, 16 …",
+          "发现 t = 256 时两边结构一致",
+          "得 t = 256"
+        ]
+      }
+    },
+    {
+      "type": "mathtex_formula",
+      "label": "答案",
+      "params": {
+        "title": "解",
+        "formula": "t = 256",
+        "caption": "唯一正实数解（本题语境）"
+      }
+    },
+    {
+      "type": "chapter",
+      "label": "03 验证"
+    },
+    {
+      "type": "mathtex_derivation",
+      "label": "代入验算",
+      "params": {
+        "title": "代入原式验证",
+        "steps": [
+          "2^{256} = t^{32}",
+          "256 = 2^8",
+          "2^{256} = (2^8)^{32} = 256^{32}"
+        ]
+      }
+    },
+    {
+      "type": "function_graph",
+      "label": "数量感",
+      "params": {
+        "title": "指数增长（示意）",
+        "label": "2^x"
+      }
+    },
+    {
+      "type": "keyword_pop",
+      "label": "要点",
+      "params": {
+        "title": "记住这些",
+        "keywords": ["取次方", "指数法则", "凑结构", "必验算"]
+      }
+    },
+    {
+      "type": "bullet_list",
+      "label": "回顾",
+      "params": {
+        "items": [
+          "原式：2^t = t^32",
+          "两步取次方 → 2^{1/32} = t^{1/t}",
+          "答案：t = 256",
+          "验证：2^256 = 256^32"
+        ]
+      }
+    },
+    {
+      "type": "fade_text",
+      "label": "感谢观看 · 欢迎收藏"
+    }
+  ]
+}
