@@ -1,7 +1,7 @@
 # SunshineLife AI Videos — 产品规格书
 
-> **文档版本：** v1.3（2026-09）  
-> **适用代码：** `main` @ `ed9a8bf` 及之后  
+> **文档版本：** v1.4（2026-09）  
+> **适用代码：** `main` @ `b07403f` 及之后  
 > **在线地址（ECS）：** `http://47.99.184.249/sunshinelife_ai_videos/`
 
 ---
@@ -707,7 +707,7 @@ shots[].type
 
 ### 7.9 与 Manim 官方 Example Gallery 的对应关系
 
-官方画廊：[Manim Community — Example Gallery](https://docs.manim.community/en/stable/examples.html)（v0.21，约 **26** 个独立示例，分 5 类）。
+官方画廊：[Manim Community — Example Gallery](https://docs.manim.community/en/stable/examples.html)（v0.21，**27** 个独立示例，分 5 类；完整表见 §7.9.1）。
 
 **结论（先读这句）：**
 
@@ -784,6 +784,210 @@ shots[].type
 1. **量产科普片**：用 §7.5 注册 `type` + Remotion 包装（一键成片）。
 2. **复现官方某一镜**：Manim 页 → 示例画廊 / 粘贴官方代码 → `custom_python` 单镜渲染 → 再插入 `shots` 或单独下载 MP4。
 3. **参数曲线类**：优先 `formula_curve` 或 `manim_custom` + `params.scene`，少写 Python。
+
+#### 7.9.1 官方画廊 27 例完整对照表
+
+来源：[Manim Example Gallery](https://docs.manim.community/en/stable/examples.html)（v0.21）。
+
+| # | 官方示例 | 状态 | 本系统用法 | 依赖 / 条件 | 备注 |
+|---|----------|------|------------|-------------|------|
+| 1 | ManimCELogo | 🔵 | `custom_python` | 🟠 texlive | Logo + MathTex `\mathbb{M}` |
+| 2 | BraceAnnotation | 🔵 | `custom_python`；`official_custom_examples.json` | 🟠 `get_tex` | 括号标注 |
+| 3 | VectorArrow | 🔵 | `custom_python`；`official_custom_examples.json` | — | 🟡 近似：`coordinate_grid` + `vector_sum` |
+| 4 | GradientImageFromArray | 🔵 | `custom_python` | numpy | 🟡 近似：`image_focus` |
+| 5 | BooleanOperations | 🔵 | `custom_python` | — | 并/交/差/补集动画 |
+| 6 | PointMovingOnShapes | 🔵 | `custom_python` | — | **建议注册** `manim_point_on_path` |
+| 7 | MovingAround | 🔵 | `custom_python` | — | 🟡 近似：`transform_demo` |
+| 8 | MovingAngle | 🔵 | `custom_python` | 🟠 MathTex θ | ValueTracker + Angle |
+| 9 | MovingDots | 🔵 | `custom_python` | — | 双点连线 updater |
+| 10 | MovingGroupToDestination | 🔵 | `custom_python` | — | VGroup 对齐移动 |
+| 11 | MovingFrameBox | 🟢 | **`manim_moving_frame_box`** | 🟠 公式 texlive；中文标题走字体预设 | Manim 页「官方画廊精选」 |
+| 12 | RotationUpdater | 🔵 | `custom_python` | — | `add_updater` 旋转 |
+| 13 | PointWithTrace | 🟢 | **`manim_point_with_trace`**（`demo` / `parametric`） | — | 参数模式可画 2D 公式轨迹 |
+| 14 | SinAndCosFunctionPlot | 🟡 | `function_graph`；🔵 完整版 | 🟠 轴标签 MathTex | **建议增强** `function_graph` 双曲线 |
+| 15 | ArgMinExample | 🔵 | `custom_python` | — | ValueTracker 求极值 |
+| 16 | GraphAreaPlot | 🔵 | `custom_python` | — | 黎曼和/面积；🟡 `bar_chart` 不等价 |
+| 17 | PolygonOnAxes | 🔵 | `custom_python` | — | 反比例矩形；🟡 `coordinate_grid` |
+| 18 | HeatDiagramPlot | 🔵 | `custom_python` | 🟠 Tex 轴标 | 折线热图 |
+| 19 | FollowingGraphCamera | 🔵 | `custom_python` | 🟣 MovingCameraScene | **建议注册**（相机跟随） |
+| 20 | MovingZoomedSceneAround | 🔵 | `custom_python` | 🟣 ZoomedScene | 放大镜场景 |
+| 21 | FixedInFrameMObjectTest | 🔵 | `custom_python` | 🟣 ThreeDScene | 固定 HUD 文字 |
+| 22 | ThreeDLightSourcePosition | 🟡 | `manim_parametric_surface` / `scene_3d_surface` | 🟣 OpenGL | 曲面近似，非灯光教程 |
+| 23 | ThreeDCameraRotation | 🟡 | `scene_3d_orbit` / `manim_curve_3d` | 🟣 OpenGL | 环境旋转近似 |
+| 24 | ThreeDCameraIllusionRotation | 🔵 | `custom_python` | 🟣 OpenGL | 错觉旋转 |
+| 25 | ThreeDSurfacePlot | 🟢 | **`manim_parametric_surface`**（`SurfaceScene`） | 🟣 OpenGL | 高斯曲面类 |
+| 26 | OpeningManim | 🔵 | `custom_python` | 🟠 texlive | 网格非线性变换综合示例 |
+| 27 | SineCurveUnitCircle | 🔵 | `custom_python` | 🟠 | 🟡 `sine_waveform` 仅波形；**建议注册**完整版 |
+
+**统计（27 行含 SineCurveUnitCircle）：**
+
+| 状态 | 数量 | 说明 |
+|------|------|------|
+| 🟢 已内置 `type` | **3** | `manim_moving_frame_box`、`manim_point_with_trace`、`manim_parametric_surface`（及宇宙 scene） |
+| 🟡 内置近似 | **8** | 可用但画面/交互与官方不完全一致 |
+| 🔵 仅 `custom_python` | **16** | 粘贴官方 Scene 即可渲染 |
+| 🟠 需 texlive | **10+** | 含 MathTex / Tex / `get_tex` |
+| 🟣 需 OpenGL | **7** | 3D / 变焦 / 跟拍相机 |
+
+### 7.10 配置参考手册（速查）
+
+成片与 Manim 的**颜色、中文字体**可在 Web 配置；**字号、元素坐标**多数镜头尚未暴露为通用 JSON 字段（见 §7.10.4）。
+
+#### 7.10.1 项目 `theme` 对象（一键成片 / JSON）
+
+```json
+{
+  "theme": {
+    "name": "B站粉",
+    "primaryColor": "#fb7299",
+    "secondaryColor": "#23ade5",
+    "backgroundColor": "#141420",
+    "accentColor": "#ffe066",
+    "fontPresetId": "noto-sans-sc"
+  }
+}
+```
+
+| 字段 | 作用范围 | 说明 |
+|------|----------|------|
+| `backgroundColor` | Manim + Remotion | Manim 场景背景（`apply_scene_theme`） |
+| `primaryColor` | Manim + Remotion | 标题、主强调色 |
+| `secondaryColor` | Manim + Remotion | 次强调、部分图形 |
+| `accentColor` | Manim + Remotion | 高亮、框线默认色 |
+| `fontPresetId` | Manim 中文 `Text` + Remotion CSS | 见 §7.10.2；后端解析为 `manimCjkFont` / `cjk_font` |
+| `fontFamily` | 主要 Remotion | CSS 字体栈；Manim 仅在无 `fontPresetId` 时尝试解析 |
+| `manimCjkFont` | Manim | 直接指定 Manim `Text()` 字体名，优先级高于 `fontPresetId` |
+
+**配置入口：**
+
+| 入口 | 配色 | 字体 |
+|------|------|------|
+| 一键成片页 | 「配色方案」下拉 | 「字体预设」下拉（提交时写入 `theme`） |
+| 项目 JSON `theme` 块 | 手写 hex 或 `name` 匹配预设 | `fontPresetId` 或 `manimCjkFont` |
+| Manim 单镜页 | — | 字体预设 + `params.cjk_font` |
+| 单镜 `params` | `primaryColor` 等可覆盖（注入 `MANIM_PARAMS`） | `cjk_font` / `font` / `fontFamily` |
+
+内置配色名（`frontend/utils/remotion-presets.ts`）：工程红、科技蓝、半导体绿、学术紫、简约白、清新浅蓝、B站粉 等。
+
+#### 7.10.2 字体预设 `fontPresetId` 一览
+
+| `fontPresetId` | 显示名 | Manim 字体名 | ECS 说明 |
+|----------------|--------|--------------|----------|
+| `noto-sans-sc` | 思源黑体（推荐） | Noto Sans SC | `install-fonts.sh` 已含 |
+| `microsoft-yahei` | 微软雅黑 | Microsoft YaHei | Linux 映射为 Noto Sans SC |
+| `pingfang` | 苹方 | PingFang SC | Linux 映射为 Noto Sans SC |
+| `kaiti` | 楷体（教材感） | KaiTi | Linux 映射 **AR PL UKai CN** |
+| `arial` | Arial | Arial | 英文为主 |
+| `georgia` | Georgia | Georgia | 衬线 |
+
+**重要区分：**
+
+| 内容类型 | 能否用字体预设？ | 说明 |
+|----------|------------------|------|
+| 中文标题 / `mk_text` | ✅ | `乘积求导法则` 等 |
+| Remotion 包装字幕 | ✅ | `fontFamily` CSS |
+| **MathTex / Tex 公式** | ❌ | LaTeX 数学字体；需 texlive，与 `cjk_font` 无关 |
+| 英文 `Text('Horizontal distance')` | ✅ | 走 Manim 西文字体 |
+
+#### 7.10.3 镜头时长与 Manim 内部节奏
+
+| 层级 | 字段 | 位置 | 作用 |
+|------|------|------|------|
+| 成片时间轴 | `durationSeconds` | `shots[]` 根级 | Remotion 槽位秒数（30fps） |
+| 成片时间轴 | `durationInFrames` | `shots[]` 根级 | 槽位帧数（优先于默认 150） |
+| Manim 内部 | `hold_seconds` | `params` | 场景结尾停留 |
+| Manim 内部 | `curve_run_time` / `intro_run_time` | `params` | 曲线绘制、3D 引入 |
+| Manim 内部 | `rotate_seconds` | `params` | 3D 相机旋转（宇宙 scene） |
+
+成片槽位与 Manim 动画时长**独立**：槽位太短会截断 MP4 尾部。
+
+#### 7.10.4 单镜 `params` 能力边界（诚实说明）
+
+| 能力 | 成片 `theme` | 单镜 `params` | 全类型通用 JSON？ |
+|------|-------------|---------------|-------------------|
+| 背景色 / 主色 / 强调色 | ✅ | ✅ 可覆盖 | 主题级 |
+| 中文字体 | ✅ `fontPresetId` | ✅ `cjk_font` | 所有 `mk_text` 模板 |
+| 标题字号 | ❌ | ⚠️ 仅部分模板有专用字段 | **未**统一 `title_font_size` |
+| 元素 xy 坐标 | ❌ | ⚠️ 极少数 | **未**统一布局 API |
+| 公式 MathTex 样式 | ❌ | ⚠️ `parts` 等专用字段 | 仅公式类镜头 |
+
+完全自由布局 → **`custom_python`** 或 **`custom_dsl`**（能力有限）。
+
+#### 7.10.5 示例：`manim_moving_frame_box` 完整 params
+
+```json
+{
+  "type": "manim_moving_frame_box",
+  "label": "乘积求导",
+  "durationSeconds": 8,
+  "params": {
+    "title": "乘积求导法则",
+    "cjk_font": "KaiTi",
+    "parts": [
+      "\\frac{d}{dx}f(x)g(x)=",
+      "f(x)\\frac{d}{dx}g(x)",
+      "+",
+      "g(x)\\frac{d}{dx}f(x)"
+    ],
+    "highlight_indices": [1, 3],
+    "frame_color": "#ffe066",
+    "primaryColor": "#fb7299",
+    "backgroundColor": "#141420",
+    "hold_seconds": 1
+  }
+}
+```
+
+#### 7.10.6 ECS 环境与脚本
+
+| 脚本 | 用途 |
+|------|------|
+| `deploy/ecs/update-subpath.sh` | 日常 `git pull` + 构建 + pm2 |
+| `deploy/ecs/install-fonts.sh` | Noto CJK + 文鼎楷体（楷体预设） |
+| `deploy/ecs/install-texlive-optional.sh` | MathTex / Tex 清晰渲染 |
+| `deploy/ecs/install-opengl-deps.sh` | ThreeDScene / OpenGL + xvfb |
+| `scripts/sync-ecs-to-local.ps1` | Windows 拉取成片（HTTP 站点无法用浏览器选文件夹） |
+
+**健康检查：** `curl http://localhost:3012/api/health` · `curl http://localhost:3012/api/manim/status`
+
+#### 7.10.7 本地归档与门户
+
+| 功能 | 说明 |
+|------|------|
+| 任务管理 → 选择本地文件夹 | 需 **HTTPS** 或 localhost；`http://47.99.184.249` 下请用 `sync-ecs-to-local.ps1` |
+| 未选文件夹点「归档到本地」 | 回退为浏览器下载 ZIP/MP4 |
+| 页脚站点门户 | ECS 根站 / 英语学习 / Manim 文档 |
+
+#### 7.10.8 一键成片预设按钮
+
+| 按钮 | 工程路径 |
+|------|----------|
+| 学习 MVP | 内置遗忘曲线 |
+| 数学题·快速版 / 完整版 | `examples/projects/math-2pow-t-equals-t32/` |
+| 蒙提霍尔 | `examples/projects/monty-hall/` |
+| 数学宇宙 | `manim_custom` 多 scene |
+| 读书训练 | `examples/projects/reading-study/` |
+
+### 7.11 官方画廊缺口与建议新增镜头（路线图）
+
+按**教学价值 × 实现成本**排序，建议下一批注册为独立 `type`（当前均可先用 `custom_python`）：
+
+| 优先级 | 建议 `type` | 对应官方示例 | 理由 |
+|--------|-------------|--------------|------|
+| P0 | `manim_vector_arrow` | VectorArrow | 科普极高频；与现有 `vector_sum` 互补 |
+| P0 | `manim_brace_annotation` | BraceAnnotation | 尺寸/距离标注 |
+| P0 | `manim_sin_cos_plot` | SinAndCosFunctionPlot | 强化 `function_graph` 为官方同级 |
+| P1 | `manim_point_on_path` | PointMovingOnShapes | 路径运动入门 |
+| P1 | `manim_moving_angle` | MovingAngle | 角度 / ValueTracker |
+| P1 | `manim_sine_unit_circle` | SineCurveUnitCircle | 三角函数经典推导 |
+| P1 | `manim_boolean_ops` | BooleanOperations | 集合可视化 |
+| P2 | `manim_following_camera` | FollowingGraphCamera | 需 `MovingCameraScene` 模板基建 |
+| P2 | `manim_graph_area` | GraphAreaPlot | 面积 / 黎曼和 |
+| P2 | `manim_heat_diagram` | HeatDiagramPlot | 热力学示意 |
+| P3 | `manim_zoomed_scene` | MovingZoomedSceneAround | 需 ZoomedScene + OpenGL |
+| P3 | `manim_opening_demo` | OpeningManim | 综合演示片头（片段化） |
+
+**暂不建议做成一键 `type`（保持 `custom_python`）：** ManimCELogo、OpeningManim 全片、MovingZoomedSceneAround 长代码维护成本高。
 
 ---
 
@@ -973,6 +1177,7 @@ pm2 logs sunshinelife-videos-api
 | v1.1 | 2026-09 | 镜头规划 → 一键成片衔接；提示词库；HyperFrames 环境检测；导航工作流重排；字体预设；output 工程包自动导出 |
 | v1.2 | 2026-09 | 完整罗列 Remotion 16 种 + Manim 63 种 + 数学宇宙 33 scene；流水线映射表；时长参数；谐波/Spirograph 场景 @ `c08e9b1` |
 | v1.3 | 2026-09 | 读书训练 10 种 + 官方画廊精选（公式框选、动点轨迹）；本地归档 / 站点门户；§7.9 Gallery 对照；Manim 75 种 |
+| v1.4 | 2026-09 | §7.9.1 官方 27 例完整对照表；§7.10 配置手册（theme/字体/时长/ECS）；§7.11 缺口与新增路线图；Manim 字体 `fontPresetId` 传递修复 @ `b07403f` |
 
 ---
 
