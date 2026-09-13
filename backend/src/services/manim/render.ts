@@ -12,6 +12,7 @@ export interface ManimPayload {
   type: string;
   params?: Record<string, unknown>;
   subtitleId?: string;
+  manimCjkFont?: string;
 }
 
 export interface ManimClipJson {
@@ -90,10 +91,18 @@ export async function renderManim(
     ? `${MANIM_ROOT}${path.delimiter}${process.env.PYTHONPATH}`
     : MANIM_ROOT;
 
+  const manimEnv: NodeJS.ProcessEnv = { ...process.env, PYTHONPATH: pyPath };
+  const cjkFont =
+    payload.manimCjkFont ||
+    (typeof payload.params?.cjk_font === "string" ? payload.params.cjk_font : undefined);
+  if (cjkFont) {
+    manimEnv.MANIM_CJK_FONT = cjkFont;
+  }
+
   const exitCode = await new Promise<number>((resolve, reject) => {
     const proc = spawnPythonStdin(RENDER_SCRIPT, payloadJson, {
       cwd: MANIM_ROOT,
-      env: { ...process.env, PYTHONPATH: pyPath },
+      env: manimEnv,
     });
 
     proc.stderr?.on("data", (d) => {

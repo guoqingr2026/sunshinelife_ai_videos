@@ -29,10 +29,10 @@ export default function TasksPage() {
   };
 
   const statusBadge = {
-    pending: "bg-yellow-900 text-yellow-300",
-    running: "bg-blue-900 text-blue-300",
-    success: "bg-green-900 text-green-300",
-    failed: "bg-red-900 text-red-300",
+    pending: "badge-pending",
+    running: "badge-running",
+    success: "badge-success",
+    failed: "badge-failed",
   };
 
   const kindLabel: Record<string, string> = {
@@ -45,11 +45,11 @@ export default function TasksPage() {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">渲染任务管理</h1>
+        <h1 className="page-title mb-0">渲染任务管理</h1>
         <select
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          className="bg-darker border border-gray-600 rounded-lg p-2 text-sm"
+          className="input-field p-2 text-sm w-auto"
         >
           <option value="">全部类型</option>
           <option value="manim">Manim</option>
@@ -60,59 +60,46 @@ export default function TasksPage() {
       </div>
 
       {loading && tasks.length === 0 ? (
-        <p className="text-gray-500">加载中...</p>
+        <p className="text-muted">加载中...</p>
       ) : tasks.length === 0 ? (
-        <p className="text-gray-500">暂无任务</p>
+        <p className="text-muted">暂无任务</p>
       ) : (
         <div className="space-y-3">
           {tasks.map((task) => (
             <div
               key={task.id}
-              className="bg-darker border border-gray-700 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-3"
+              className="panel flex flex-col md:flex-row md:items-center justify-between gap-3"
             >
               <div className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-mono text-gray-400">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-mono text-muted">
                     {task.id.slice(0, 12)}...
                   </span>
-                  <span className="text-xs px-2 py-0.5 rounded bg-gray-800">
+                  <span className="badge bg-surface text-ink border-border">
                     {kindLabel[task.kind]}
                   </span>
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded ${statusBadge[task.status]}`}
-                  >
-                    {task.status}
-                  </span>
+                  <span className={statusBadge[task.status]}>{task.status}</span>
                 </div>
-                <p className="text-xs text-gray-500">
+                <p className="text-xs text-muted">
                   {new Date(task.createdAt).toLocaleString()}
                 </p>
-                {task.error && (
-                  <p className="text-xs text-red-400">{task.error}</p>
-                )}
+                {task.error && <p className="text-xs text-red-600">{task.error}</p>}
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-wrap">
                 {task.outputUrl && (
-                  <a
-                    href={task.outputUrl}
-                    download
-                    className="px-3 py-1.5 text-sm bg-gray-700 rounded hover:bg-gray-600"
-                  >
+                  <a href={task.outputUrl} download className="btn-outline text-sm py-1.5">
                     下载视频
                   </a>
                 )}
                 {task.framesUrl && (
-                  <a
-                    href={task.framesUrl}
-                    className="px-3 py-1.5 text-sm bg-gray-700 rounded hover:bg-gray-600"
-                  >
+                  <a href={task.framesUrl} className="btn-outline text-sm py-1.5">
                     查看帧
                   </a>
                 )}
                 <button
                   onClick={() => handleDelete(task.id)}
-                  className="px-3 py-1.5 text-sm bg-red-900/50 text-red-300 rounded hover:bg-red-900"
+                  className="px-3 py-1.5 text-sm rounded-lg font-semibold border border-red-200 bg-red-50 text-red-700 hover:bg-red-100"
                 >
                   删除
                 </button>

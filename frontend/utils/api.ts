@@ -189,6 +189,7 @@ export const api = {
     project?: VideoProject;
     preview?: boolean;
     renderFinal?: boolean;
+    theme?: ThemeConfig;
   }) =>
     request<{ taskId: string; status: string }>("/api/video/compose", {
       method: "POST",

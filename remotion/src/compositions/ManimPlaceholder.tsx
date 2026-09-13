@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   title?: string;
@@ -11,6 +12,7 @@ export const ManimPlaceholder: React.FC<Props> = ({
   description = "",
   primaryColor = "#e94560",
 }) => {
+  const { fontFamily } = useThemeFont();
   const frame = useCurrentFrame();
   const opacity = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: "clamp" });
 
@@ -29,7 +31,7 @@ export const ManimPlaceholder: React.FC<Props> = ({
             fontSize: 28,
             color: primaryColor,
             marginBottom: 24,
-            fontFamily: "sans-serif",
+            fontFamily,
           }}
         >
           [ Manim 片段 ]
@@ -40,7 +42,7 @@ export const ManimPlaceholder: React.FC<Props> = ({
             fontWeight: "bold",
             color: "white",
             marginBottom: 32,
-            fontFamily: "sans-serif",
+            fontFamily,
           }}
         >
           {title}
@@ -51,7 +53,7 @@ export const ManimPlaceholder: React.FC<Props> = ({
               fontSize: 32,
               color: "#aaa",
               lineHeight: 1.5,
-              fontFamily: "sans-serif",
+              fontFamily,
             }}
           >
             {description}

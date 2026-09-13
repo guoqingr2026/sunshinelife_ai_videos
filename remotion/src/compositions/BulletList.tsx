@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   items?: string[];
@@ -13,6 +14,7 @@ export const BulletList: React.FC<Props> = ({
   primaryColor = "#e94560",
   backgroundColor = "#1a1a2e",
 }) => {
+  const { fontFamily } = useThemeFont();
   const frame = useCurrentFrame();
 
   return (
@@ -23,7 +25,7 @@ export const BulletList: React.FC<Props> = ({
         padding: 100,
       }}
     >
-      <div style={{ fontSize: 48, color: primaryColor, marginBottom: 40, fontFamily: "sans-serif" }}>
+      <div style={{ fontSize: 48, color: primaryColor, marginBottom: 40, fontFamily }}>
         {title}
       </div>
       {items.map((item, i) => {
@@ -40,7 +42,7 @@ export const BulletList: React.FC<Props> = ({
               fontSize: 34,
               color: "white",
               marginBottom: 20,
-              fontFamily: "sans-serif",
+              fontFamily,
               display: "flex",
               gap: 16,
             }}

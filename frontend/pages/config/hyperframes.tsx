@@ -37,53 +37,53 @@ export default function HyperFramesConfig() {
   };
 
   const statusColor = {
-    pending: "text-yellow-400",
-    running: "text-blue-400",
-    success: "text-green-400",
-    failed: "text-red-400",
+    pending: "status-pending",
+    running: "status-running",
+    success: "status-success",
+    failed: "status-failed",
   };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">HyperFrames 动画配置</h1>
+      <h1 className="page-title">HyperFrames 动画配置</h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">动画描述 (Prompt)</label>
+            <label className="block text-sm text-muted mb-2 font-semibold">动画描述 (Prompt)</label>
             <textarea
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
               rows={4}
-              className="w-full bg-darker border border-gray-600 rounded-lg p-3 text-sm"
+              className="input-field p-3 text-sm"
             />
           </div>
 
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-sm text-gray-400 mb-1">时长 (秒)</label>
+              <label className="block text-sm text-muted mb-1 font-semibold">时长 (秒)</label>
               <input
                 type="number"
                 value={duration}
                 onChange={(e) => setDuration(Number(e.target.value))}
-                className="w-full bg-darker border border-gray-600 rounded-lg p-2"
+                className="input-field p-2"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">FPS</label>
+              <label className="block text-sm text-muted mb-1 font-semibold">FPS</label>
               <input
                 type="number"
                 value={fps}
                 onChange={(e) => setFps(Number(e.target.value))}
-                className="w-full bg-darker border border-gray-600 rounded-lg p-2"
+                className="input-field p-2"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-400 mb-1">风格</label>
+              <label className="block text-sm text-muted mb-1 font-semibold">风格</label>
               <select
                 value={style}
                 onChange={(e) => setStyle(e.target.value)}
-                className="w-full bg-darker border border-gray-600 rounded-lg p-2"
+                className="input-field p-2"
               >
                 <option value="handdrawn">手绘</option>
                 <option value="ui">UI</option>
@@ -92,43 +92,34 @@ export default function HyperFramesConfig() {
             </div>
           </div>
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !prompt.trim()}
-            className="px-6 py-2 bg-primary rounded-lg font-medium hover:bg-red-600 disabled:opacity-50"
-          >
+          <button onClick={handleSubmit} disabled={loading || !prompt.trim()} className="btn-primary">
             {loading ? "提交中..." : "生成帧序列 & 合成视频"}
           </button>
         </div>
 
-        <div className="bg-darker rounded-lg border border-gray-700 p-4">
-          <h3 className="font-semibold mb-3">输出预览</h3>
+        <div className="panel">
+          <h3 className="font-bold text-ink mb-3">输出预览</h3>
           {task ? (
             <div className="space-y-2 text-sm">
-              <p>ID: <code className="text-gray-300">{task.id}</code></p>
+              <p>ID: <code className="text-muted">{task.id}</code></p>
               <p>
-                状态:{" "}
-                <span className={statusColor[task.status]}>{task.status}</span>
+                状态: <span className={statusColor[task.status]}>{task.status}</span>
               </p>
               {task.framesUrl && (
                 <p>
                   帧序列:{" "}
-                  <a href={task.framesUrl} className="text-primary underline">
+                  <a href={task.framesUrl} className="text-primary underline font-semibold">
                     {task.framesUrl}
                   </a>
                 </p>
               )}
               {task.outputUrl && task.status === "success" && (
-                <video
-                  src={task.outputUrl}
-                  controls
-                  className="w-full rounded mt-2"
-                />
+                <video src={task.outputUrl} controls className="w-full rounded-lg mt-2 border border-border" />
               )}
-              {task.error && <p className="text-red-400">{task.error}</p>}
+              {task.error && <p className="text-red-600">{task.error}</p>}
             </div>
           ) : (
-            <p className="text-gray-500">提交任务后显示输出</p>
+            <p className="text-muted">提交任务后显示输出</p>
           )}
         </div>
       </div>

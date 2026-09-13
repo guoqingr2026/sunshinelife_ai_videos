@@ -8,6 +8,9 @@ export interface ThemeConfig {
   backgroundColor: string;
   accentColor: string;
   name?: string;
+  fontFamily?: string;
+  fontPresetId?: string;
+  manimCjkFont?: string;
 }
 
 export interface TimelineItem {

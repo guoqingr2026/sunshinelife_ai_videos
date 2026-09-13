@@ -6,10 +6,15 @@ import {
   TIMELINE_MODULES,
   ThemeConfig,
 } from "../../utils/remotion-presets";
+import FontPresetSelect from "../../components/FontPresetSelect";
+import { DEFAULT_FONT_PRESET, applyFontPresetToTheme } from "../../utils/typography-presets";
 
 export default function RemotionConfig() {
   const [templateId] = useState("simple-electric");
-  const [theme, setTheme] = useState<ThemeConfig>(COLOR_SCHEMES[0]);
+  const [fontPresetId, setFontPresetId] = useState(DEFAULT_FONT_PRESET.id);
+  const [theme, setTheme] = useState<ThemeConfig>(
+    applyFontPresetToTheme(COLOR_SCHEMES[0], DEFAULT_FONT_PRESET.id)
+  );
   const [timelineJson, setTimelineJson] = useState(
     JSON.stringify(BUILTIN_TEMPLATES[0].timeline, null, 2)
   );
@@ -46,8 +51,13 @@ export default function RemotionConfig() {
 
   const applyBuiltin = (idx: number) => {
     const t = BUILTIN_TEMPLATES[idx];
-    setTheme(t.theme);
+    setTheme(applyFontPresetToTheme(t.theme, fontPresetId));
     setTimelineJson(JSON.stringify(t.timeline, null, 2));
+  };
+
+  const handleFontPresetChange = (id: string) => {
+    setFontPresetId(id);
+    setTheme((prev) => applyFontPresetToTheme(prev, id));
   };
 
   const loadSaved = (t: RemotionTemplate) => {
@@ -86,16 +96,16 @@ export default function RemotionConfig() {
   };
 
   const statusColor = {
-    pending: "text-yellow-400",
-    running: "text-blue-400",
-    success: "text-green-400",
-    failed: "text-red-400",
+    pending: "status-pending",
+    running: "status-running",
+    success: "status-success",
+    failed: "status-failed",
   };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">Remotion 动画配置</h1>
-      <p className="text-gray-400 text-sm mb-4">
+      <h1 className="page-title">Remotion 动画配置</h1>
+      <p className="page-desc">
         点击模块插入时间轴；配色可一键切换；模板可保存复用。Manim 真实动画请用{" "}
         <code className="text-primary">manim_clip</code> 并填入 MP4 地址。
       </p>
@@ -103,16 +113,16 @@ export default function RemotionConfig() {
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div className="xl:col-span-2 space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">配色方案</label>
+            <label className="block text-sm text-muted mb-2 font-semibold">配色方案</label>
             <div className="flex flex-wrap gap-2">
               {COLOR_SCHEMES.map((scheme) => (
                 <button
                   key={scheme.name}
-                  onClick={() => setTheme(scheme)}
-                  className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-2 ${
+                  onClick={() => setTheme(applyFontPresetToTheme(scheme, fontPresetId))}
+                  className={`px-3 py-2 rounded-lg border text-sm flex items-center gap-2 font-semibold ${
                     theme.name === scheme.name
-                      ? "border-primary bg-primary/20"
-                      : "border-gray-600 hover:border-gray-500"
+                      ? "pill-tab-active"
+                      : "pill-tab"
                   }`}
                 >
                   <span
@@ -155,15 +165,17 @@ export default function RemotionConfig() {
             </div>
           </div>
 
+          <FontPresetSelect value={fontPresetId} onChange={handleFontPresetChange} />
+
           <div>
-            <label className="block text-sm text-gray-400 mb-2">插入模块</label>
+            <label className="block text-sm text-muted mb-2 font-semibold">插入模块</label>
             <div className="flex flex-wrap gap-2">
               {TIMELINE_MODULES.map((mod) => (
                 <button
                   key={mod.type}
                   onClick={() => insertModule(mod)}
                   title={mod.description}
-                  className="px-3 py-1.5 bg-darker border border-gray-600 rounded text-sm hover:border-primary"
+                  className="btn-outline text-sm py-1.5"
                 >
                   + {mod.label}
                 </button>
@@ -173,35 +185,31 @@ export default function RemotionConfig() {
 
           <div className="flex gap-2 items-end">
             <div className="flex-1">
-              <label className="block text-sm text-gray-400 mb-1">片段 URL（Manim/HF）</label>
+              <label className="block text-sm text-muted mb-1 font-semibold">片段 URL（Manim/HF）</label>
               <input
                 value={clipUrl}
                 onChange={(e) => setClipUrl(e.target.value)}
                 placeholder="/files/manim/xxx.mp4"
-                className="w-full bg-darker border border-gray-600 rounded-lg p-2 text-sm"
+                className="input-field p-2 text-sm"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm text-gray-400 mb-2">时间轴 JSON</label>
+            <label className="block text-sm text-muted mb-2 font-semibold">时间轴 JSON</label>
             <textarea
               value={timelineJson}
               onChange={(e) => setTimelineJson(e.target.value)}
               rows={14}
-              className="w-full bg-darker border border-gray-600 rounded-lg p-3 text-sm font-mono"
+              className="input-field p-3 text-sm font-mono"
             />
           </div>
 
           <div className="flex flex-wrap gap-3 items-center">
-            <button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="px-6 py-2 bg-primary rounded-lg font-medium hover:bg-red-600 disabled:opacity-50"
-            >
+            <button onClick={handleSubmit} disabled={loading} className="btn-primary">
               {loading ? "提交中..." : "提交渲染"}
             </button>
-            <label className="flex items-center gap-2 text-sm text-gray-400">
+            <label className="flex items-center gap-2 text-sm text-muted font-semibold">
               <input
                 type="checkbox"
                 checked={preview}
@@ -213,14 +221,14 @@ export default function RemotionConfig() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-darker rounded-lg border border-gray-700 p-4">
-            <h3 className="font-semibold mb-3">内置模板</h3>
+          <div className="panel">
+            <h3 className="font-bold text-ink mb-3">内置模板</h3>
             <div className="space-y-2">
               {BUILTIN_TEMPLATES.map((t, i) => (
                 <button
                   key={t.name}
                   onClick={() => applyBuiltin(i)}
-                  className="w-full text-left px-3 py-2 rounded bg-dark hover:bg-gray-800 text-sm"
+                  className="w-full text-left px-3 py-2 rounded-lg btn-outline text-sm"
                 >
                   {t.name}
                 </button>
@@ -228,32 +236,32 @@ export default function RemotionConfig() {
             </div>
           </div>
 
-          <div className="bg-darker rounded-lg border border-gray-700 p-4">
-            <h3 className="font-semibold mb-3">保存的模板</h3>
+          <div className="panel">
+            <h3 className="font-bold text-ink mb-3">保存的模板</h3>
             <div className="flex gap-2 mb-3">
               <input
                 value={templateName}
                 onChange={(e) => setTemplateName(e.target.value)}
                 placeholder="模板名称"
-                className="flex-1 bg-dark border border-gray-600 rounded p-2 text-sm"
+                className="flex-1 input-field p-2 text-sm"
               />
               <button
                 onClick={handleSaveTemplate}
                 disabled={!templateName.trim()}
-                className="px-3 py-2 bg-gray-700 rounded text-sm hover:bg-gray-600 disabled:opacity-50"
+                className="btn-secondary text-sm py-2 disabled:opacity-50"
               >
                 保存
               </button>
             </div>
             {savedTemplates.length === 0 ? (
-              <p className="text-gray-500 text-sm">暂无保存的模板</p>
+              <p className="text-muted text-sm">暂无保存的模板</p>
             ) : (
               <div className="space-y-2 max-h-40 overflow-y-auto">
                 {savedTemplates.map((t) => (
                   <div key={t.id} className="flex gap-2 items-center">
                     <button
                       onClick={() => loadSaved(t)}
-                      className="flex-1 text-left px-3 py-2 rounded bg-dark hover:bg-gray-800 text-sm truncate"
+                      className="flex-1 text-left px-3 py-2 rounded-lg btn-outline text-sm truncate"
                     >
                       {t.name}
                     </button>
@@ -263,7 +271,7 @@ export default function RemotionConfig() {
                           setSavedTemplates((prev) => prev.filter((x) => x.id !== t.id))
                         )
                       }
-                      className="text-red-400 text-xs px-2"
+                      className="text-red-600 text-xs px-2 font-bold"
                     >
                       删
                     </button>
@@ -273,11 +281,11 @@ export default function RemotionConfig() {
             )}
           </div>
 
-          <div className="bg-darker rounded-lg border border-gray-700 p-4">
-            <h3 className="font-semibold mb-3">渲染结果</h3>
+          <div className="panel">
+            <h3 className="font-bold text-ink mb-3">渲染结果</h3>
             {task ? (
               <div className="space-y-2 text-sm">
-                <p>ID: <code className="text-gray-300">{task.id}</code></p>
+                <p>ID: <code className="text-muted">{task.id}</code></p>
                 <p>
                   状态: <span className={statusColor[task.status]}>{task.status}</span>
                 </p>
@@ -301,7 +309,7 @@ export default function RemotionConfig() {
                 {task.error && <p className="text-red-400 text-xs">{task.error}</p>}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">提交任务后显示结果</p>
+              <p className="text-muted text-sm">提交任务后显示结果</p>
             )}
           </div>
         </div>

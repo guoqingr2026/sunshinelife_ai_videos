@@ -14,6 +14,7 @@ import { StatHighlight } from "./StatHighlight";
 import { FlowSteps } from "./FlowSteps";
 import { TimelineBar } from "./TimelineBar";
 import { FormulaCard } from "./FormulaCard";
+import { ThemeFontProvider, resolveRemotionFontFamily } from "../theme-font";
 
 export interface TimelineItem {
   type: string;
@@ -45,6 +46,9 @@ export interface ThemeConfig {
   backgroundColor?: string;
   accentColor?: string;
   font?: string;
+  fontFamily?: string;
+  fontPresetId?: string;
+  manimCjkFont?: string;
   logoUrl?: string;
 }
 
@@ -60,9 +64,11 @@ export const SimpleElectric: React.FC<SimpleElectricProps> = ({
   const primaryColor = theme.primaryColor || "#e94560";
   const secondaryColor = theme.secondaryColor || "#0f3460";
   const backgroundColor = theme.backgroundColor || "#1a1a2e";
+  const fontFamily = resolveRemotionFontFamily(theme);
   let offset = 0;
 
   return (
+    <ThemeFontProvider fontFamily={fontFamily}>
     <AbsoluteFill style={{ backgroundColor }}>
       {timeline.map((item, index) => {
         const duration = item.durationInFrames || 90;
@@ -237,6 +243,7 @@ export const SimpleElectric: React.FC<SimpleElectricProps> = ({
         );
       })}
     </AbsoluteFill>
+    </ThemeFontProvider>
   );
 };
 

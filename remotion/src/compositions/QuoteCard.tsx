@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   quote?: string;
@@ -13,6 +14,7 @@ export const QuoteCard: React.FC<Props> = ({
   primaryColor = "#e94560",
   backgroundColor = "#1a1a2e",
 }) => {
+  const { fontFamily } = useThemeFont();
   const frame = useCurrentFrame();
   const opacity = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: "clamp" });
   const scale = interpolate(frame, [0, 25], [0.95, 1], { extrapolateRight: "clamp" });
@@ -35,11 +37,11 @@ export const QuoteCard: React.FC<Props> = ({
           paddingLeft: 40,
         }}
       >
-        <div style={{ fontSize: 48, color: "white", lineHeight: 1.5, fontFamily: "sans-serif" }}>
+        <div style={{ fontSize: 48, color: "white", lineHeight: 1.5, fontFamily }}>
           “{quote}”
         </div>
         {author && (
-          <div style={{ fontSize: 28, color: primaryColor, marginTop: 24, fontFamily: "sans-serif" }}>
+          <div style={{ fontSize: 28, color: primaryColor, marginTop: 24, fontFamily }}>
             — {author}
           </div>
         )}

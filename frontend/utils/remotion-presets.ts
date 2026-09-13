@@ -4,6 +4,12 @@ export interface ThemeConfig {
   backgroundColor: string;
   accentColor: string;
   name?: string;
+  /** Remotion 正文字体 CSS 栈 */
+  fontFamily?: string;
+  /** 字体预设 id，见 typography-presets.ts */
+  fontPresetId?: string;
+  /** Manim mk_text 使用的系统字体名 */
+  manimCjkFont?: string;
 }
 
 export const COLOR_SCHEMES: ThemeConfig[] = [

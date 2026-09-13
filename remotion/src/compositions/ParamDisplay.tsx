@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   params?: Record<string, unknown>;
@@ -17,6 +18,7 @@ export const ParamDisplay: React.FC<Props> = ({
   primaryColor = "#0f3460",
   backgroundColor = "#16213e",
 }) => {
+  const { fontMono } = useThemeFont();
   const frame = useCurrentFrame();
   const entries = Object.entries(params);
 
@@ -46,7 +48,7 @@ export const ParamDisplay: React.FC<Props> = ({
               opacity,
               fontSize: 48,
               color: "white",
-              fontFamily: "monospace",
+              fontFamily: fontMono,
               borderLeft: `4px solid ${primaryColor}`,
               paddingLeft: 20,
             }}

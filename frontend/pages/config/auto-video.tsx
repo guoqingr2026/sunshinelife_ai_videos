@@ -6,6 +6,9 @@ import {
   MATH_EXPONENTIAL_PROJECT_LITE_JSON,
 } from "../../utils/example-math-project";
 import { MANIM_TEMPLATES } from "../../utils/manim-catalog";
+import FontPresetSelect from "../../components/FontPresetSelect";
+import { COLOR_SCHEMES } from "../../utils/remotion-presets";
+import { DEFAULT_FONT_PRESET, applyFontPresetToTheme } from "../../utils/typography-presets";
 
 const REMOTION_SHOT_TYPES = new Set([
   "title", "chapter", "bullet_list", "fade_text", "subtitle", "quote",
@@ -83,6 +86,7 @@ export default function AutoVideoPage() {
   const [loading, setLoading] = useState(false);
   const [planning, setPlanning] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [fontPresetId, setFontPresetId] = useState(DEFAULT_FONT_PRESET.id);
   const [videoError, setVideoError] = useState(false);
   const logEndRef = useRef<HTMLDivElement>(null);
 
@@ -143,12 +147,14 @@ export default function AutoVideoPage() {
     setSubmitError("");
     setTask(null);
     try {
+      const theme = applyFontPresetToTheme(COLOR_SCHEMES[3], fontPresetId);
       const { taskId } = await api.createComposeTask({
         brief: "",
         title: project.title,
         project,
         preview,
         renderFinal,
+        theme,
       });
       setTask(await api.getComposeTask(taskId));
     } catch (e) {
@@ -169,10 +175,10 @@ export default function AutoVideoPage() {
     : "";
 
   const statusColor = {
-    pending: "text-yellow-400",
-    running: "text-blue-400",
-    success: "text-green-400",
-    failed: "text-red-400",
+    pending: "status-pending",
+    running: "status-running",
+    success: "status-success",
+    failed: "status-failed",
   };
 
   const stepIcon = useMemo(
@@ -188,22 +194,22 @@ export default function AutoVideoPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">一键成片（MVP）</h1>
-      <p className="text-gray-400 text-sm mb-4">
-        只需填写下方<strong className="text-white">项目 JSON</strong>，系统按固定流程执行：
+      <h1 className="page-title">一键成片（MVP）</h1>
+      <p className="page-desc">
+        只需填写下方<strong className="text-ink">项目 JSON</strong>，系统按固定流程执行：
         规划时间轴 → 渲染 Manim → 写入 timeline → Remotion 合成 → 自动导出 <code className="text-primary">output</code> 工程包（可下载到本地）。
       </p>
 
-      <div className="bg-darker border border-gray-700 rounded-lg p-4 mb-6 text-sm text-gray-300 font-mono leading-relaxed">
-        <pre className="whitespace-pre-wrap text-xs text-gray-400">{MVP_WORKFLOW_HELP.trim()}</pre>
+      <div className="panel-muted mb-6 text-sm font-mono leading-relaxed">
+        <pre className="whitespace-pre-wrap text-xs text-muted">{MVP_WORKFLOW_HELP.trim()}</pre>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="text-sm text-gray-400">项目 JSON（唯一分镜来源）</label>
-              <div className="flex gap-3">
+              <label className="text-sm text-muted font-semibold">项目 JSON（唯一分镜来源）</label>
+              <div className="flex gap-2 flex-wrap">
                 <button
                   type="button"
                   onClick={() => {
@@ -212,7 +218,7 @@ export default function AutoVideoPage() {
                     setPreviewPlan(null);
                     setPlanError("");
                   }}
-                  className="text-xs text-primary hover:underline"
+                  className="btn-ghost text-xs"
                 >
                   学习 MVP
                 </button>
@@ -224,7 +230,7 @@ export default function AutoVideoPage() {
                     setPreviewPlan(null);
                     setPlanError("");
                   }}
-                  className="text-xs text-green-400 hover:underline"
+                  className="pill-tab text-xs py-1"
                 >
                   数学题·快速版
                 </button>
@@ -236,7 +242,7 @@ export default function AutoVideoPage() {
                     setPreviewPlan(null);
                     setPlanError("");
                   }}
-                  className="text-xs text-amber-400 hover:underline"
+                  className="pill-tab text-xs py-1"
                 >
                   数学题·完整版
                 </button>
@@ -251,8 +257,8 @@ export default function AutoVideoPage() {
               }}
               rows={16}
               disabled={!!isActive}
-              className={`w-full bg-darker border rounded-lg p-3 text-xs font-mono disabled:opacity-60 ${
-                jsonValid ? "border-gray-600" : "border-red-500/60"
+              className={`input-field p-3 text-xs font-mono disabled:opacity-60 ${
+                jsonValid ? "" : "border-red-400"
               }`}
               spellCheck={false}
             />
@@ -261,12 +267,12 @@ export default function AutoVideoPage() {
             )}
             {jsonValid && project && (
               <div className="text-xs mt-1 space-y-0.5">
-                <p className="text-green-500/80">
+                <p className="text-success font-semibold">
                   已识别 {project.shots!.length} 个镜头（Manim {shotStats.manim} · Remotion {shotStats.remotion})
                   {project.title ? ` · 「${project.title}」` : ""}
                 </p>
                 {shotStats.manim > 8 && (
-                  <p className="text-amber-400/90">
+                  <p className="text-amber-700 font-semibold">
                     含 {shotStats.manim} 个 Manim，全片约 20–40 分钟；建议先用「快速版」或取消「自动合成成片」。
                   </p>
                 )}
@@ -278,7 +284,7 @@ export default function AutoVideoPage() {
               </div>
             )}
             {isActive && (
-              <p className="text-yellow-500/90 text-xs mt-1">
+              <p className="text-amber-700 font-semibold text-xs mt-1">
                 有任务进行中。可先点「重置界面状态」再换示例；或等待当前任务结束。
               </p>
             )}
@@ -289,30 +295,33 @@ export default function AutoVideoPage() {
               type="button"
               onClick={handlePreviewPlan}
               disabled={planning || !!isActive || !jsonValid}
-              className="px-4 py-2 border border-gray-600 rounded-lg text-sm hover:bg-gray-800 disabled:opacity-50"
+              className="btn-outline disabled:opacity-50"
             >
               {planning ? "预览中…" : "预览分镜"}
             </button>
             <button
               onClick={handleStart}
               disabled={loading || !!isActive || !jsonValid || shotStats.unknown.length > 0}
-              className="px-6 py-2 bg-primary rounded-lg font-semibold hover:bg-red-600 disabled:opacity-50"
+              className="btn-primary disabled:opacity-50"
             >
               {loading ? "提交中…" : isActive ? "生成进行中…" : "一键生成视频"}
             </button>
             {(isActive || task) && (
-              <button
-                type="button"
-                onClick={resetLocalTask}
-                className="px-4 py-2 border border-gray-600 rounded-lg text-sm text-gray-400 hover:bg-gray-800"
-              >
+              <button type="button" onClick={resetLocalTask} className="btn-outline">
                 重置界面状态
               </button>
             )}
           </div>
 
+          <FontPresetSelect
+            value={fontPresetId}
+            onChange={setFontPresetId}
+            disabled={!!isActive}
+            className="max-w-md"
+          />
+
           <div className="flex flex-wrap gap-4 text-sm">
-            <label className="flex items-center gap-2 text-gray-300">
+            <label className="flex items-center gap-2 text-muted font-semibold">
               <input
                 type="checkbox"
                 checked={preview}
@@ -321,7 +330,7 @@ export default function AutoVideoPage() {
               />
               预览模式（更快）
             </label>
-            <label className="flex items-center gap-2 text-gray-300">
+            <label className="flex items-center gap-2 text-muted font-semibold">
               <input
                 type="checkbox"
                 checked={renderFinal}
@@ -336,20 +345,20 @@ export default function AutoVideoPage() {
           {submitError && <p className="text-red-400 text-sm">{submitError}</p>}
 
           {previewPlan && (
-            <div className="bg-darker border border-gray-700 rounded-lg p-4 text-sm space-y-2">
-              <p className="font-semibold">分镜预览 · {previewPlan.title}</p>
-              <ul className="text-xs space-y-1 text-gray-300">
+            <div className="panel text-sm space-y-2">
+              <p className="font-bold text-ink">分镜预览 · {previewPlan.title}</p>
+              <ul className="text-xs space-y-1 text-ink">
                 {(previewPlan.resolvedShots || []).map((s, i) => (
                   <li key={i}>
-                    <span className="text-gray-500">{i + 1}.</span>{" "}
-                    <span className={s.kind === "manim" ? "text-green-400" : "text-blue-400"}>
+                    <span className="text-muted">{i + 1}.</span>{" "}
+                    <span className={s.kind === "manim" ? "text-success font-semibold" : "text-primary font-semibold"}>
                       [{s.kind}]
                     </span>{" "}
                     {s.type} — {s.label}
                   </li>
                 ))}
               </ul>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-muted">
                 Manim 任务 {previewPlan.manimJobs.length} 个 · 时间轴共 {previewPlan.timeline.length} 段
               </p>
             </div>
@@ -357,24 +366,24 @@ export default function AutoVideoPage() {
         </div>
 
         <div className="space-y-4">
-          <div className="bg-darker rounded-lg border border-gray-700 p-4">
+          <div className="panel">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-semibold">进度</h3>
+              <h3 className="font-bold text-ink">进度</h3>
               {task && (
-                <span className="text-xs text-gray-500 font-mono">
+                <span className="text-xs text-muted font-mono">
                   {task.id.slice(0, 8)}…
                 </span>
               )}
             </div>
 
             {loading ? (
-              <p className="text-blue-300 text-sm">正在提交任务…</p>
+              <p className="text-primary font-semibold text-sm">正在提交任务…</p>
             ) : !task ? (
-              <p className="text-gray-500 text-sm">点击「一键生成视频」后开始</p>
+              <p className="text-muted text-sm">点击「一键生成视频」后开始</p>
             ) : (
               <div className="space-y-4 text-sm">
                 <div>
-                  <div className="flex justify-between text-xs text-gray-400 mb-1">
+                  <div className="flex justify-between text-xs text-muted mb-1 font-semibold">
                     <span>
                       状态:{" "}
                       <span className={statusColor[task.status]}>{task.status}</span>
@@ -386,7 +395,7 @@ export default function AutoVideoPage() {
                     </span>
                     <span>已用时 {formatElapsed(payload?.startedAt)}</span>
                   </div>
-                  <div className="h-3 bg-gray-800 rounded-full overflow-hidden">
+                  <div className="h-3 bg-surface border border-border rounded-full overflow-hidden">
                     <div
                       className={`h-full transition-all duration-500 ${
                         task.status === "failed"
@@ -398,15 +407,15 @@ export default function AutoVideoPage() {
                       style={{ width: `${Math.max(percent, task.status === "pending" ? 2 : 0)}%` }}
                     />
                   </div>
-                  <p className="text-right text-xs text-gray-500 mt-1">{percent}%</p>
+                  <p className="text-right text-xs text-muted mt-1 font-semibold">{percent}%</p>
                 </div>
 
                 {payload?.progress && (
-                  <p className="text-blue-300 text-sm leading-relaxed">{payload.progress}</p>
+                  <p className="text-primary text-sm leading-relaxed font-semibold">{payload.progress}</p>
                 )}
 
                 {task.status === "pending" && (
-                  <p className="text-yellow-500/90 text-xs">
+                  <p className="text-amber-700 font-semibold text-xs">
                     等待 Worker 执行。若其他 Manim/Remotion 任务正在跑，会依次排队。
                   </p>
                 )}
@@ -416,22 +425,22 @@ export default function AutoVideoPage() {
                     {payload.steps.map((step) => (
                       <li
                         key={step.id}
-                        className={`flex items-center gap-2 ${
+                        className={`flex items-center gap-2 font-semibold ${
                           step.status === "running"
-                            ? "text-blue-300"
+                            ? "text-primary"
                             : step.status === "done"
-                              ? "text-green-400"
+                              ? "text-success"
                               : step.status === "error"
-                                ? "text-red-400"
+                                ? "text-red-600"
                                 : step.status === "skipped"
-                                  ? "text-gray-600"
-                                  : "text-gray-500"
+                                  ? "text-muted"
+                                  : "text-muted"
                         }`}
                       >
                         <span className="w-4 text-center">{stepIcon[step.status]}</span>
                         <span>{step.label}</span>
                         {step.id === "manim" && payload.manimTotal && payload.manimTotal > 0 && (
-                          <span className="text-gray-500">
+                          <span className="text-muted">
                             ({payload.manimCurrent || 0}/{payload.manimTotal})
                           </span>
                         )}
@@ -442,22 +451,22 @@ export default function AutoVideoPage() {
 
                 {payload?.logs && payload.logs.length > 0 && (
                   <div>
-                    <p className="text-xs text-gray-500 mb-1">实时日志</p>
-                    <div className="bg-black/40 rounded p-2 max-h-48 overflow-y-auto font-mono text-xs space-y-0.5">
+                    <p className="text-xs text-muted mb-1 font-semibold">实时日志</p>
+                    <div className="code-block max-h-48 space-y-0.5">
                       {payload.logs.map((entry, i) => (
                         <div
                           key={i}
                           className={
                             entry.level === "error"
-                              ? "text-red-400"
+                              ? "text-red-600"
                               : entry.level === "warn"
-                                ? "text-yellow-400"
+                                ? "text-amber-700"
                                 : entry.level === "success"
-                                  ? "text-green-400"
-                                  : "text-gray-400"
+                                  ? "text-success"
+                                  : "text-muted"
                           }
                         >
-                          <span className="text-gray-600">[{formatTime(entry.time)}]</span>{" "}
+                          <span className="text-muted/70">[{formatTime(entry.time)}]</span>{" "}
                           {entry.message}
                         </div>
                       ))}
@@ -466,13 +475,13 @@ export default function AutoVideoPage() {
                   </div>
                 )}
 
-                {task.error && <p className="text-red-400 text-sm">{task.error}</p>}
+                {task.error && <p className="text-red-600 text-sm font-semibold">{task.error}</p>}
 
                 {task.status === "success" && (task.outputUrl || payload?.bundleZipUrl) && (
                   <>
                     <div className="flex flex-wrap gap-3 text-sm">
                       {task.outputUrl && (
-                        <a href={task.outputUrl} download className="text-primary underline">
+                        <a href={task.outputUrl} download className="btn-ghost">
                           下载成片 MP4
                         </a>
                       )}
@@ -480,7 +489,7 @@ export default function AutoVideoPage() {
                         <a
                           href={api.getComposeBundleUrl(task.id)}
                           download
-                          className="text-green-400 underline font-medium"
+                          className="btn-ghost text-success"
                         >
                           下载 output 工程包 (.zip)
                         </a>
@@ -490,14 +499,14 @@ export default function AutoVideoPage() {
                           href={payload.bundleDirUrl}
                           target="_blank"
                           rel="noreferrer"
-                          className="text-gray-400 underline text-xs"
+                          className="btn-ghost text-xs"
                         >
                           浏览服务器 output 目录
                         </a>
                       )}
                     </div>
                     {payload?.bundleZipUrl && (
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-xs text-muted mt-1">
                         工程包含：project.json、timeline、Manim 素材、成片、README 与制作日志，解压后可在本地二次开发。
                       </p>
                     )}
@@ -522,11 +531,11 @@ export default function AutoVideoPage() {
           </div>
 
           {timelineJson && (
-            <details className="bg-darker rounded-lg border border-gray-700 p-4">
-              <summary className="font-semibold text-sm cursor-pointer">
+            <details className="panel">
+              <summary className="font-bold text-sm cursor-pointer text-ink">
                 Remotion 时间轴 JSON（合成用）
               </summary>
-              <pre className="text-xs text-gray-300 overflow-auto max-h-64 whitespace-pre-wrap mt-2">
+              <pre className="text-xs text-ink code-block max-h-64 whitespace-pre-wrap mt-2">
                 {timelineJson}
               </pre>
             </details>

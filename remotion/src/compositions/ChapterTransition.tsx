@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   chapterTitle?: string;
@@ -11,6 +12,7 @@ export const ChapterTransition: React.FC<Props> = ({
   primaryColor = "#e94560",
   backgroundColor = "#1a1a2e",
 }) => {
+  const { fontFamily } = useThemeFont();
   const frame = useCurrentFrame();
   const slideX = interpolate(frame, [0, 20, 40, 60], [-100, 0, 0, 100], {
     extrapolateRight: "clamp",
@@ -34,7 +36,7 @@ export const ChapterTransition: React.FC<Props> = ({
           color: primaryColor,
           opacity,
           transform: `translateX(${slideX}px)`,
-          fontFamily: "sans-serif",
+          fontFamily,
         }}
       >
         {chapterTitle}

@@ -1,8 +1,10 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 export const DeviceToggle: React.FC<{ backgroundColor?: string }> = ({
   backgroundColor = "#0f0f23",
 }) => {
+  const { fontFamily } = useThemeFont();
   const frame = useCurrentFrame();
   const isOn = frame > 30;
   const glow = interpolate(frame, [30, 45], [0, 1], {
@@ -30,7 +32,7 @@ export const DeviceToggle: React.FC<{ backgroundColor?: string }> = ({
           alignItems: "center",
           fontSize: 24,
           color: "white",
-          fontFamily: "sans-serif",
+          fontFamily,
           transition: "none",
         }}
       >

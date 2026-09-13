@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   title?: string;
@@ -11,6 +12,7 @@ export const TitleAnimation: React.FC<Props> = ({
   primaryColor = "#e94560",
   backgroundColor = "#1a1a2e",
 }) => {
+  const { fontFamily } = useThemeFont();
   const frame = useCurrentFrame();
   const opacity = interpolate(frame, [0, 30], [0, 1], { extrapolateRight: "clamp" });
   const scale = interpolate(frame, [0, 30], [0.8, 1], { extrapolateRight: "clamp" });
@@ -30,7 +32,7 @@ export const TitleAnimation: React.FC<Props> = ({
           color: primaryColor,
           opacity,
           transform: `scale(${scale})`,
-          fontFamily: "sans-serif",
+          fontFamily,
         }}
       >
         {title}

@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   steps?: string[];
@@ -11,6 +12,7 @@ export const FlowSteps: React.FC<Props> = ({
   primaryColor = "#e94560",
   backgroundColor = "#1a1a2e",
 }) => {
+  const { fontFamily } = useThemeFont();
   const frame = useCurrentFrame();
 
   return (
@@ -43,12 +45,12 @@ export const FlowSteps: React.FC<Props> = ({
                   justifyContent: "center",
                   fontSize: 22,
                   fontWeight: "bold",
-                  fontFamily: "sans-serif",
+                  fontFamily,
                 }}
               >
                 {i + 1}
               </div>
-              <div style={{ fontSize: 32, color: "white", fontFamily: "sans-serif" }}>{step}</div>
+              <div style={{ fontSize: 32, color: "white", fontFamily }}>{step}</div>
               {i < steps.length - 1 && (
                 <div style={{ fontSize: 28, color: primaryColor, marginLeft: 8 }}>→</div>
               )}

@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   leftTitle?: string;
@@ -19,6 +20,7 @@ export const CompareCard: React.FC<Props> = ({
   secondaryColor = "#0f3460",
   backgroundColor = "#1a1a2e",
 }) => {
+  const { fontFamily } = useThemeFont();
   const frame = useCurrentFrame();
   const progress = interpolate(frame, [0, 25], [0, 1], { extrapolateRight: "clamp" });
 
@@ -32,7 +34,7 @@ export const CompareCard: React.FC<Props> = ({
             backgroundColor: secondaryColor,
             borderRadius: 16,
             padding: 40,
-            fontFamily: "sans-serif",
+            fontFamily,
           }}
         >
           <div style={{ fontSize: 40, color: "#aaa", marginBottom: 20 }}>{leftTitle}</div>
@@ -45,7 +47,7 @@ export const CompareCard: React.FC<Props> = ({
             backgroundColor: primaryColor,
             borderRadius: 16,
             padding: 40,
-            fontFamily: "sans-serif",
+            fontFamily,
           }}
         >
           <div style={{ fontSize: 40, color: "rgba(255,255,255,0.8)", marginBottom: 20 }}>

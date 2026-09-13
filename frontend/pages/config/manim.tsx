@@ -9,6 +9,8 @@ import {
   getTemplateDomain,
   type ManimDomain,
 } from "../../utils/manim-catalog";
+import FontPresetSelect from "../../components/FontPresetSelect";
+import { DEFAULT_FONT_PRESET, getFontPreset } from "../../utils/typography-presets";
 
 type LayerFilter = "all" | 1 | 2 | 3;
 type DomainFilter = "all" | ManimDomain;
@@ -22,6 +24,7 @@ export default function ManimConfig() {
   const [status, setStatus] = useState<ManimStatus | null>(null);
   const [loading, setLoading] = useState(false);
   const [videoError, setVideoError] = useState(false);
+  const [fontPresetId, setFontPresetId] = useState(DEFAULT_FONT_PRESET.id);
 
   const selected = getManimTemplate(type);
 
@@ -76,6 +79,8 @@ export default function ManimConfig() {
         setLoading(false);
         return;
       }
+      const preset = getFontPreset(fontPresetId);
+      finalParams.cjk_font = preset.manimFont;
       const result = await api.createManimTask({ type, params: finalParams });
       setTask(await api.getManimTask(result.taskId));
     } finally {
@@ -90,29 +95,23 @@ export default function ManimConfig() {
   const clipJsonText = task?.clipJson ? JSON.stringify(task.clipJson, null, 2) : "";
 
   const statusColor = {
-    pending: "text-yellow-400",
-    running: "text-blue-400",
-    success: "text-green-400",
-    failed: "text-red-400",
+    pending: "status-pending",
+    running: "status-running",
+    success: "status-success",
+    failed: "status-failed",
   };
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">Manim 动画引擎</h1>
-      <p className="text-gray-400 text-sm mb-4">
-        四域应用：<strong className="text-white">半导体</strong> · <strong className="text-white">学习</strong> · <strong className="text-white">英语</strong> · <strong className="text-white">媒体/3D</strong>。
+      <h1 className="page-title">Manim 动画引擎</h1>
+      <p className="page-desc">
+        四域应用：<strong className="text-ink">半导体</strong> · <strong className="text-ink">学习</strong> · <strong className="text-ink">英语</strong> · <strong className="text-ink">媒体/3D</strong>。
         三层能力 L1/L2/L3；覆盖 MathTex（texlive 可选）、ThreeDScene（OpenGL）、SVG/图片/视频。
         生成 <code className="text-primary">.mp4</code> + Remotion <code className="text-primary">manim_clip</code> <code className="text-primary">.json</code>。
       </p>
 
       {status && (
-        <div
-          className={`mb-4 p-3 rounded-lg border text-sm ${
-            status.manimInstalled
-              ? "border-green-700 bg-green-900/20 text-green-300"
-              : "border-yellow-700 bg-yellow-900/20 text-yellow-200"
-          }`}
-        >
+        <div className={status.manimInstalled ? "alert-ok" : "alert-warn"}>
           <p className="font-medium">
             {status.manimInstalled ? "✓ 已安装 Manim" : "⚠ 未安装 Manim（占位视频）"}
           </p>
@@ -133,15 +132,17 @@ export default function ManimConfig() {
         </div>
       )}
 
+      <div className="mb-4 max-w-md">
+        <FontPresetSelect value={fontPresetId} onChange={setFontPresetId} />
+      </div>
+
       <div className="flex flex-wrap gap-2 mb-2 text-xs">
         {(["all", ...MANIM_DOMAINS.map((d) => d.id)] as DomainFilter[]).map((d) => (
           <button
             key={d}
             type="button"
             onClick={() => setDomainFilter(d)}
-            className={`px-3 py-1 rounded-full border ${
-              domainFilter === d ? "bg-primary border-primary text-white" : "border-gray-600 text-gray-400"
-            }`}
+            className={domainFilter === d ? "pill-tab pill-tab-active" : "pill-tab"}
           >
             {d === "all" ? "全部域" : MANIM_DOMAINS.find((x) => x.id === d)?.label ?? d}
           </button>
@@ -153,9 +154,7 @@ export default function ManimConfig() {
             key={String(l)}
             type="button"
             onClick={() => setLayerFilter(l)}
-            className={`px-3 py-1 rounded-full border ${
-              layerFilter === l ? "bg-gray-700 border-gray-500 text-white" : "border-gray-600 text-gray-400"
-            }`}
+            className={layerFilter === l ? "pill-tab pill-tab-active" : "pill-tab"}
           >
             {l === "all" ? "全部层" : `L${l}`}
           </button>
@@ -165,11 +164,11 @@ export default function ManimConfig() {
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div>
-            <label className="block text-sm text-gray-400 mb-2">场景类型</label>
+            <label className="block text-sm text-muted mb-2 font-semibold">场景类型</label>
             <select
               value={type}
               onChange={(e) => setType(e.target.value)}
-              className="w-full bg-darker border border-gray-600 rounded-lg p-2"
+              className="input-field p-2"
             >
               {grouped.map((g) => (
                 <optgroup key={g.id} label={g.label}>
@@ -184,26 +183,26 @@ export default function ManimConfig() {
           </div>
 
           {selected && (
-            <div className="bg-darker border border-gray-700 rounded-lg p-4 text-sm space-y-3">
+            <div className="panel text-sm space-y-3">
               <div className="flex justify-between items-start gap-2">
                 <div>
                   <p className="font-semibold">{selected.label}</p>
-                  <p className="text-gray-500 text-xs mt-1">{selected.desc}</p>
+                  <p className="text-muted text-xs mt-1">{selected.desc}</p>
                 </div>
                 <div className="flex flex-col gap-1 items-end shrink-0">
-                  <span className="text-xs px-2 py-0.5 rounded bg-gray-800 text-gray-300">
+                  <span className="badge bg-surface text-ink border-border">
                     L{selected.layer}
                   </span>
-                  <span className="text-xs px-2 py-0.5 rounded bg-gray-800 text-amber-300/90">
+                  <span className="badge bg-amber-50 text-amber-800 border-amber-200">
                     {MANIM_DOMAINS.find((d) => d.id === getTemplateDomain(selected.id))?.label}
                   </span>
                 </div>
               </div>
               <div>
-                <p className="text-xs text-gray-500 mb-1">Manim 原语（能力索引）</p>
+                <p className="text-xs text-muted mb-1 font-semibold">Manim 原语（能力索引）</p>
                 <div className="flex flex-wrap gap-1">
                   {selected.primitives.map((p) => (
-                    <span key={p} className="text-xs px-2 py-0.5 rounded bg-gray-800 text-blue-300 font-mono">
+                    <span key={p} className="badge bg-blue-50 text-blue-800 border-blue-200 font-mono">
                       {p}
                     </span>
                   ))}
@@ -218,9 +217,9 @@ export default function ManimConfig() {
                 </p>
               )}
               {Object.keys(selected.paramHelp).length > 0 && (
-                <ul className="text-xs text-gray-500 space-y-0.5">
+                <ul className="text-xs text-muted space-y-0.5">
                   {Object.entries(selected.paramHelp).map(([k, v]) => (
-                    <li key={k}><code className="text-gray-400">{k}</code> — {v}</li>
+                    <li key={k}><code className="text-primary">{k}</code> — {v}</li>
                   ))}
                 </ul>
               )}
@@ -229,8 +228,8 @@ export default function ManimConfig() {
 
           <div>
             <div className="flex justify-between items-center mb-1">
-              <label className="text-sm text-gray-400">参数 JSON</label>
-              <button type="button" onClick={fillExample} className="text-xs text-primary hover:underline">
+              <label className="text-sm text-muted font-semibold">参数 JSON</label>
+              <button type="button" onClick={fillExample} className="btn-ghost text-xs">
                 一键填充示例
               </button>
             </div>
@@ -239,7 +238,7 @@ export default function ManimConfig() {
               onChange={(e) => setParamsJson(e.target.value)}
               rows={type === "custom_python" ? 14 : 10}
               spellCheck={false}
-              className="w-full bg-darker border border-gray-600 rounded-lg p-3 font-mono text-xs"
+              className="input-field p-3 font-mono text-xs"
             />
             {type === "custom_python" && (
               <p className="text-xs text-yellow-500/90 mt-1">
@@ -263,37 +262,33 @@ export default function ManimConfig() {
             )}
           </div>
 
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="px-6 py-2 bg-primary rounded-lg font-medium hover:bg-red-600 disabled:opacity-50"
-          >
+          <button onClick={handleSubmit} disabled={loading} className="btn-primary">
             {loading ? "渲染中..." : "生成 Manim 视频"}
           </button>
         </div>
 
         <div className="space-y-4">
-          <div className="bg-darker rounded-lg border border-gray-700 p-4">
-            <h3 className="font-semibold mb-3">预览</h3>
+          <div className="panel">
+            <h3 className="font-bold text-ink mb-3">预览</h3>
             {!task ? (
-              <p className="text-gray-500 text-sm">提交后在此预览</p>
+              <p className="text-muted text-sm">提交后在此预览</p>
             ) : (
               <div className="space-y-2 text-sm">
-                <p>类型: <code className="text-gray-300">{String(task.payload?.type ?? type)}</code></p>
+                <p>类型: <code className="text-muted">{String(task.payload?.type ?? type)}</code></p>
                 <p>状态: <span className={statusColor[task.status]}>{task.status}</span></p>
                 {task.outputUrl && task.status === "success" && (
                   <>
                     <div className="flex flex-wrap gap-2 text-xs">
-                      <button onClick={copyClipUrl} className="text-primary underline">复制 MP4</button>
+                      <button onClick={copyClipUrl} className="btn-ghost text-xs">复制 MP4</button>
                       {task.clipJson && (
-                        <button onClick={copyClipJson} className="text-primary underline">复制 JSON</button>
+                        <button onClick={copyClipJson} className="btn-ghost text-xs">复制 JSON</button>
                       )}
-                      <a href={task.outputUrl} download className="text-gray-400 underline">下载 MP4</a>
+                      <a href={task.outputUrl} download className="btn-ghost text-xs">下载 MP4</a>
                     </div>
                     {clipJsonText && (
                       <details className="text-xs">
-                        <summary className="cursor-pointer text-gray-400">manim_clip JSON</summary>
-                        <pre className="mt-1 p-2 bg-black/40 rounded overflow-auto max-h-32">{clipJsonText}</pre>
+                        <summary className="cursor-pointer text-muted font-semibold">manim_clip JSON</summary>
+                        <pre className="mt-1 code-block max-h-32">{clipJsonText}</pre>
                       </details>
                     )}
                     <video src={task.outputUrl} controls className="w-full rounded bg-black" onError={() => setVideoError(true)} />
@@ -303,8 +298,8 @@ export default function ManimConfig() {
                 {task.error && <p className="text-yellow-400 text-xs">{task.error}</p>}
                 {task.renderLog && (
                   <details className="text-xs">
-                    <summary className="cursor-pointer text-gray-400">渲染日志</summary>
-                    <pre className="mt-1 p-2 bg-black/40 rounded overflow-auto max-h-40 whitespace-pre-wrap">{task.renderLog}</pre>
+                    <summary className="cursor-pointer text-muted font-semibold">渲染日志</summary>
+                    <pre className="mt-1 code-block max-h-40 whitespace-pre-wrap">{task.renderLog}</pre>
                   </details>
                 )}
               </div>

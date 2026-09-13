@@ -47,7 +47,7 @@ export async function renderCompose(
     const plan = planFromBrief(payload.brief, payload.title, payload.project);
     timeline = plan.timeline;
     manimJobs = plan.manimJobs;
-    theme = plan.theme;
+    theme = payload.theme ? { ...plan.theme, ...payload.theme } : plan.theme;
     patchComposeProgress(taskId, {
       phase: "planned",
       progress: `规划完成：${manimJobs.length} 个 Manim 镜头`,
@@ -84,9 +84,15 @@ export async function renderCompose(
       log: `[${i + 1}/${manimJobs!.length}] 开始渲染 ${job.type} — ${job.label}`,
     });
 
+    const manimParams = { ...(job.params || {}) };
+    if (theme?.manimCjkFont && !manimParams.cjk_font) {
+      manimParams.cjk_font = theme.manimCjkFont;
+    }
+
     const result = await renderManim(manimTaskId, {
       type: job.type,
-      params: job.params,
+      params: manimParams,
+      manimCjkFont: theme?.manimCjkFont,
     });
 
     const clipUrl = toRemotionMediaUrl(result.outputUrl);

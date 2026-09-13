@@ -16,21 +16,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      <header className="bg-darker border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold text-primary">
+      <header className="bg-card/95 backdrop-blur border-b border-border shadow-sm sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <Link to="/" className="text-xl font-extrabold text-primary shrink-0">
             动画生产系统
           </Link>
-          <nav className="flex gap-1 flex-wrap">
+          <nav className="flex gap-2 flex-wrap">
             {NAV_ITEMS.map((item) => (
               <Link
                 key={item.href}
                 to={item.href}
-                className={`px-3 py-1.5 rounded text-sm transition-colors ${
-                  location.pathname === item.href
-                    ? "bg-primary text-white"
-                    : "text-gray-300 hover:bg-gray-700"
-                }`}
+                className={
+                  location.pathname === item.href ? "nav-tab nav-tab-active" : "nav-tab"
+                }
               >
                 {item.label}
               </Link>
@@ -38,9 +36,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </nav>
         </div>
       </header>
-      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6">
-        {children}
-      </main>
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 py-6">{children}</main>
     </div>
   );
 }

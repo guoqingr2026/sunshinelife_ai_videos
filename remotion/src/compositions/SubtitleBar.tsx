@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   text?: string;
@@ -11,6 +12,7 @@ export const SubtitleBar: React.FC<Props> = ({
   primaryColor = "#e94560",
   backgroundColor = "#1a1a2e",
 }) => {
+  const { fontFamily } = useThemeFont();
   const frame = useCurrentFrame();
   const slideY = interpolate(frame, [0, 20], [40, 0], { extrapolateRight: "clamp" });
   const opacity = interpolate(frame, [0, 15], [0, 1], { extrapolateRight: "clamp" });
@@ -30,7 +32,7 @@ export const SubtitleBar: React.FC<Props> = ({
           padding: "24px 32px",
           fontSize: 36,
           color: "white",
-          fontFamily: "sans-serif",
+          fontFamily,
         }}
       >
         {text}

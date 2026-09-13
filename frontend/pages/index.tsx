@@ -42,21 +42,15 @@ const modules = [
 export default function Home() {
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-2">低成本网页端动画生产系统</h1>
-      <p className="text-gray-400 mb-8">
+      <h1 className="text-3xl font-extrabold text-ink mb-2">低成本网页端动画生产系统</h1>
+      <p className="text-muted mb-8 text-lg">
         Remotion + Manim + HyperFrames + AI 文案生成
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {modules.map((m) => (
-          <Link
-            key={m.href}
-            to={m.href}
-            className="block p-6 bg-darker rounded-lg border border-gray-700 hover:border-primary transition-colors"
-          >
-            <h2 className="text-lg font-semibold text-primary mb-2">
-              {m.title}
-            </h2>
-            <p className="text-gray-400 text-sm">{m.desc}</p>
+          <Link key={m.href} to={m.href} className="module-card">
+            <h2 className="text-lg font-bold text-primary mb-2">{m.title}</h2>
+            <p className="text-muted text-sm">{m.desc}</p>
           </Link>
         ))}
       </div>

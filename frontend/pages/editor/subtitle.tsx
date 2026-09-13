@@ -35,45 +35,32 @@ export default function SubtitleEditor() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">字幕编辑</h1>
+      <h1 className="page-title">字幕编辑</h1>
 
       <div className="mb-4">
-        <label className="block text-sm text-gray-400 mb-2">
+        <label className="block text-sm text-muted mb-2 font-semibold">
           上传字幕文件 (.srt / .txt)
         </label>
-        <input
-          type="file"
-          accept=".srt,.txt"
-          onChange={handleFileUpload}
-          className="text-sm text-gray-300"
-        />
+        <input type="file" accept=".srt,.txt" onChange={handleFileUpload} className="text-sm text-muted" />
       </div>
 
       <div className="mb-4">
-        <label className="block text-sm text-gray-400 mb-2">字幕内容</label>
+        <label className="block text-sm text-muted mb-2 font-semibold">字幕内容</label>
         <textarea
           value={text}
           onChange={(e) => setText(e.target.value)}
           rows={16}
-          className="w-full bg-darker border border-gray-600 rounded-lg p-4 text-sm font-mono focus:border-primary focus:outline-none"
+          className="input-field p-4 text-sm font-mono"
           placeholder="粘贴或上传字幕内容..."
         />
       </div>
 
-      <div className="flex gap-3 items-center">
-        <button
-          onClick={handleSave}
-          disabled={loading || !text.trim()}
-          className="px-6 py-2 bg-primary rounded-lg font-medium hover:bg-red-600 disabled:opacity-50 transition-colors"
-        >
+      <div className="flex gap-3 items-center flex-wrap">
+        <button onClick={handleSave} disabled={loading || !text.trim()} className="btn-primary">
           {loading ? "保存中..." : "保存（自动断句修复）"}
         </button>
-        {saved && (
-          <span className="text-green-400 text-sm">
-            已保存 ID: {saved.id}
-          </span>
-        )}
-        {error && <span className="text-red-400 text-sm">{error}</span>}
+        {saved && <span className="text-success text-sm font-semibold">已保存 ID: {saved.id}</span>}
+        {error && <span className="text-red-600 text-sm">{error}</span>}
       </div>
     </div>
   );

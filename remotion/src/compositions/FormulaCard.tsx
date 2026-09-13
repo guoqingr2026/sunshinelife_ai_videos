@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   formula?: string;
@@ -13,6 +14,7 @@ export const FormulaCard: React.FC<Props> = ({
   primaryColor = "#e94560",
   backgroundColor = "#1a1a2e",
 }) => {
+  const { fontFamily, fontSerif } = useThemeFont();
   const frame = useCurrentFrame();
   const opacity = interpolate(frame, [0, 20], [0, 1], { extrapolateRight: "clamp" });
 
@@ -34,10 +36,10 @@ export const FormulaCard: React.FC<Props> = ({
           textAlign: "center",
         }}
       >
-        <div style={{ fontSize: 28, color: "#aaa", marginBottom: 20, fontFamily: "sans-serif" }}>
+        <div style={{ fontSize: 28, color: "#aaa", marginBottom: 20, fontFamily }}>
           {caption}
         </div>
-        <div style={{ fontSize: 72, color: "white", fontFamily: "serif" }}>{formula}</div>
+        <div style={{ fontSize: 72, color: "white", fontFamily: fontSerif }}>{formula}</div>
       </div>
     </AbsoluteFill>
   );

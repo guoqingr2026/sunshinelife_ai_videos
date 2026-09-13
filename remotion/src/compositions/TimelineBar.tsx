@@ -1,4 +1,5 @@
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { useThemeFont } from "../theme-font";
 
 interface Props {
   events?: string[];
@@ -13,6 +14,7 @@ export const TimelineBar: React.FC<Props> = ({
   primaryColor = "#e94560",
   backgroundColor = "#1a1a2e",
 }) => {
+  const { fontFamily } = useThemeFont();
   const frame = useCurrentFrame();
   const lineWidth = interpolate(frame, [10, 40], [0, 100], {
     extrapolateLeft: "clamp",
@@ -29,7 +31,7 @@ export const TimelineBar: React.FC<Props> = ({
       }}
     >
       <div style={{ width: "90%", maxWidth: 1200 }}>
-        <div style={{ fontSize: 40, color: "white", marginBottom: 48, fontFamily: "sans-serif" }}>
+        <div style={{ fontSize: 40, color: "white", marginBottom: 48, fontFamily }}>
           {title}
         </div>
         <div style={{ position: "relative", height: 80 }}>
@@ -61,7 +63,7 @@ export const TimelineBar: React.FC<Props> = ({
                       margin: "0 auto 12px",
                     }}
                   />
-                  <div style={{ fontSize: 24, color: "#ddd", fontFamily: "sans-serif" }}>{ev}</div>
+                  <div style={{ fontSize: 24, color: "#ddd", fontFamily }}>{ev}</div>
                 </div>
               );
             })}

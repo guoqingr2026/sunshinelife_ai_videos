@@ -69,16 +69,16 @@ export default function ShotPlanPage() {
   };
 
   if (loading) {
-    return <p className="text-gray-500">加载中…</p>;
+    return <p className="text-muted">加载中…</p>;
   }
 
   const categories = ["工程", "数学", "信息图", "文本", "结构"];
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-2">镜头规划文章</h1>
-      <p className="text-gray-400 text-sm mb-4">
-        复制下方 <strong className="text-white">GPT 提示词</strong> 到 ChatGPT，让它按规格输出分镜 JSON；
+      <h1 className="page-title">镜头规划文章</h1>
+      <p className="page-desc">
+        复制下方 <strong className="text-ink">GPT 提示词</strong> 到 ChatGPT，让它按规格输出分镜 JSON；
         贴回本页保存后，
         <Link to="/config/auto-video" className="text-primary underline mx-1">
           一键成片
@@ -87,65 +87,49 @@ export default function ShotPlanPage() {
       </p>
 
       <div className="flex flex-wrap gap-2 mb-6">
-        <button
-          onClick={() => copyText(gptPrompt, "gpt")}
-          className="px-4 py-2 bg-primary rounded-lg text-sm font-medium hover:bg-red-600"
-        >
+        <button onClick={() => copyText(gptPrompt, "gpt")} className="btn-primary text-sm py-2">
           {copied === "gpt" ? "已复制！" : "复制 GPT 分镜提示词"}
         </button>
-        <button
-          onClick={() => copyText(defaultArticle, "article")}
-          className="px-4 py-2 border border-gray-600 rounded-lg text-sm hover:border-gray-400"
-        >
+        <button onClick={() => copyText(defaultArticle, "article")} className="btn-secondary text-sm py-2">
           {copied === "article" ? "已复制！" : "复制完整规格文章"}
         </button>
-        <button
-          onClick={handleReset}
-          className="px-4 py-2 border border-gray-600 rounded-lg text-sm hover:border-gray-400"
-        >
+        <button onClick={handleReset} className="btn-outline">
           恢复默认模板
         </button>
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <div className="space-y-3">
-          <label className="block text-sm text-gray-400">规划文章（粘贴 GPT 输出或手动编辑）</label>
+          <label className="block text-sm text-muted font-semibold">规划文章（粘贴 GPT 输出或手动编辑）</label>
           <textarea
             value={article}
             onChange={(e) => setArticle(e.target.value)}
             rows={28}
-            className="w-full bg-darker border border-gray-600 rounded-lg p-3 text-sm font-mono"
+            className="input-field p-3 text-sm font-mono"
           />
           <div className="flex flex-wrap gap-2">
-            <button
-              onClick={handlePreview}
-              className="px-4 py-2 border border-gray-600 rounded-lg hover:border-gray-400 text-sm"
-            >
+            <button onClick={handlePreview} className="btn-outline">
               预览解析
             </button>
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-6 py-2 bg-primary rounded-lg font-medium hover:bg-red-600 disabled:opacity-50"
-            >
+            <button onClick={handleSave} disabled={saving} className="btn-primary">
               {saving ? "保存中…" : "保存并生效"}
             </button>
           </div>
-          {message && <p className="text-green-400 text-sm">{message}</p>}
+          {message && <p className="text-success text-sm font-semibold">{message}</p>}
           {saved?.updatedAt && (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-muted">
               上次保存: {new Date(saved.updatedAt).toLocaleString()}
             </p>
           )}
         </div>
 
         <div className="space-y-4 max-h-[85vh] overflow-y-auto">
-          <div className="bg-darker border border-gray-700 rounded-lg p-4">
-            <h3 className="font-semibold mb-2 text-sm">格式规范（GPT 必须遵守）</h3>
-            <div className="text-xs text-gray-400 space-y-3">
+          <div className="panel">
+            <h3 className="font-bold mb-2 text-sm text-ink">格式规范（GPT 必须遵守）</h3>
+            <div className="text-xs text-muted space-y-3">
               <div>
-                <p className="text-gray-300 font-medium mb-1">1. 关键词规则（每行一条）</p>
-                <pre className="bg-black/40 p-2 rounded overflow-x-auto whitespace-pre-wrap">
+                <p className="text-ink font-semibold mb-1">1. 关键词规则（每行一条）</p>
+                <pre className="code-block whitespace-pre-wrap">
 {`关键词1, 关键词2 → manim类型ID | 显示标签
 
 pn结, pn → pn_junction | PN 结
@@ -153,8 +137,8 @@ pn结, pn → pn_junction | PN 结
                 </pre>
               </div>
               <div>
-                <p className="text-gray-300 font-medium mb-1">2. 固定镜头序列（可选，按顺序用）</p>
-                <pre className="bg-black/40 p-2 rounded overflow-x-auto whitespace-pre-wrap">
+                <p className="text-ink font-semibold mb-1">2. 固定镜头序列（可选，按顺序用）</p>
+                <pre className="code-block whitespace-pre-wrap">
 {`## 镜头序列
 1. pn_junction | PN 结原理
 2. forgetting_curve | 遗忘曲线
@@ -162,8 +146,8 @@ pn结, pn → pn_junction | PN 结
                 </pre>
               </div>
               <div>
-                <p className="text-gray-300 font-medium mb-1">3. JSON 整段（推荐，三种粘贴方式均可）</p>
-                <pre className="bg-black/40 p-2 rounded overflow-x-auto whitespace-pre-wrap text-[11px]">
+                <p className="text-ink font-semibold mb-1">3. JSON 整段（推荐，三种粘贴方式均可）</p>
+                <pre className="code-block whitespace-pre-wrap text-[11px]">
                   方式A: 用 markdown 代码块包裹 JSON{"\n"}
                   方式B: 直接粘贴纯 JSON 对象{"\n"}
                   方式C: GPT 输出 json 换行后接对象
@@ -172,27 +156,27 @@ pn结, pn → pn_junction | PN 结
             </div>
           </div>
 
-          <div className="bg-darker border border-gray-700 rounded-lg p-4">
-            <h3 className="font-semibold mb-2 text-sm">
+          <div className="panel">
+            <h3 className="font-bold mb-2 text-sm text-ink">
               全部 Manim 类型与关键词（{types.length} 种）
             </h3>
             <div className="space-y-3">
               {categories.map((cat) => (
                 <div key={cat}>
-                  <p className="text-xs text-primary font-medium mb-1">{cat}</p>
+                  <p className="text-xs text-primary font-bold mb-1">{cat}</p>
                   <div className="space-y-1">
                     {types
                       .filter((t) => t.category === cat)
                       .map((t) => (
                         <div
                           key={t.id}
-                          className="text-xs bg-black/30 rounded p-2 font-mono"
+                          className="text-xs bg-surface border border-border rounded-lg p-2 font-mono"
                         >
-                          <span className="text-yellow-300">{t.id}</span>
-                          <span className="text-gray-500 mx-1">|</span>
-                          <span className="text-white">{t.label}</span>
-                          <p className="text-gray-500 mt-0.5">{t.desc}</p>
-                          <p className="text-gray-400 mt-0.5">
+                          <span className="text-amber-700 font-bold">{t.id}</span>
+                          <span className="text-muted mx-1">|</span>
+                          <span className="text-ink font-semibold">{t.label}</span>
+                          <p className="text-muted mt-0.5">{t.desc}</p>
+                          <p className="text-muted mt-0.5">
                             {t.keywords.join(", ")} → {t.id} | {t.label}
                           </p>
                         </div>
@@ -204,20 +188,20 @@ pn结, pn → pn_junction | PN 结
           </div>
 
           {preview && (
-            <div className="bg-darker border border-gray-700 rounded-lg p-4">
-              <h3 className="font-semibold mb-2 text-sm">解析结果</h3>
+            <div className="panel">
+              <h3 className="font-bold mb-2 text-sm text-ink">解析结果</h3>
               {preview.errors.length > 0 && (
-                <ul className="text-yellow-400 text-xs mb-2">
+                <ul className="text-amber-700 text-xs mb-2 font-semibold">
                   {preview.errors.map((e, i) => (
                     <li key={i}>{e}</li>
                   ))}
                 </ul>
               )}
-              <p className="text-xs text-gray-400 mb-2">
+              <p className="text-xs text-muted mb-2">
                 规则 {preview.rules.length} 条 · 固定镜头 {preview.shots.length} 个
                 {preview.shots.length > 0 && "（按顺序使用，忽略关键词匹配）"}
               </p>
-              <pre className="text-xs text-gray-300 overflow-auto max-h-48 whitespace-pre-wrap">
+              <pre className="text-xs text-ink code-block max-h-48 whitespace-pre-wrap">
                 {JSON.stringify({ rules: preview.rules, shots: preview.shots }, null, 2)}
               </pre>
             </div>
