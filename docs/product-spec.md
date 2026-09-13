@@ -1,7 +1,7 @@
 # SunshineLife AI Videos — 产品规格书
 
-> **文档版本：** v1.2（2026-09）  
-> **适用代码：** `main` @ `c08e9b1` 及之后  
+> **文档版本：** v1.3（2026-09）  
+> **适用代码：** `main` @ `ed9a8bf` 及之后  
 > **在线地址（ECS）：** `http://47.99.184.249/sunshinelife_ai_videos/`
 
 ---
@@ -29,8 +29,10 @@
 | ⑤ | HyperFrames | `/config/hyperframes` | AI 关键帧手绘动画（需 API Key + ffmpeg） |
 | ⑥ | Remotion | `/config/remotion` | 手动编辑 timeline 并单独渲染 |
 | ⑦ | B 站文案 | `/packaging/bilibili` | 标题 / 简介 / 钩子 / 封面文案 |
-| ⑧ | 任务管理 | `/tasks` | 全部渲染任务状态与下载 |
+| ⑧ | 任务管理 | `/tasks` | 全部渲染任务状态与下载；**本地归档**（浏览器选文件夹保存 ZIP/MP4） |
 | ⑨ | **提示词库** | `/config/prompts` | 全流程模板提示词合集（手动 → 未来 API） |
+
+页脚 **站点门户**（`frontend/utils/site-portal.ts`）可跳转：ECS 根站、英语学习 `/english/`、本系统、Manim 官方文档。
 
 导航栏顺序即推荐操作顺序：**先规划，再成片，最后发布与排错**。
 
@@ -163,6 +165,9 @@
 
 - **学习 MVP** — 内置遗忘曲线示例（约 5 镜）
 - **数学题·快速版 / 完整版** — 指数方程示例（见 `examples/projects/math-2pow-t-equals-t32/`）
+- **蒙提霍尔** — Remotion 三门 + Manim 概率树示例
+- **数学宇宙** — `manim_custom` 多曲线镜头
+- **读书训练** — 10 个学习方法 + 数学曲线隐喻（见 `examples/projects/reading-study/`）
 
 #### 4.2.2 预览与配置
 
@@ -211,6 +216,8 @@
 - 状态：`pending` → `running` → `success` / `failed`
 - 失败时查看 **error** 字段（Manim 未安装、类型无效、Remotion 超时等）
 - Worker 每 **2 秒** 轮询一条 pending 任务，多任务依次排队
+- **本地归档**（Chrome/Edge）：选择本机文件夹 → 将成片 ZIP / MP4 写入该目录；可选「归档后删除服务器素材」。无文件夹权限时回退为浏览器下载。详见 `docs/local-archive-and-baidu.md`
+- Windows 批量同步：`scripts/sync-ecs-to-local.ps1`（从 ECS 拉取任务产物，不依赖浏览器 File System API）
 
 ---
 
@@ -236,6 +243,10 @@
 ### 5.1 Manim 单镜调试
 
 **场景：** 验证某个模板参数、测试 `custom_python`、查看 Manim 环境是否就绪。
+
+- **能力索引**：按领域浏览全部已注册 `type` 与默认 `params`
+- **示例画廊**：展示 `scene_examples.json` + `official_custom_examples.json` 全部条目；一键应用到任务或复制为 `custom_python` JSON
+- **官方示例**：已内置 6 个 [Manim Example Gallery](https://docs.manim.community/en/stable/examples.html) 片段（`SquareToCircle`、`VectorArrow`、`BraceAnnotation`、`HarmonicRibbon3D` 等），见 §7.9
 
 1. **Manim** → 能力索引选类型 → 填 `params` JSON → 提交。
 2. `GET /api/manim/status` 可查看 `manimInstalled` / `mode: real|placeholder`。
@@ -374,7 +385,7 @@ shots[].type
 
 ### 7.5 Manim 内容动画类型（`shots[].type` 可直接使用）
 
-共 **63** 种，经 `resolveManimType()` 识别；Python 注册于 `manim/template_catalog.py`（`custom_python` 另走代码粘贴，仍计入镜头规划类型表）。
+共 **73** 种，经 `resolveManimType()` 识别；其中 **72** 种在 `manim/template_catalog.py` 有 Python 模板，`custom_python` 另走代码粘贴（仍计入镜头规划类型表）。
 
 #### 7.5.1 工程 / 物理 / 电气（9）
 
@@ -483,13 +494,31 @@ shots[].type
 | `manim_koch_snowflake` | `KochSnowflakeScene` |
 | `manim_three_body` | `ThreeBodyScene` |
 
-#### 7.5.10 高级 / 自定义（3）
+#### 7.5.10 读书 / 学习方法专题（10）
+
+| ID | 中文 |
+|----|------|
+| `manim_outline` | 大纲结构图 |
+| `manim_teacher_resources` | 老师资源图 |
+| `manim_draw_diagram` | 结构绘制 |
+| `manim_compare_table` | 左右对比表 |
+| `manim_vocabulary_focus` | 单字放大 |
+| `manim_multi_explanation` | 多人解释 |
+| `manim_explanation_highlight` | 详解高亮 |
+| `manim_recall_page` | 翻页复述 |
+| `manim_phone_fade` | 手机淡出 |
+| `manim_keybook` | 考前重点本 |
+
+示例：`examples/projects/reading-study/project.json`；一键成片 **「读书训练」** 按钮（约 50 镜，含 `typewriter_text`、`chapter` 与数学曲线隐喻）。
+
+#### 7.5.11 高级 / 自定义（4）
 
 | ID | 说明 |
 |----|------|
 | `manim_custom` | **推荐**：`params.scene` 指定宇宙场景名（§7.6），一个 `type` 覆盖全部宇宙镜头 |
-| `custom_python` | `params.code` 粘贴完整 Manim `Scene` 类 |
+| `custom_python` | `params.code` 粘贴完整 Manim `Scene` 类（**覆盖官方画廊任意示例**，见 §7.9） |
 | `custom_dsl` | `params` JSON DSL 场景 |
+| `formula_curve` | 输入 `x(t)` / `y(t)` / `r(t)` 公式生成参数曲线 |
 
 **Manim 镜头别名（`MANIM_TYPE_ALIASES` → 规范 ID）：**
 
@@ -667,6 +696,86 @@ shots[].type
 
 **新增自定义镜头需同步：** `shot-plan-spec.ts` → `plan-timeline.ts` → `SimpleElectric.tsx`（Remotion）或 `template_catalog.py` + 模板文件（Manim）→ `manim-capabilities.ts` →（可选）`scene_examples.json`。
 
+### 7.9 与 Manim 官方 Example Gallery 的对应关系
+
+官方画廊：[Manim Community — Example Gallery](https://docs.manim.community/en/stable/examples.html)（v0.21，约 **26** 个独立示例，分 5 类）。
+
+**结论（先读这句）：**
+
+| 问题 | 答案 |
+|------|------|
+| 能否「一键成片」直接选官方画廊里的每一个示例？ | **不能**。画廊是教学用完整 `Scene` 代码，本系统只有 **73 个注册 `type`** + 宇宙 scene，不会为每个官方示例单独注册按钮。 |
+| 能否在本系统里**渲染出与官方一致的画面**？ | **可以**。把官方 `class Xxx(Scene)` 粘贴为 `custom_python`（或 Manim 页示例画廊 →「应用到任务」），即可走同一套 Manim 渲染链。 |
+| 与「官网案例」的定位差异 | 本系统是 **分镜流水线 + 模板库**；官方文档是 **完整 Manim API 参考**。两者互补，不是 1:1 菜单对应。 |
+
+**实现路径说明：**
+
+| 标记 | 含义 |
+|------|------|
+| 🟢 内置 | 已有注册 `type`，可在 `shots[]` 里直接写 `type` |
+| 🟡 近似 | 内置模板画面类似，细节与官方不完全一致 |
+| 🔵 custom_python | 粘贴官方代码即可复现 |
+| 🟠 需 texlive | `Tex` / `MathTex` / `get_tex()` 清晰显示需 `install-texlive-optional.sh`；未装时部分示例降级为 `mk_text` 或渲染失败 |
+| 🟣 需 OpenGL | `ThreeDScene` / `MovingCameraScene` / `ZoomedScene` 需 `install-opengl-deps.sh` + xvfb |
+
+#### Basic Concepts（5）
+
+| 官方示例 | 本系统 |
+|----------|--------|
+| ManimCELogo | 🔵 + 🟠（`MathTex` 字母 M；形状部分可用 `custom_python`） |
+| BraceAnnotation | 🔵（已收录 `official_custom_examples.json`）；🟠 `get_tex` |
+| VectorArrow | 🔵（已收录）；🟡 `coordinate_grid` + `vector_sum` |
+| GradientImageFromArray | 🔵；🟡 `image_focus` |
+| BooleanOperations | 🔵 |
+
+#### Animations（8）
+
+| 官方示例 | 本系统 |
+|----------|--------|
+| PointMovingOnShapes | 🔵 |
+| MovingAround | 🔵 |
+| MovingAngle | 🔵 |
+| MovingDots | 🔵 |
+| MovingGroupToDestination | 🔵 |
+| MovingFrameBox | 🔵；🟡 `manim_explanation_highlight`（框选高亮） |
+| RotationUpdater | 🔵 |
+| PointWithTrace | 🔵；🟡 `orbit_paths`（轨迹示意，非 TracedPath 同款） |
+
+#### Plotting with Manim（5）
+
+| 官方示例 | 本系统 |
+|----------|--------|
+| SinAndCosFunctionPlot | 🟢 `function_graph`；🔵 完整版 |
+| ArgMinExample | 🔵；🟢 `function_graph` |
+| GraphAreaPlot | 🔵；🟡 `bar_chart` / `function_graph` |
+| PolygonOnAxes | 🔵；🟢 `coordinate_grid` |
+| HeatDiagramPlot | 🔵（`numpy` + `ImageMobject`） |
+
+#### Special Camera Settings（7）
+
+| 官方示例 | 本系统 |
+|----------|--------|
+| FollowingGraphCamera | 🔵 + 🟣（`MovingCameraScene`） |
+| MovingZoomedSceneAround | 🔵 + 🟣（`ZoomedScene`） |
+| FixedInFrameMObjectTest | 🔵 + 🟣（`ThreeDScene`） |
+| ThreeDLightSourcePosition | 🔵 + 🟣；🟢 `scene_3d_surface` / `manim_parametric_surface`（曲面类，非同款灯光演示） |
+| ThreeDCameraRotation | 🔵 + 🟣；🟢 `scene_3d_orbit` / `manim_curve_3d` |
+| ThreeDCameraIllusionRotation | 🔵 + 🟣 |
+| ThreeDSurfacePlot | 🔵 + 🟣；🟢 `manim_parametric_surface`（`SurfaceScene`） |
+
+#### Advanced Projects（2）
+
+| 官方示例 | 本系统 |
+|----------|--------|
+| OpeningManim | 🔵 + 🟠（`Tex` / `MathTex` / 网格非线性变换） |
+| SineCurveUnitCircle | 🔵；🟡 `sine_waveform` / `function_graph`（示意，非单位圆推导全流程） |
+
+**推荐用法：**
+
+1. **量产科普片**：用 §7.5 注册 `type` + Remotion 包装（一键成片）。
+2. **复现官方某一镜**：Manim 页 → 示例画廊 / 粘贴官方代码 → `custom_python` 单镜渲染 → 再插入 `shots` 或单独下载 MP4。
+3. **参数曲线类**：优先 `formula_curve` 或 `manim_custom` + `params.scene`，少写 Python。
+
 ---
 
 ## 8. 系统架构（技术规格摘要）
@@ -766,6 +875,25 @@ IMAGE_MODEL=dall-e-3
 | 3 | 生成 → 任务管理查看 Manim 逐镜进度 |
 | 4 | B 站文案 → 工程科普风格 |
 
+### 示例 D：读书方法「10 个真正有效的方法」
+
+| 步 | 操作 |
+|----|------|
+| 1 | 一键成片 → **读书训练** 加载 `examples/projects/reading-study/project.json` |
+| 2 | 预览分镜（约 50 镜：章节 + 打字机 + 曲线隐喻 + 10 个学习方法 Manim 信息图） |
+| 3 | 正式生成 → 任务管理下载 MP4 / 工程包 |
+| 4 | （可选）任务管理 → **本地归档** 到本机项目文件夹 |
+
+### 示例 E：复现 Manim 官方画廊某一镜
+
+| 步 | 操作 |
+|----|------|
+| 1 | 打开 [官方 Example Gallery](https://docs.manim.community/en/stable/examples.html)，复制目标 `Scene` 类代码 |
+| 2 | **Manim** 页 → **自定义 Python** 或示例画廊 → 粘贴 / 应用 |
+| 3 | 若含 `ThreeDScene`：ECS 执行 `sudo bash deploy/ecs/install-opengl-deps.sh` |
+| 4 | 若含 `MathTex` / `Tex`：可选 `install-texlive-optional.sh` |
+| 5 | 单镜渲染成功后，可将 `custom_python` 镜头并入 `shots[]` 参与一键成片 |
+
 ---
 
 ## 11. 常见问题排查
@@ -780,6 +908,9 @@ IMAGE_MODEL=dall-e-3
 | HyperFrames 无 MP4 | 无 ffmpeg | `apt install -y ffmpeg` |
 | Remotion 失败 | Chrome 路径错误 | 检查 `REMOTION_BROWSER_EXECUTABLE` |
 | 白屏 | 前端 base path 不匹配 | `VITE_BASE_PATH=/sunshinelife_ai_videos/` 重新 build |
+| ECS `git pull` 超时 | 国内服务器访问 GitHub 443 不稳定 | 换镜像：`git remote set-url origin https://ghfast.top/https://github.com/guoqingr2026/sunshinelife_ai_videos.git` 再 pull；或 Windows `deploy/ecs/upload-from-windows.ps1` |
+| `custom_python` ThreeD 黑屏 | 缺 OpenGL 依赖 | `sudo bash deploy/ecs/install-opengl-deps.sh` |
+| 本地归档按钮无效 | 非 Chrome/Edge 或未授权文件夹 | 换浏览器；或用 `scripts/sync-ecs-to-local.ps1` |
 
 诊断脚本（ECS）：
 
@@ -804,6 +935,9 @@ pm2 logs sunshinelife-videos-api
 | GET | `/api/video/compose/:id/bundle` | 下载工程 ZIP |
 | GET | `/api/hyperframes/status` | HyperFrames 环境检测 |
 | GET | `/api/manim/status` | Manim 环境检测 |
+| GET | `/api/manim/examples` | 场景示例 + 官方 `custom_python` 条目 |
+| GET | `/api/manim/universe-scenes` | 数学宇宙 scene 列表 |
+| POST | `/api/tasks/:id/purge-assets` | 归档后删除服务器任务素材 |
 | GET | `/api/tasks` | 任务列表 |
 
 ---
@@ -814,8 +948,11 @@ pm2 logs sunshinelife-videos-api
 |------|------|
 | [README.md](../README.md) | 安装与快速启动 |
 | [manim-automation-guide.md](./manim-automation-guide.md) | Manim 类型、params、API 详解 |
+| [local-archive-and-baidu.md](./local-archive-and-baidu.md) | 本地归档与 ECS 同步 |
 | [deploy/ecs/README.md](../deploy/ecs/README.md) | 阿里云 ECS 部署 |
 | [examples/projects/math-2pow-t-equals-t32/](../examples/projects/math-2pow-t-equals-t32/) | 数学题完整示例工程 |
+| [examples/projects/reading-study/](../examples/projects/reading-study/) | 读书训练示例工程 |
+| [Manim Example Gallery](https://docs.manim.community/en/stable/examples.html) | 官方场景代码（经 `custom_python` 接入） |
 
 ---
 
@@ -826,6 +963,7 @@ pm2 logs sunshinelife-videos-api
 | v1.0 | 2026-03 | 字幕、Manim、HyperFrames、Remotion、B 站文案、任务管理 |
 | v1.1 | 2026-09 | 镜头规划 → 一键成片衔接；提示词库；HyperFrames 环境检测；导航工作流重排；字体预设；output 工程包自动导出 |
 | v1.2 | 2026-09 | 完整罗列 Remotion 16 种 + Manim 63 种 + 数学宇宙 33 scene；流水线映射表；时长参数；谐波/Spirograph 场景 @ `c08e9b1` |
+| v1.3 | 2026-09 | 读书训练 10 种 Manim + 示例工程；本地归档 / 站点门户 / Manim 官方示例画廊；§7.9 官方 Gallery 能力对照；Manim 73 种 @ `ed9a8bf` |
 
 ---
 
