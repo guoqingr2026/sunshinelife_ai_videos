@@ -1,0 +1,213 @@
+{
+  "title": "读书不是天赋，是训练：10 个真正有效的方法",
+  "shots": [
+    {
+      "type": "typewriter_text",
+      "label": "开场",
+      "text": "为什么我努力读书，成绩还是停在 60 分？",
+      "highlight": ["努力", "60 分"]
+    },
+    {
+      "type": "manim_lorenz_attractor",
+      "label": "混沌开场",
+      "params": { "title": "混沌的学习状态" }
+    },
+    {
+      "type": "typewriter_text",
+      "label": "核心问题",
+      "text": "那些能考到 80、90 分的人，到底差在哪里？",
+      "highlight": ["80 分", "90 分"]
+    },
+    {
+      "type": "typewriter_text",
+      "label": "核心思想",
+      "text": "差别不在聪明，而在方法。读书，是可以训练的。",
+      "highlight": ["方法", "训练"]
+    },
+    { "type": "chapter", "label": "01 建立大纲" },
+    {
+      "type": "typewriter_text",
+      "label": "大纲引入",
+      "text": "读书不是把知识塞进去，而是先知道要塞到哪里。",
+      "highlight": ["结构", "大纲"]
+    },
+    {
+      "type": "manim_cardioid",
+      "label": "心形线隐喻",
+      "params": { "title": "结构的中心" }
+    },
+    {
+      "type": "manim_outline",
+      "label": "大纲结构图",
+      "params": { "title": "建立脑内索引系统" }
+    },
+    { "type": "chapter", "label": "02 抓住老师资源" },
+    {
+      "type": "typewriter_text",
+      "label": "老师引入",
+      "text": "老师的讲义、笔记、考古题，就是最接近出题方向的资料。",
+      "highlight": ["讲义", "考古题"]
+    },
+    {
+      "type": "manim_rose_curve",
+      "label": "玫瑰线隐喻",
+      "params": { "title": "老师的重点像花瓣一样展开" }
+    },
+    {
+      "type": "manim_teacher_resources",
+      "label": "老师资源图",
+      "params": { "title": "老师的重点就是考点" }
+    },
+    { "type": "chapter", "label": "03 画出来" },
+    {
+      "type": "typewriter_text",
+      "label": "画出来引入",
+      "text": "很多图看过去了，但没真正理解。画出来，才会发现自己缺了什么。",
+      "highlight": ["画出来", "理解"]
+    },
+    {
+      "type": "manim_archimedean_spiral",
+      "label": "螺线隐喻",
+      "params": { "title": "理解是螺旋式上升" }
+    },
+    {
+      "type": "manim_draw_diagram",
+      "label": "心脏结构绘制",
+      "params": { "title": "画出复杂结构" }
+    },
+    { "type": "chapter", "label": "04 比较" },
+    {
+      "type": "typewriter_text",
+      "label": "比较引入",
+      "text": "把容易混淆的概念放在同一页比较，差异一眼就能看清楚。",
+      "highlight": ["比较", "差异"]
+    },
+    {
+      "type": "manim_lissajous",
+      "label": "李萨如隐喻",
+      "params": { "title": "不同频率的概念需要分开" }
+    },
+    {
+      "type": "manim_compare_table",
+      "label": "左右对比表",
+      "params": { "title": "水溶性 vs 脂溶性" }
+    },
+    { "type": "chapter", "label": "05 背单字" },
+    {
+      "type": "typewriter_text",
+      "label": "背单字引入",
+      "text": "不要整页扫过去，而是一个单字连续看五遍、十遍。",
+      "highlight": ["单字", "重复"]
+    },
+    {
+      "type": "manim_exponential_spiral",
+      "label": "指数螺线隐喻",
+      "params": { "title": "记忆的加速曲线" }
+    },
+    {
+      "type": "manim_vocabulary_focus",
+      "label": "单字放大闪烁",
+      "params": { "title": "单字击破法" }
+    },
+    { "type": "chapter", "label": "06 多被教几次" },
+    {
+      "type": "typewriter_text",
+      "label": "多教引入",
+      "text": "同一道题，问不同的人，你会得到不同的解释方式。",
+      "highlight": ["解释", "不同角度"]
+    },
+    {
+      "type": "manim_cycloid",
+      "label": "摆线隐喻",
+      "params": { "title": "不同路径，同一目的" }
+    },
+    {
+      "type": "manim_multi_explanation",
+      "label": "三人解释图",
+      "params": { "title": "不同讲法带来不同理解" }
+    },
+    { "type": "chapter", "label": "07 看详解" },
+    {
+      "type": "typewriter_text",
+      "label": "详解引入",
+      "text": "详解比题目更重要。重复出现的关键字，就是重点。",
+      "highlight": ["详解", "重点"]
+    },
+    {
+      "type": "manim_mandelbrot_zoom",
+      "label": "曼德布罗隐喻",
+      "params": { "title": "细节的无限深度" }
+    },
+    {
+      "type": "manim_explanation_highlight",
+      "label": "详解高亮",
+      "params": { "title": "详解中的关键字" }
+    },
+    { "type": "chapter", "label": "08 翻页复述法" },
+    {
+      "type": "typewriter_text",
+      "label": "复述引入",
+      "text": "看完一页，翻过去之前先问自己：我刚刚学到了什么？",
+      "highlight": ["复述", "检核"]
+    },
+    {
+      "type": "manim_lemniscate",
+      "label": "无限符号隐喻",
+      "params": { "title": "复述让记忆循环强化" }
+    },
+    {
+      "type": "manim_recall_page",
+      "label": "翻页复述动画",
+      "params": { "title": "即时检核机制" }
+    },
+    { "type": "chapter", "label": "09 习惯养成" },
+    {
+      "type": "typewriter_text",
+      "label": "习惯引入",
+      "text": "自制力不是天生的，是训练出来的。",
+      "highlight": ["习惯", "自制力"]
+    },
+    {
+      "type": "manim_lorenz_attractor",
+      "label": "混沌 → 稳定隐喻",
+      "params": { "title": "从混乱到稳定" }
+    },
+    {
+      "type": "manim_phone_fade",
+      "label": "手机淡出",
+      "params": { "title": "减少干扰" }
+    },
+    { "type": "chapter", "label": "10 考前重点本" },
+    {
+      "type": "typewriter_text",
+      "label": "重点本引入",
+      "text": "提前整理一本只放易忘点的重点本。",
+      "highlight": ["重点本", "易忘点"]
+    },
+    {
+      "type": "manim_cardioid",
+      "label": "心形线收束",
+      "params": { "title": "回到核心" }
+    },
+    {
+      "type": "manim_keybook",
+      "label": "厚书变薄本",
+      "params": { "title": "考前只看这一本" }
+    },
+    { "type": "chapter", "label": "结尾" },
+    {
+      "type": "typewriter_text",
+      "label": "收束",
+      "text": "读书不是天赋，是训练。选一个方法开始，你会发现自己真的在变强。",
+      "highlight": ["训练", "变强"]
+    }
+  ],
+  "theme": {
+    "name": "B站粉",
+    "primaryColor": "#fb7299",
+    "secondaryColor": "#23ade5",
+    "backgroundColor": "#141420",
+    "accentColor": "#ffe066",
+    "fontPresetId": "noto-sans-sc"
+  }
+}

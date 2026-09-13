@@ -79,4 +79,15 @@ TEMPLATES = {
     "manim_koch_snowflake": "templates.math_universe.fractals.KochSnowflakeScene",
     "manim_three_body": "templates.math_universe.dynamics.ThreeBodyScene",
     "manim_parametric_curve": "templates.math_universe.curve_2d.ParametricCurveScene",
+    # 读书 / 学习方法专题
+    "manim_outline": "templates.reading_study_scenes.ManimOutline",
+    "manim_teacher_resources": "templates.reading_study_scenes.ManimTeacherResources",
+    "manim_draw_diagram": "templates.reading_study_scenes.ManimDrawDiagram",
+    "manim_compare_table": "templates.reading_study_scenes.ManimCompareTable",
+    "manim_vocabulary_focus": "templates.reading_study_scenes.ManimVocabularyFocus",
+    "manim_multi_explanation": "templates.reading_study_scenes.ManimMultiExplanation",
+    "manim_explanation_highlight": "templates.reading_study_scenes.ManimExplanationHighlight",
+    "manim_recall_page": "templates.reading_study_scenes.ManimRecallPage",
+    "manim_phone_fade": "templates.reading_study_scenes.ManimPhoneFade",
+    "manim_keybook": "templates.reading_study_scenes.ManimKeyBook",
 }

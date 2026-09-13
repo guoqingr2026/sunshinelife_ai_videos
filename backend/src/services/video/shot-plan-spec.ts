@@ -156,6 +156,17 @@ export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
   { id: "manim_julia_set", label: "朱利亚集", category: "数学", desc: "Julia 分形", keywords: ["julia", "朱利亚", "分形"] },
   { id: "manim_koch_snowflake", label: "Koch 雪花", category: "数学", desc: "Koch 分形雪花", keywords: ["koch", "雪花", "分形"] },
   { id: "manim_three_body", label: "三体问题", category: "数学", desc: "三质点引力轨迹", keywords: ["三体", "引力", "混沌"] },
+  // 读书 / 学习方法专题
+  { id: "manim_outline", label: "大纲结构图", category: "学习", desc: "章节树状大纲动画", keywords: ["大纲", "结构", "outline", "索引"] },
+  { id: "manim_teacher_resources", label: "老师资源图", category: "学习", desc: "讲义笔记考古题汇聚考点", keywords: ["老师", "讲义", "考古题", "考点"] },
+  { id: "manim_draw_diagram", label: "结构绘制", category: "学习", desc: "画图理解复杂结构", keywords: ["画图", "绘制", "diagram", "理解"] },
+  { id: "manim_compare_table", label: "左右对比表", category: "学习", desc: "易混淆概念并列比较", keywords: ["比较", "对比", "compare", "表格"] },
+  { id: "manim_vocabulary_focus", label: "单字放大", category: "学习", desc: "单字击破重复记忆", keywords: ["单字", "词汇", "vocabulary", "重复"] },
+  { id: "manim_multi_explanation", label: "多人解释", category: "学习", desc: "不同讲法不同角度", keywords: ["解释", "多角度", "multi", "讲法"] },
+  { id: "manim_explanation_highlight", label: "详解高亮", category: "学习", desc: "详解关键字框选强调", keywords: ["详解", "关键字", "highlight", "重点"] },
+  { id: "manim_recall_page", label: "翻页复述", category: "学习", desc: "翻页前自问学到了什么", keywords: ["复述", "翻页", "recall", "检核"] },
+  { id: "manim_phone_fade", label: "手机淡出", category: "学习", desc: "减少干扰习惯养成", keywords: ["手机", "干扰", "习惯", "fade"] },
+  { id: "manim_keybook", label: "考前重点本", category: "学习", desc: "厚书浓缩易忘点", keywords: ["重点本", "易忘点", "keybook", "考前"] },
 ];
 
 for (const spec of MANIM_TYPE_SPECS) {

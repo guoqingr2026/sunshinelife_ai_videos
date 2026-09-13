@@ -15,5 +15,5 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false
   },
-  "include": ["src", "pages", "components", "utils"]
+  "include": ["src", "pages", "components", "utils", "../examples/projects/**/*.json"]
 }

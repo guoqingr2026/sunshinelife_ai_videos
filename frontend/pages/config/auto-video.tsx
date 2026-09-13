@@ -13,6 +13,7 @@ import {
 } from "../../utils/example-math-project";
 import { MONTY_HALL_PROJECT_JSON } from "../../utils/example-monty-hall-project";
 import { MATH_UNIVERSE_PROJECT_JSON } from "../../utils/example-math-universe-project";
+import { READING_STUDY_PROJECT_JSON } from "../../utils/example-reading-study-project";
 import { MANIM_TEMPLATES } from "../../utils/manim-catalog";
 import FontPresetSelect from "../../components/FontPresetSelect";
 import ThemeSchemeSelect from "../../components/ThemeSchemeSelect";
@@ -396,6 +397,18 @@ export default function AutoVideoPage() {
                   className="pill-tab text-xs py-1"
                 >
                   数学宇宙
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetLocalTask();
+                    setProjectJson(READING_STUDY_PROJECT_JSON);
+                    setPreviewPlan(null);
+                    setPlanError("");
+                  }}
+                  className="pill-tab text-xs py-1"
+                >
+                  读书训练
                 </button>
               </div>
             </div>
