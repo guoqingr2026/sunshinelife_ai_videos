@@ -52,9 +52,10 @@ async function processNextTask() {
     } else if (task.kind === "hyperframes") {
       const result = await renderHyperFrames(task.id, payload);
       db.task.update({ id: task.id }, {
-        status: "success",
+        status: result.warning && !result.outputUrl ? "failed" : "success",
         outputUrl: result.outputUrl || undefined,
         framesUrl: result.framesUrl,
+        error: result.warning,
       });
     } else if (task.kind === "compose") {
       patchComposeProgress(task.id, {

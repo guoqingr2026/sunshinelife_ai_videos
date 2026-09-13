@@ -228,6 +228,24 @@ export const api = {
       defaultArticle: string;
     }>("/api/video/shot-plan/spec"),
 
+  getShotPlanProject: () =>
+    request<{
+      title: string;
+      shots: ShotPlanShot[];
+      projectJson: string;
+      shotCount: number;
+      updatedAt?: string;
+    }>("/api/video/shot-plan/project"),
+
+  getHyperFramesStatus: () =>
+    request<{
+      imageApiConfigured: boolean;
+      imageModel: string;
+      ffmpegAvailable: boolean;
+      hints: string[];
+      ready: boolean;
+    }>("/api/hyperframes/status"),
+
   createRemotionTask: (data: {
     templateId: string;
     timeline: Array<Record<string, unknown>>;

@@ -1,14 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
 
 const NAV_ITEMS = [
-  { href: "/config/auto-video", label: "一键成片" },
   { href: "/config/shot-plan", label: "镜头规划" },
+  { href: "/config/auto-video", label: "一键成片" },
   { href: "/editor/subtitle", label: "字幕编辑" },
   { href: "/config/manim", label: "Manim" },
   { href: "/config/hyperframes", label: "HyperFrames" },
   { href: "/config/remotion", label: "Remotion" },
   { href: "/packaging/bilibili", label: "B站文案" },
   { href: "/tasks", label: "任务管理" },
+  { href: "/config/prompts", label: "提示词库" },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {

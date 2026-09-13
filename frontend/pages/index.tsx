@@ -2,14 +2,14 @@ import { Link } from "react-router-dom";
 
 const modules = [
   {
-    href: "/config/auto-video",
-    title: "一键自动成片",
-    desc: "填写要求 → 自动 Manim + 时间轴 + 合成",
+    href: "/config/shot-plan",
+    title: "镜头规划（步骤 1）",
+    desc: "GPT 分镜 JSON → 保存 → 发送到一键成片",
   },
   {
-    href: "/config/shot-plan",
-    title: "镜头规划文章",
-    desc: "粘贴 GPT 分镜 → 自动解析生效",
+    href: "/config/auto-video",
+    title: "一键成片（步骤 2）",
+    desc: "导入项目 JSON → Manim + Remotion 自动合成",
   },
   {
     href: "/editor/subtitle",
@@ -37,6 +37,11 @@ const modules = [
     desc: "复制提示词，在 ChatGPT 中生成文案",
   },
   { href: "/tasks", title: "任务管理", desc: "查看渲染状态、下载视频" },
+  {
+    href: "/config/prompts",
+    title: "提示词库",
+    desc: "全流程模板提示词，手动复制 → 未来 API",
+  },
 ];
 
 export default function Home() {

@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Link } from "react-router-dom";
 import { api, ComposePayload, ComposeTask } from "../../utils/api";
+import { consumeProjectHandoff } from "../../utils/project-bridge";
 import { MVP_PROJECT_JSON, MVP_WORKFLOW_HELP } from "../../utils/mvp-project";
 import {
   MATH_EXPONENTIAL_PROJECT_JSON,
@@ -88,6 +90,13 @@ export default function AutoVideoPage() {
   const [submitError, setSubmitError] = useState("");
   const [fontPresetId, setFontPresetId] = useState(DEFAULT_FONT_PRESET.id);
   const [videoError, setVideoError] = useState(false);
+  const [importMessage, setImportMessage] = useState("");
+  const [pendingShotPlan, setPendingShotPlan] = useState<{
+    shotCount: number;
+    title: string;
+    projectJson: string;
+    updatedAt?: string;
+  } | null>(null);
   const logEndRef = useRef<HTMLDivElement>(null);
 
   const project = useMemo(() => parseProjectJson(projectJson), [projectJson]);
@@ -100,6 +109,40 @@ export default function AutoVideoPage() {
     setTask(null);
     setSubmitError("");
     setVideoError(false);
+  };
+
+  useEffect(() => {
+    const handoff = consumeProjectHandoff();
+    if (handoff) {
+      setProjectJson(handoff);
+      setPreviewPlan(null);
+      setPlanError("");
+      setImportMessage("已从镜头规划导入项目 JSON，可直接预览或一键生成。");
+      return;
+    }
+    api
+      .getShotPlanProject()
+      .then((p) =>
+        setPendingShotPlan({
+          shotCount: p.shotCount,
+          title: p.title,
+          projectJson: p.projectJson,
+          updatedAt: p.updatedAt,
+        })
+      )
+      .catch(() => setPendingShotPlan(null));
+  }, []);
+
+  const applyPendingShotPlan = () => {
+    if (!pendingShotPlan) return;
+    resetLocalTask();
+    setProjectJson(pendingShotPlan.projectJson);
+    setPreviewPlan(null);
+    setPlanError("");
+    setImportMessage(
+      `已导入镜头规划「${pendingShotPlan.title}」（${pendingShotPlan.shotCount} 个镜头）`
+    );
+    setPendingShotPlan(null);
   };
 
   useEffect(() => {
@@ -194,11 +237,41 @@ export default function AutoVideoPage() {
 
   return (
     <div>
-      <h1 className="page-title">一键成片（MVP）</h1>
+      <h1 className="page-title">一键成片（步骤 2）</h1>
       <p className="page-desc">
-        只需填写下方<strong className="text-ink">项目 JSON</strong>，系统按固定流程执行：
-        规划时间轴 → 渲染 Manim → 写入 timeline → Remotion 合成 → 自动导出 <code className="text-primary">output</code> 工程包（可下载到本地）。
+        请先完成
+        <Link to="/config/shot-plan" className="text-primary underline mx-1">镜头规划</Link>
+        并导入项目 JSON。系统执行：规划时间轴 → Manim → Remotion → 导出
+        <code className="text-primary">output</code> 工程包。
       </p>
+
+      <div className="panel-muted mb-4 text-xs text-muted flex flex-wrap gap-4">
+        <span><strong className="text-primary">① 镜头规划</strong></span>
+        <span>→</span>
+        <span><strong className="text-ink">② 一键成片</strong>（当前）</span>
+        <span>→</span>
+        <span>③ 任务管理</span>
+      </div>
+
+      {importMessage && (
+        <p className="text-success text-sm font-semibold mb-4">{importMessage}</p>
+      )}
+
+      {pendingShotPlan && !importMessage && (
+        <div className="panel-muted mb-4 flex flex-wrap items-center gap-3 text-sm">
+          <span className="text-muted">
+            检测到已保存的镜头规划「{pendingShotPlan.title}」（{pendingShotPlan.shotCount} 镜
+            {pendingShotPlan.updatedAt
+              ? ` · ${new Date(pendingShotPlan.updatedAt).toLocaleString()}`
+              : ""}
+            ）
+          </span>
+          <button type="button" onClick={applyPendingShotPlan} className="btn-primary text-sm py-1.5">
+            导入到项目 JSON
+          </button>
+          <Link to="/config/shot-plan" className="btn-ghost text-sm">返回镜头规划</Link>
+        </div>
+      )}
 
       <div className="panel-muted mb-6 text-sm font-mono leading-relaxed">
         <pre className="whitespace-pre-wrap text-xs text-muted">{MVP_WORKFLOW_HELP.trim()}</pre>

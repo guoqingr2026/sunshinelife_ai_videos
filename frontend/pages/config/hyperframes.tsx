@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { api, Task } from "../../utils/api";
 
 export default function HyperFramesConfig() {
@@ -10,6 +11,17 @@ export default function HyperFramesConfig() {
   const [style, setStyle] = useState("handdrawn");
   const [task, setTask] = useState<Task | null>(null);
   const [loading, setLoading] = useState(false);
+  const [envStatus, setEnvStatus] = useState<{
+    imageApiConfigured: boolean;
+    ffmpegAvailable: boolean;
+    hints: string[];
+    ready: boolean;
+    imageModel: string;
+  } | null>(null);
+
+  useEffect(() => {
+    api.getHyperFramesStatus().then(setEnvStatus).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!task || task.status === "success" || task.status === "failed") return;
@@ -43,9 +55,40 @@ export default function HyperFramesConfig() {
     failed: "status-failed",
   };
 
+  const showVideo = task?.status === "success" && task.outputUrl;
+  const showFramesOnly =
+    task?.status === "success" && !task.outputUrl && task.framesUrl;
+
   return (
     <div>
       <h1 className="page-title">HyperFrames 动画配置</h1>
+
+      {envStatus && (
+        <div
+          className={`panel-muted mb-6 text-sm space-y-2 ${
+            envStatus.ready ? "border-green-300" : "border-amber-400"
+          }`}
+        >
+          <p className="font-bold text-ink">
+            环境检测：{envStatus.ready ? "就绪" : "未完全就绪"}
+          </p>
+          <ul className="text-xs text-muted space-y-1 list-disc list-inside">
+            <li>
+              图像 API：{envStatus.imageApiConfigured ? "已配置" : "未配置（将用占位图）"}
+              {envStatus.imageApiConfigured && ` · 模型 ${envStatus.imageModel}`}
+            </li>
+            <li>ffmpeg：{envStatus.ffmpegAvailable ? "可用" : "未安装（无法合成 MP4）"}</li>
+            {envStatus.hints.map((h, i) => (
+              <li key={i} className="text-amber-800 font-semibold">{h}</li>
+            ))}
+          </ul>
+          <p className="text-xs text-muted">
+            提示词模板见
+            <Link to="/config/prompts" className="text-primary underline mx-1">提示词库</Link>
+            HyperFrames 步骤。
+          </p>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
@@ -92,9 +135,18 @@ export default function HyperFramesConfig() {
             </div>
           </div>
 
-          <button onClick={handleSubmit} disabled={loading || !prompt.trim()} className="btn-primary">
+          <button
+            onClick={handleSubmit}
+            disabled={loading || !prompt.trim()}
+            className="btn-primary disabled:opacity-50"
+          >
             {loading ? "提交中..." : "生成帧序列 & 合成视频"}
           </button>
+          {envStatus && !envStatus.ready && (
+            <p className="text-amber-700 text-xs font-semibold">
+              环境未就绪：无 API Key 会得到占位图；无 ffmpeg 无法合成 MP4。建议先修复 .env 后 pm2 restart。
+            </p>
+          )}
         </div>
 
         <div className="panel">
@@ -113,10 +165,19 @@ export default function HyperFramesConfig() {
                   </a>
                 </p>
               )}
-              {task.outputUrl && task.status === "success" && (
+              {showVideo && (
                 <video src={task.outputUrl} controls className="w-full rounded-lg mt-2 border border-border" />
               )}
-              {task.error && <p className="text-red-600">{task.error}</p>}
+              {showFramesOnly && (
+                <p className="text-amber-700 font-semibold text-xs">
+                  任务标记成功但未生成 MP4（通常因 ffmpeg 缺失）。帧目录仍可下载。
+                </p>
+              )}
+              {task.error && (
+                <p className={task.status === "failed" ? "text-red-600" : "text-amber-700"}>
+                  {task.error}
+                </p>
+              )}
             </div>
           ) : (
             <p className="text-muted">提交任务后显示输出</p>

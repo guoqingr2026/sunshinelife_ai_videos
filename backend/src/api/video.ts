@@ -13,6 +13,7 @@ import {
   buildDefaultShotPlanArticle,
 } from "../services/video/shot-plan-spec";
 import { initComposeProgress } from "../services/video/compose-progress";
+import { buildComposeProjectFromShotPlan } from "../services/video/shot-plan-project";
 import { getOutputBundleZipPath } from "../lib/storage";
 import fs from "fs";
 
@@ -43,6 +44,20 @@ router.post("/shot-plan", (req, res) => {
     }
     const config = saveShotPlanArticle(article);
     res.json(config);
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+router.get("/shot-plan/project", (_req, res) => {
+  try {
+    const project = buildComposeProjectFromShotPlan();
+    if (!project) {
+      return res.status(400).json({
+        error: "尚未保存固定镜头序列。请在镜头规划中粘贴 JSON 并点「保存并生效」。",
+      });
+    }
+    res.json(project);
   } catch (err) {
     res.status(500).json({ error: String(err) });
   }

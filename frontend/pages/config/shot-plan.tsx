@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api, ShotPlanConfig, ShotPlanPreview } from "../../utils/api";
+import { setProjectHandoff } from "../../utils/project-bridge";
 
 type ManimTypeSpec = {
   id: string;
@@ -11,6 +12,7 @@ type ManimTypeSpec = {
 };
 
 export default function ShotPlanPage() {
+  const navigate = useNavigate();
   const [article, setArticle] = useState("");
   const [preview, setPreview] = useState<ShotPlanPreview | null>(null);
   const [saved, setSaved] = useState<ShotPlanConfig | null>(null);
@@ -55,9 +57,32 @@ export default function ShotPlanPage() {
       const config = await api.saveShotPlan(article);
       setSaved(config);
       setPreview({ rules: config.rules, shots: config.shots, errors: [] });
-      setMessage("已保存！一键成片将自动使用这些规则。");
+      setMessage(`已保存 ${config.shots.length} 个固定镜头。可点「发送到一键成片」导入项目 JSON。`);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSendToCompose = async () => {
+    setMessage("");
+    try {
+      const project = await api.getShotPlanProject();
+      setProjectHandoff(project.projectJson);
+      navigate("/config/auto-video");
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "导出失败：请先保存含 shots 的规划");
+    }
+  };
+
+  const handleExportJson = async () => {
+    try {
+      const project = await api.getShotPlanProject();
+      await navigator.clipboard.writeText(project.projectJson);
+      setCopied("project");
+      setTimeout(() => setCopied(""), 2000);
+      setMessage(`已复制项目 JSON（${project.shotCount} 个镜头）`);
+    } catch (e) {
+      setMessage(e instanceof Error ? e.message : "请先保存含 shots 的规划");
     }
   };
 
@@ -76,15 +101,22 @@ export default function ShotPlanPage() {
 
   return (
     <div>
-      <h1 className="page-title">镜头规划文章</h1>
+      <h1 className="page-title">镜头规划（步骤 1）</h1>
       <p className="page-desc">
-        复制下方 <strong className="text-ink">GPT 提示词</strong> 到 ChatGPT，让它按规格输出分镜 JSON；
-        贴回本页保存后，
-        <Link to="/config/auto-video" className="text-primary underline mx-1">
-          一键成片
-        </Link>
-        自动读取。
+        复制 <strong className="text-ink">GPT 分镜提示词</strong> → 生成 JSON → 贴回本页保存 →
+        <strong className="text-ink">发送到一键成片</strong>（步骤 2）。
+        也可在
+        <Link to="/config/prompts" className="text-primary underline mx-1">提示词库</Link>
+        查看全流程模板。
       </p>
+
+      <div className="panel-muted mb-6 text-xs text-muted flex flex-wrap gap-4">
+        <span><strong className="text-primary">① 镜头规划</strong> 生成分镜 JSON</span>
+        <span>→</span>
+        <span><strong className="text-ink">② 一键成片</strong> Manim + Remotion</span>
+        <span>→</span>
+        <span>③ 任务管理下载</span>
+      </div>
 
       <div className="flex flex-wrap gap-2 mb-6">
         <button onClick={() => copyText(gptPrompt, "gpt")} className="btn-primary text-sm py-2">
@@ -113,6 +145,12 @@ export default function ShotPlanPage() {
             </button>
             <button onClick={handleSave} disabled={saving} className="btn-primary">
               {saving ? "保存中…" : "保存并生效"}
+            </button>
+            <button type="button" onClick={handleExportJson} className="btn-outline">
+              {copied === "project" ? "已复制 JSON" : "导出项目 JSON"}
+            </button>
+            <button type="button" onClick={handleSendToCompose} className="btn-primary">
+              发送到一键成片 →
             </button>
           </div>
           {message && <p className="text-success text-sm font-semibold">{message}</p>}

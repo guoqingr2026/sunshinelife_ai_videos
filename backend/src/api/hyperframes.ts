@@ -1,7 +1,43 @@
 import { Router } from "express";
+import { spawn } from "child_process";
 import { db } from "../lib/db";
 
 const router = Router();
+
+async function checkFfmpeg(): Promise<boolean> {
+  return new Promise((resolve) => {
+    const proc = spawn("ffmpeg", ["-version"], { shell: true });
+    proc.on("close", (code) => resolve(code === 0));
+    proc.on("error", () => resolve(false));
+  });
+}
+
+router.get("/status", async (_req, res) => {
+  const imageApiConfigured = !!(process.env.IMAGE_API_KEY || process.env.OPENAI_API_KEY);
+  const imageModel = process.env.IMAGE_MODEL || "dall-e-3";
+  const ffmpegAvailable = await checkFfmpeg();
+
+  const hints: string[] = [];
+  if (!imageApiConfigured) {
+    hints.push(
+      "未配置 IMAGE_API_KEY 或 OPENAI_API_KEY：将生成 8×8 占位图，画面几乎看不见。请在 .env 中设置后 pm2 restart。"
+    );
+  }
+  if (!ffmpegAvailable) {
+    hints.push("未检测到 ffmpeg：帧序列可生成，但无法合成 MP4。请执行 apt install -y ffmpeg");
+  }
+  if (imageApiConfigured && ffmpegAvailable) {
+    hints.push("环境就绪。3 秒 @30fps 约需 7 次图像 API 调用，请留意费用与排队时间。");
+  }
+
+  res.json({
+    imageApiConfigured,
+    imageModel,
+    ffmpegAvailable,
+    hints,
+    ready: imageApiConfigured && ffmpegAvailable,
+  });
+});
 
 router.post("/task", async (req, res) => {
   try {
