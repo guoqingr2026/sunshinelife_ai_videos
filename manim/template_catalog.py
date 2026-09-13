@@ -90,4 +90,7 @@ TEMPLATES = {
     "manim_recall_page": "templates.reading_study_scenes.ManimRecallPage",
     "manim_phone_fade": "templates.reading_study_scenes.ManimPhoneFade",
     "manim_keybook": "templates.reading_study_scenes.ManimKeyBook",
+    # Manim 官方画廊精选
+    "manim_moving_frame_box": "templates.gallery_scenes.ManimMovingFrameBox",
+    "manim_point_with_trace": "templates.gallery_scenes.ManimPointWithTrace",
 }

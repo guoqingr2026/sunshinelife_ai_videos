@@ -9,6 +9,7 @@ META = {
     "manim_rossler": {"renderer": "opengl", "xvfb": True},
     "mathtex_formula": {"renderer": "cairo", "needs_latex": True},
     "mathtex_derivation": {"renderer": "cairo", "needs_latex": True},
+    "manim_moving_frame_box": {"renderer": "cairo", "needs_latex": True},
     "video_embed": {"renderer": "cairo"},
     "image_focus": {"renderer": "cairo"},
     "svg_icon": {"renderer": "cairo"},

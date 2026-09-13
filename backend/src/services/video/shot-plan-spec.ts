@@ -61,6 +61,8 @@ export const MANIM_TYPE_ALIASES: Record<string, string> = {
   rossler: "manim_rossler",
   parametric_surface: "manim_parametric_surface",
   parametric_curve: "manim_parametric_curve",
+  moving_frame_box: "manim_moving_frame_box",
+  point_with_trace: "manim_point_with_trace",
   formula_curve: "formula_curve",
   curve_formula: "formula_curve",
   image: "image_focus",
@@ -167,6 +169,9 @@ export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
   { id: "manim_recall_page", label: "翻页复述", category: "学习", desc: "翻页前自问学到了什么", keywords: ["复述", "翻页", "recall", "检核"] },
   { id: "manim_phone_fade", label: "手机淡出", category: "学习", desc: "减少干扰习惯养成", keywords: ["手机", "干扰", "习惯", "fade"] },
   { id: "manim_keybook", label: "考前重点本", category: "学习", desc: "厚书浓缩易忘点", keywords: ["重点本", "易忘点", "keybook", "考前"] },
+  // Manim 官方画廊精选
+  { id: "manim_moving_frame_box", label: "公式框选", category: "数学", desc: "分段 MathTex + 框选高亮切换（乘积求导等）", keywords: ["movingframebox", "框选", "mathtex", "求导", "surrounding"] },
+  { id: "manim_point_with_trace", label: "动点轨迹", category: "数学", desc: "动点留痕；demo 旋转平移或 parametric 公式曲线", keywords: ["pointwithtrace", "轨迹", "trace", "updater", "参数曲线"] },
 ];
 
 for (const spec of MANIM_TYPE_SPECS) {

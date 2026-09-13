@@ -385,7 +385,7 @@ shots[].type
 
 ### 7.5 Manim 内容动画类型（`shots[].type` 可直接使用）
 
-共 **73** 种，经 `resolveManimType()` 识别；其中 **72** 种在 `manim/template_catalog.py` 有 Python 模板，`custom_python` 另走代码粘贴（仍计入镜头规划类型表）。
+共 **75** 种，经 `resolveManimType()` 识别；其中 **74** 种在 `manim/template_catalog.py` 有 Python 模板，`custom_python` 另走代码粘贴（仍计入镜头规划类型表）。
 
 #### 7.5.1 工程 / 物理 / 电气（9）
 
@@ -511,7 +511,16 @@ shots[].type
 
 示例：`examples/projects/reading-study/project.json`；一键成片 **「读书训练」** 按钮（约 50 镜，含 `typewriter_text`、`chapter` 与数学曲线隐喻）。
 
-#### 7.5.11 高级 / 自定义（4）
+#### 7.5.11 官方画廊精选（2）
+
+| ID | 中文 | 说明 |
+|----|------|------|
+| `manim_moving_frame_box` | 公式框选 | 官方 MovingFrameBox：分段 `MathTex` + `SurroundingRectangle` 切换（**建议 texlive**） |
+| `manim_point_with_trace` | 动点轨迹 | 官方 PointWithTrace：`mode=demo` 旋转留痕；`mode=parametric` + `x(t),y(t)` 动态绘曲线 |
+
+示例见 `manim/scene_examples.json`（Manim 页画廊 →「官方画廊精选」）。
+
+#### 7.5.12 高级 / 自定义（4）
 
 | ID | 说明 |
 |----|------|
@@ -704,7 +713,7 @@ shots[].type
 
 | 问题 | 答案 |
 |------|------|
-| 能否「一键成片」直接选官方画廊里的每一个示例？ | **不能**。画廊是教学用完整 `Scene` 代码，本系统只有 **73 个注册 `type`** + 宇宙 scene，不会为每个官方示例单独注册按钮。 |
+| 能否「一键成片」直接选官方画廊里的每一个示例？ | **部分可以**。已内置 `manim_moving_frame_box`、`manim_point_with_trace` 等精选镜头；其余仍用 **75 个注册 `type`** + `custom_python` 粘贴官方代码。 |
 | 能否在本系统里**渲染出与官方一致的画面**？ | **可以**。把官方 `class Xxx(Scene)` 粘贴为 `custom_python`（或 Manim 页示例画廊 →「应用到任务」），即可走同一套 Manim 渲染链。 |
 | 与「官网案例」的定位差异 | 本系统是 **分镜流水线 + 模板库**；官方文档是 **完整 Manim API 参考**。两者互补，不是 1:1 菜单对应。 |
 
@@ -737,9 +746,9 @@ shots[].type
 | MovingAngle | 🔵 |
 | MovingDots | 🔵 |
 | MovingGroupToDestination | 🔵 |
-| MovingFrameBox | 🔵；🟡 `manim_explanation_highlight`（框选高亮） |
+| MovingFrameBox | 🟢 `manim_moving_frame_box`；🟠 texlive |
 | RotationUpdater | 🔵 |
-| PointWithTrace | 🔵；🟡 `orbit_paths`（轨迹示意，非 TracedPath 同款） |
+| PointWithTrace | 🟢 `manim_point_with_trace`（`demo` / `parametric`） |
 
 #### Plotting with Manim（5）
 
@@ -963,7 +972,7 @@ pm2 logs sunshinelife-videos-api
 | v1.0 | 2026-03 | 字幕、Manim、HyperFrames、Remotion、B 站文案、任务管理 |
 | v1.1 | 2026-09 | 镜头规划 → 一键成片衔接；提示词库；HyperFrames 环境检测；导航工作流重排；字体预设；output 工程包自动导出 |
 | v1.2 | 2026-09 | 完整罗列 Remotion 16 种 + Manim 63 种 + 数学宇宙 33 scene；流水线映射表；时长参数；谐波/Spirograph 场景 @ `c08e9b1` |
-| v1.3 | 2026-09 | 读书训练 10 种 Manim + 示例工程；本地归档 / 站点门户 / Manim 官方示例画廊；§7.9 官方 Gallery 能力对照；Manim 73 种 @ `ed9a8bf` |
+| v1.3 | 2026-09 | 读书训练 10 种 + 官方画廊精选（公式框选、动点轨迹）；本地归档 / 站点门户；§7.9 Gallery 对照；Manim 75 种 |
 
 ---
 
