@@ -35,6 +35,7 @@ class SurfaceScene(ThreeDScene):
             surface,
             str(p.get("title", "参数曲面")),
             str(p.get("subtitle", "")),
+            params=p,
         )
 
 
@@ -55,4 +56,5 @@ class SaddleSurfaceScene(ThreeDScene):
             surface,
             str(p.get("title", "鞍面")),
             str(p.get("subtitle", "")),
+            params=p,
         )

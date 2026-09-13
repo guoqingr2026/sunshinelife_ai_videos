@@ -105,6 +105,76 @@
       }
     },
     {
+      "id": "spirograph",
+      "label": "万花筒 · Spirograph",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "内旋轮线 hypotrochoid",
+      "durationSeconds": 12,
+      "params": {
+        "scene": "SpirographScene",
+        "title": "万花筒曲线",
+        "subtitle": "R=3, r=1, d=2",
+        "R": 3,
+        "r": 1,
+        "d": 2,
+        "t_max": 50,
+        "curve_run_time": 5,
+        "hold_seconds": 4
+      }
+    },
+    {
+      "id": "harmonic_2d",
+      "label": "谐波叠加 2D",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "多频李萨如叠加",
+      "durationSeconds": 12,
+      "params": {
+        "scene": "HarmonicCurveScene",
+        "title": "谐波叠加",
+        "subtitle": "sin(3t)+0.5sin(5t), cos(4t)+0.5cos(6t)",
+        "t_max": 20,
+        "curve_run_time": 5,
+        "hold_seconds": 4
+      }
+    },
+    {
+      "id": "iterated_flower",
+      "label": "迭代花朵",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "r = sin(5θ)·cos(3θ)",
+      "params": {
+        "scene": "IteratedFlowerScene",
+        "title": "迭代花朵",
+        "subtitle": "r = sin(5θ)·cos(3θ)",
+        "petals_a": 5,
+        "petals_b": 3,
+        "curve_run_time": 4,
+        "hold_seconds": 3
+      }
+    },
+    {
+      "id": "complex_curve",
+      "label": "复平面曲线",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "z = e^{it} + 0.5e^{3it}",
+      "params": {
+        "scene": "ComplexCurveScene",
+        "title": "复平面曲线",
+        "subtitle": "z = e^{it} + 0.5e^{3it}",
+        "t_max": 20,
+        "curve_run_time": 4,
+        "hold_seconds": 3
+      }
+    },
+    {
       "id": "curve_3d",
       "label": "3D 螺旋曲线",
       "category": "curve_3d",
@@ -129,6 +199,57 @@
         "scene": "Lissajous3DScene",
         "title": "3D 李萨如",
         "subtitle": "空间闭合曲线"
+      }
+    },
+    {
+      "id": "harmonic_3d",
+      "label": "3D 谐波曲线",
+      "category": "curve_3d",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "sin(3t), cos(4t), sin(2t)",
+      "durationSeconds": 14,
+      "params": {
+        "scene": "Harmonic3DScene",
+        "title": "3D 谐波曲线",
+        "subtitle": "空间谐波轨迹",
+        "t_max": 20,
+        "hold_seconds": 6,
+        "rotate_seconds": 6
+      }
+    },
+    {
+      "id": "harmonic_ribbon_3d",
+      "label": "3D 谐波光带",
+      "category": "curve_3d",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "多频叠加漂浮光带",
+      "durationSeconds": 16,
+      "params": {
+        "scene": "HarmonicRibbon3D",
+        "title": "3D 谐波光带",
+        "subtitle": "多频叠加 · 宇宙光轨",
+        "t_max": 20,
+        "hold_seconds": 8,
+        "rotate_seconds": 8
+      }
+    },
+    {
+      "id": "spiral_flower_3d",
+      "label": "3D 螺旋花",
+      "category": "curve_3d",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "立体玫瑰螺旋",
+      "durationSeconds": 14,
+      "params": {
+        "scene": "SpiralFlower3D",
+        "title": "3D 螺旋花",
+        "subtitle": "立体玫瑰轨迹",
+        "t_max": 25,
+        "hold_seconds": 6,
+        "rotate_seconds": 6
       }
     },
     {
@@ -215,6 +336,24 @@
         "subtitle": "自定义初值",
         "initial_conditions": [[0.1, 0, 0], [0.5, 0.2, 0], [1.0, -0.1, 0.5]],
         "colors": ["#ff6b6b", "#4ecdc4", "#ffe66d"]
+      }
+    },
+    {
+      "id": "color_lorenz_3d",
+      "label": "渐变洛伦兹光轨",
+      "category": "chaos",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "单轨蓝紫黄渐变混沌轨迹",
+      "durationSeconds": 16,
+      "params": {
+        "scene": "ColorLorenz3D",
+        "title": "渐变洛伦兹",
+        "subtitle": "混沌光轨",
+        "steps": 8000,
+        "hold_seconds": 8,
+        "rotate_seconds": 8,
+        "intro_run_time": 3
       }
     },
     {

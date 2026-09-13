@@ -1,3 +1,4 @@
+import cmath
 import importlib.util
 import math
 import os
@@ -49,6 +50,7 @@ class ParametricCurveScene(Scene):
             str(p.get("title", "参数曲线")),
             str(p.get("subtitle", "")),
             theme,
+            params=p,
         )
 
 
@@ -61,7 +63,7 @@ class RoseCurveScene(Scene):
             lambda t: math.sin(k * t), 0, TAU, color=theme.primary
         )
         sub = str(p.get("subtitle") or f"r = sin({k:g}θ)")
-        play_2d_curve(self, curve, str(p.get("title", "玫瑰线")), sub, theme)
+        play_2d_curve(self, curve, str(p.get("title", "玫瑰线")), sub, theme, params=p)
 
 
 class CardioidScene(Scene):
@@ -72,7 +74,7 @@ class CardioidScene(Scene):
             lambda t: 1 - math.cos(t), 0, TAU, color=theme.primary
         )
         play_2d_curve(
-            self, curve, str(p.get("title", "心形线")), str(p.get("subtitle", "")), theme
+            self, curve, str(p.get("title", "心形线")), str(p.get("subtitle", "")), theme, params=p
         )
 
 
@@ -91,6 +93,7 @@ class ArchimedeanSpiralScene(Scene):
             str(p.get("title", "阿基米德螺线")),
             str(p.get("subtitle", "")),
             theme,
+            params=p,
         )
 
 
@@ -109,7 +112,151 @@ class EpicycloidScene(Scene):
 
         curve = build_parametric(x_fn, y_fn, 0, TAU, color=theme.accent)
         play_2d_curve(
-            self, curve, str(p.get("title", "外摆线")), str(p.get("subtitle", "")), theme
+            self,
+            curve,
+            str(p.get("title", "外摆线")),
+            str(p.get("subtitle", "")),
+            theme,
+            params=p,
+        )
+
+
+class SpirographScene(Scene):
+    """内旋轮线 / 万花筒（hypotrochoid）"""
+
+    def construct(self):
+        theme = apply_scene_theme(self)
+        p = get_params(
+            {
+                "title": "万花筒曲线",
+                "subtitle": "内旋轮 · Spirograph",
+                "R": 3,
+                "r": 1,
+                "d": 2,
+                "t_max": 50,
+            }
+        )
+        R = float(p.get("R", 3))
+        r = float(p.get("r", 1))
+        d = float(p.get("d", 2))
+        t_max = float(p.get("t_max", 50))
+        ratio = (R - r) / r
+
+        def x_fn(t):
+            return (R - r) * math.cos(t) + d * math.cos(ratio * t)
+
+        def y_fn(t):
+            return (R - r) * math.sin(t) - d * math.sin(ratio * t)
+
+        curve = build_parametric(x_fn, y_fn, 0, t_max, color=theme.accent, n=600)
+        play_2d_curve(
+            self,
+            curve,
+            str(p.get("title", "万花筒曲线")),
+            str(p.get("subtitle", "")),
+            theme,
+            params=p,
+        )
+
+
+class HarmonicCurveScene(Scene):
+    """多频谐波叠加平面曲线"""
+
+    def construct(self):
+        theme = apply_scene_theme(self)
+        p = get_params(
+            {
+                "title": "谐波叠加",
+                "subtitle": "多频李萨如",
+                "t_max": 20,
+            }
+        )
+        t_max = float(p.get("t_max", 20))
+        curve = build_parametric(
+            lambda t: math.sin(3 * t) + 0.5 * math.sin(5 * t),
+            lambda t: math.cos(4 * t) + 0.5 * math.cos(6 * t),
+            0,
+            t_max,
+            color=theme.primary,
+            n=500,
+        )
+        play_2d_curve(
+            self,
+            curve,
+            str(p.get("title", "谐波叠加")),
+            str(p.get("subtitle", "")),
+            theme,
+            params=p,
+        )
+
+
+class IteratedFlowerScene(Scene):
+    """极坐标迭代花朵"""
+
+    def construct(self):
+        theme = apply_scene_theme(self)
+        p = get_params(
+            {
+                "title": "迭代花朵",
+                "subtitle": "r = sin(5θ)·cos(3θ)",
+                "petals_a": 5,
+                "petals_b": 3,
+            }
+        )
+        a = float(p.get("petals_a", 5))
+        b = float(p.get("petals_b", 3))
+        curve = build_polar_curve(
+            lambda t: math.sin(a * t) * math.cos(b * t),
+            0,
+            TAU,
+            color=theme.secondary,
+            n=500,
+        )
+        sub = str(p.get("subtitle") or f"r = sin({a:g}θ)·cos({b:g}θ)")
+        play_2d_curve(
+            self,
+            curve,
+            str(p.get("title", "迭代花朵")),
+            sub,
+            theme,
+            params=p,
+        )
+
+
+class ComplexCurveScene(Scene):
+    """复平面参数曲线"""
+
+    def construct(self):
+        theme = apply_scene_theme(self)
+        p = get_params(
+            {
+                "title": "复平面曲线",
+                "subtitle": "z = e^{it} + 0.5e^{3it}",
+                "t_max": 20,
+                "harmonic": 3,
+                "coeff": 0.5,
+            }
+        )
+        t_max = float(p.get("t_max", 20))
+        h = float(p.get("harmonic", 3))
+        coeff = float(p.get("coeff", 0.5))
+
+        def x_fn(t):
+            z = cmath.exp(1j * t) + coeff * cmath.exp(h * 1j * t)
+            return z.real
+
+        def y_fn(t):
+            z = cmath.exp(1j * t) + coeff * cmath.exp(h * 1j * t)
+            return z.imag
+
+        curve = build_parametric(x_fn, y_fn, 0, t_max, color=theme.accent, n=500)
+        play_2d_curve(
+            self,
+            curve,
+            str(p.get("title", "复平面曲线")),
+            str(p.get("subtitle", "")),
+            theme,
+            params=p,
         )
 
 
@@ -132,4 +279,5 @@ class LissajousScene(Scene):
             str(p.get("title", "李萨如图形")),
             str(p.get("subtitle", "")),
             theme,
+            params=p,
         )

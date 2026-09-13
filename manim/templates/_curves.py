@@ -95,6 +95,37 @@ def _lorenz_colors(params: dict, theme, count: int):
     return [palette[i % len(palette)] for i in range(count)]
 
 
+def build_lorenz_gradient_path(
+    steps: int = 8000,
+    dt: float = 0.01,
+    sigma: float = 10.0,
+    rho: float = 28.0,
+    beta: float = 8.0 / 3.0,
+    x0: float = 0.0,
+    y0: float = 1.0,
+    z0: float = 1.0,
+    scale: float = 0.07,
+):
+    """Single Lorenz trajectory with blue→purple→yellow gradient."""
+    from manim import BLUE, PURPLE, YELLOW
+
+    x, y, z = float(x0), float(y0), float(z0)
+    pts = []
+    for _ in range(steps):
+        dx = sigma * (y - x)
+        dy = x * (rho - z) - y
+        dz = x * y - beta * z
+        x += dx * dt
+        y += dy * dt
+        z += dz * dt
+        pts.append([x * scale, y * scale, z * scale])
+    curve = VMobject()
+    curve.set_points_as_corners(pts)
+    curve.set_color_by_gradient(BLUE, PURPLE, YELLOW)
+    curve.set_stroke(width=2)
+    return curve
+
+
 def build_lorenz_group(params: dict, theme):
     """Build 1..n Lorenz trajectories with distinct colors."""
     from manim import VGroup

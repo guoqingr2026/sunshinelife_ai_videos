@@ -91,7 +91,10 @@ interface SequenceItem {
   type: string;
   label: string;
   params?: Record<string, unknown>;
+  durationInFrames?: number;
 }
+
+const DEFAULT_MANIM_FRAMES = 150;
 
 function normalize(text: string): string {
   return text.toLowerCase().replace(/\s+/g, "");
@@ -104,12 +107,24 @@ function shotSpecToSequence(shots: ShotSpec[]): SequenceItem[] {
     if (!s) continue;
     const manim = resolveManimType(s.type);
     if (manim) {
-      items.push({ kind: "manim", type: manim, label: s.label, params: s.params });
+      items.push({
+        kind: "manim",
+        type: manim,
+        label: s.label,
+        params: s.params,
+        durationInFrames: s.durationInFrames,
+      });
       continue;
     }
     const remotion = resolveRemotionType(s.type);
     if (remotion) {
-      items.push({ kind: "remotion", type: remotion, label: s.label, params: s.params });
+      items.push({
+        kind: "remotion",
+        type: remotion,
+        label: s.label,
+        params: s.params,
+        durationInFrames: s.durationInFrames,
+      });
     }
   }
   return items;
@@ -271,7 +286,7 @@ function appendSequence(
     const idx = timeline.length;
     timeline.push({
       type: "manim_placeholder",
-      durationInFrames: 150,
+      durationInFrames: item.durationInFrames || DEFAULT_MANIM_FRAMES,
       title: item.label,
       manimType: item.type,
       _autoManim: true,

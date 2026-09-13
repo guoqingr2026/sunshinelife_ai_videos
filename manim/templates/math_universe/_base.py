@@ -9,7 +9,15 @@ from templates._text import mk_text
 from templates._theme import apply_scene_theme
 
 
-def play_2d_curve(self, curve, title: str, subtitle: str = "", theme=None):
+def play_2d_curve(
+    self,
+    curve,
+    title: str,
+    subtitle: str = "",
+    theme=None,
+    params: dict | None = None,
+):
+    p = params or {}
     if theme is None:
         theme = apply_scene_theme(self)
     else:
@@ -17,28 +25,43 @@ def play_2d_curve(self, curve, title: str, subtitle: str = "", theme=None):
     hdr = mk_title(title)
     fit_curve_group(curve)
     drop_content(curve)
-    self.play(Write(hdr), run_time=0.8)
-    self.play(Create(curve), run_time=2.2)
+    intro_rt = float(p.get("intro_run_time", 0.8))
+    curve_rt = float(p.get("curve_run_time", 2.2))
+    hold = float(p.get("hold_seconds", p.get("tail_wait", 0.8)))
+    self.play(Write(hdr), run_time=intro_rt)
+    self.play(Create(curve), run_time=curve_rt)
     if subtitle:
         cap = mk_text(subtitle, font_size=22, color=theme.muted)
         cap.to_edge(DOWN, buff=0.45)
         self.play(FadeIn(cap))
-    self.wait(0.8)
+    self.wait(hold)
 
 
-def play_3d_intro(self, mobj, title: str, subtitle: str = "", rotate: bool = True):
+def play_3d_intro(
+    self,
+    mobj,
+    title: str,
+    subtitle: str = "",
+    rotate: bool = True,
+    params: dict | None = None,
+):
+    p = params or {}
     theme = apply_scene_theme(self)
     hdr = mk_title(title)
+    intro_rt = float(p.get("intro_run_time", p.get("run_time", 2.5)))
+    rotate_secs = float(p.get("rotate_seconds", p.get("hold_seconds", 2)))
+    tail_wait = float(p.get("tail_wait", 0.5))
+    rotate_rate = float(p.get("rotate_rate", 0.12))
     self.add_fixed_in_frame_mobjects(hdr)
     self.set_camera_orientation(phi=70 * DEGREES, theta=35 * DEGREES)
-    self.play(Write(hdr), Create(mobj), run_time=2.5)
+    self.play(Write(hdr), Create(mobj), run_time=intro_rt)
     if subtitle:
         lbl = mk_text(subtitle, font_size=20, color=theme.muted)
         lbl.to_corner(DR)
         self.add_fixed_in_frame_mobjects(lbl)
         self.play(FadeIn(lbl))
     if rotate:
-        self.begin_ambient_camera_rotation(rate=0.12)
-        self.wait(2)
+        self.begin_ambient_camera_rotation(rate=rotate_rate)
+        self.wait(rotate_secs)
         self.stop_ambient_camera_rotation()
-    self.wait(0.5)
+    self.wait(tail_wait)

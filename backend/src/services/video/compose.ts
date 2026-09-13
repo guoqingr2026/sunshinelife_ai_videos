@@ -8,6 +8,20 @@ import {
 import type { ComposePayload } from "./compose-progress";
 import { createComposeOutputBundle } from "./output-bundle";
 import { injectThemeIntoManimParams } from "./manim-theme";
+import { COMPOSE_FPS } from "./shot-plan-parser";
+
+function manimClipDurationFrames(
+  slotFrames: number | undefined,
+  params: Record<string, unknown>
+): number {
+  if (typeof params.durationInFrames === "number" && params.durationInFrames > 0) {
+    return Math.round(params.durationInFrames);
+  }
+  if (typeof params.durationSeconds === "number" && params.durationSeconds > 0) {
+    return Math.round(params.durationSeconds * COMPOSE_FPS);
+  }
+  return slotFrames || 150;
+}
 
 export type { ComposePayload };
 
@@ -114,9 +128,10 @@ export async function renderCompose(
 
     const clipUrl = toRemotionMediaUrl(result.outputUrl);
     const slot = timeline![job.timelineIndex];
+    const clipFrames = manimClipDurationFrames(slot.durationInFrames, manimParams);
     timeline![job.timelineIndex] = {
       type: "manim_clip",
-      durationInFrames: slot.durationInFrames || 150,
+      durationInFrames: clipFrames,
       title: slot.title || job.label,
       sourceUrl: clipUrl,
       manimType: job.type,

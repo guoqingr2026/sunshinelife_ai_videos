@@ -1,6 +1,12 @@
 /** 与 backend shot-plan-parser normalizeShot 对齐（前端校验用） */
 
-const SHOT_RESERVED_KEYS = new Set(["type", "label", "params"]);
+const SHOT_RESERVED_KEYS = new Set([
+  "type",
+  "label",
+  "params",
+  "durationInFrames",
+  "durationSeconds",
+]);
 
 export function normalizeShotClient(raw: {
   type: string;

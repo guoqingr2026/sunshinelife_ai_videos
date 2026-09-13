@@ -42,6 +42,7 @@ class Curve3DScene(ThreeDScene):
             group,
             str(p.get("title", "3D 空间曲线")),
             str(p.get("subtitle", "")),
+            params=p,
         )
 
 
@@ -62,4 +63,93 @@ class Lissajous3DScene(ThreeDScene):
             VGroup(axes, graph),
             str(p.get("title", "3D 李萨如")),
             f"sin({a:g}t), sin({b:g}t), sin({c:g}t)",
+            params=p,
+        )
+
+
+class Harmonic3DScene(ThreeDScene):
+    """3D 空间谐波曲线"""
+
+    def construct(self):
+        p = get_params(
+            {
+                "title": "3D 谐波曲线",
+                "subtitle": "sin(3t), cos(4t), sin(2t)",
+                "t_max": 20,
+            }
+        )
+        t_max = float(p.get("t_max", 20))
+        axes = ThreeDAxes()
+
+        def curve(t):
+            return np.array([np.sin(3 * t), np.cos(4 * t), np.sin(2 * t)])
+
+        graph = ParametricFunction(curve, t_range=[0, t_max], color=RED)
+        play_3d_intro(
+            self,
+            VGroup(axes, graph),
+            str(p.get("title", "3D 谐波曲线")),
+            str(p.get("subtitle", "")),
+            params=p,
+        )
+
+
+class HarmonicRibbon3D(ThreeDScene):
+    """多频叠加 3D 光带"""
+
+    def construct(self):
+        p = get_params(
+            {
+                "title": "3D 谐波光带",
+                "subtitle": "多频叠加 · 漂浮轨迹",
+                "t_max": 20,
+            }
+        )
+        t_max = float(p.get("t_max", 20))
+        axes = ThreeDAxes()
+
+        def curve(t):
+            return np.array(
+                [
+                    np.sin(2 * t) + 0.3 * np.sin(5 * t),
+                    np.cos(3 * t) + 0.3 * np.cos(7 * t),
+                    0.6 * np.sin(4 * t),
+                ]
+            )
+
+        graph = ParametricFunction(curve, t_range=[0, t_max], color=YELLOW)
+        play_3d_intro(
+            self,
+            VGroup(axes, graph),
+            str(p.get("title", "3D 谐波光带")),
+            str(p.get("subtitle", "")),
+            params=p,
+        )
+
+
+class SpiralFlower3D(ThreeDScene):
+    """3D 螺旋花朵"""
+
+    def construct(self):
+        p = get_params(
+            {
+                "title": "3D 螺旋花",
+                "subtitle": "立体玫瑰轨迹",
+                "t_max": 25,
+            }
+        )
+        t_max = float(p.get("t_max", 25))
+        axes = ThreeDAxes()
+
+        def curve(t):
+            r = 0.2 * t
+            return np.array([r * np.cos(t), r * np.sin(t), 0.3 * np.sin(3 * t)])
+
+        graph = ParametricFunction(curve, t_range=[0, t_max], color=PURPLE)
+        play_3d_intro(
+            self,
+            VGroup(axes, graph),
+            str(p.get("title", "3D 螺旋花")),
+            str(p.get("subtitle", "")),
+            params=p,
         )

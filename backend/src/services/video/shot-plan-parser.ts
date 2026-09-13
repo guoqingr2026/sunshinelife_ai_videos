@@ -9,6 +9,8 @@ export interface ShotSpec {
   type: string;
   label: string;
   params?: Record<string, unknown>;
+  /** 成片时间轴占用帧数（30fps）；也可用 durationSeconds */
+  durationInFrames?: number;
 }
 
 export interface ProjectThemeMeta {
@@ -30,7 +32,25 @@ export interface ParsedShotPlan {
   errors: string[];
 }
 
-const SHOT_RESERVED_KEYS = new Set(["type", "label", "params"]);
+const SHOT_RESERVED_KEYS = new Set([
+  "type",
+  "label",
+  "params",
+  "durationInFrames",
+  "durationSeconds",
+]);
+
+export const COMPOSE_FPS = 30;
+
+export function shotDurationInFrames(raw: Record<string, unknown>): number | undefined {
+  if (typeof raw.durationInFrames === "number" && raw.durationInFrames > 0) {
+    return Math.round(raw.durationInFrames);
+  }
+  if (typeof raw.durationSeconds === "number" && raw.durationSeconds > 0) {
+    return Math.round(raw.durationSeconds * COMPOSE_FPS);
+  }
+  return undefined;
+}
 
 /** 将 GPT 常写在镜头根级的字段合并进 params，并生成可读 label */
 export function normalizeShot(raw: unknown): ShotSpec | null {
@@ -59,10 +79,13 @@ export function normalizeShot(raw: unknown): ShotSpec | null {
     }
   }
 
+  const durationInFrames = shotDurationInFrames(s);
+
   return {
     type,
     label,
     params: Object.keys(params).length > 0 ? params : undefined,
+    durationInFrames,
   };
 }
 
