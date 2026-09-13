@@ -32,6 +32,23 @@ def build_parametric(x_fn, y_fn, t_min: float, t_max: float, n: int = 400, color
     return curve
 
 
+def lorenz_initial_conditions(
+    n: int = 1,
+    perturbation: float = 0.35,
+    custom: list | None = None,
+):
+    """Return up to n (x0, y0, z0) tuples for Lorenz integration."""
+    n = max(1, min(int(n), 16))
+    if custom:
+        out = []
+        for item in custom[:n]:
+            if isinstance(item, (list, tuple)) and len(item) >= 3:
+                out.append((float(item[0]), float(item[1]), float(item[2])))
+        if out:
+            return out
+    return [(0.1 + i * perturbation, 0.0, 0.0) for i in range(n)]
+
+
 def build_lorenz_path(
     steps: int = 4000,
     dt: float = 0.008,
@@ -39,8 +56,11 @@ def build_lorenz_path(
     rho: float = 28.0,
     beta: float = 8.0 / 3.0,
     scale: float = 0.07,
+    x0: float = 0.1,
+    y0: float = 0.0,
+    z0: float = 0.0,
 ):
-    x, y, z = 0.1, 0.0, 0.0
+    x, y, z = float(x0), float(y0), float(z0)
     pts = []
     for _ in range(steps):
         dx = sigma * (y - x)
@@ -54,6 +74,46 @@ def build_lorenz_path(
     curve.set_points_smoothly(pts)
     curve.set_stroke(width=2)
     return curve
+
+
+def _lorenz_trajectory_count(params: dict) -> int:
+    raw = params.get("n", params.get("trajectory_count", 1))
+    try:
+        return max(1, min(int(raw), 16))
+    except (TypeError, ValueError):
+        return 1
+
+
+def _lorenz_colors(params: dict, theme, count: int):
+    from templates._theme import hex_to_color
+
+    raw = params.get("colors")
+    if isinstance(raw, list) and raw:
+        palette = [hex_to_color(str(c), theme.primary) for c in raw]
+        return [palette[i % len(palette)] for i in range(count)]
+    palette = [theme.primary, theme.secondary, theme.accent, theme.muted]
+    return [palette[i % len(palette)] for i in range(count)]
+
+
+def build_lorenz_group(params: dict, theme):
+    """Build 1..n Lorenz trajectories with distinct colors."""
+    from manim import VGroup
+
+    count = _lorenz_trajectory_count(params)
+    custom = params.get("initial_conditions")
+    if not isinstance(custom, list):
+        custom = None
+    perturbation = float(params.get("perturbation", 0.35))
+    inits = lorenz_initial_conditions(count, perturbation=perturbation, custom=custom)
+    colors = _lorenz_colors(params, theme, count)
+    steps = int(params.get("steps", 4000))
+    dt = float(params.get("dt", 0.008))
+    group = VGroup()
+    for i, (x0, y0, z0) in enumerate(inits):
+        path = build_lorenz_path(steps=steps, dt=dt, x0=x0, y0=y0, z0=z0)
+        path.set_color(colors[i])
+        group.add(path)
+    return group
 
 
 def mandelbrot_rgba(

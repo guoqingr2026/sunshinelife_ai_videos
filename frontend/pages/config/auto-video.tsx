@@ -12,6 +12,7 @@ import {
   MATH_EXPONENTIAL_PROJECT_LITE_JSON,
 } from "../../utils/example-math-project";
 import { MONTY_HALL_PROJECT_JSON } from "../../utils/example-monty-hall-project";
+import { MATH_UNIVERSE_PROJECT_JSON } from "../../utils/example-math-universe-project";
 import { MANIM_TEMPLATES } from "../../utils/manim-catalog";
 import FontPresetSelect from "../../components/FontPresetSelect";
 import ThemeSchemeSelect from "../../components/ThemeSchemeSelect";
@@ -383,6 +384,18 @@ export default function AutoVideoPage() {
                   className="pill-tab text-xs py-1"
                 >
                   蒙提霍尔
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetLocalTask();
+                    setProjectJson(MATH_UNIVERSE_PROJECT_JSON);
+                    setPreviewPlan(null);
+                    setPlanError("");
+                  }}
+                  className="pill-tab text-xs py-1"
+                >
+                  数学宇宙
                 </button>
               </div>
             </div>

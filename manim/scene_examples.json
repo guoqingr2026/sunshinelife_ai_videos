@@ -1,0 +1,392 @@
+{
+  "categories": [
+    { "id": "curve_2d", "label": "2D 曲线" },
+    { "id": "curve_3d", "label": "3D 曲线 / 曲面" },
+    { "id": "chaos", "label": "混沌吸引子" },
+    { "id": "fractal", "label": "分形" },
+    { "id": "dynamics", "label": "动力学" },
+    { "id": "registered", "label": "已注册模板（直接 type）" },
+    { "id": "text", "label": "口播 / 文本" }
+  ],
+  "examples": [
+    {
+      "id": "cardioid",
+      "label": "心形线",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "极坐标 r = 1 − cos θ",
+      "params": {
+        "scene": "CardioidScene",
+        "title": "心形线",
+        "subtitle": "r = 1 - cos θ"
+      }
+    },
+    {
+      "id": "rose_5",
+      "label": "玫瑰线 k=5",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "五瓣玫瑰 r = sin(5θ)",
+      "params": {
+        "scene": "RoseCurveScene",
+        "title": "玫瑰线",
+        "k": 5,
+        "subtitle": "r = sin(5θ)"
+      }
+    },
+    {
+      "id": "rose_3",
+      "label": "玫瑰线 k=3",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "三瓣玫瑰",
+      "params": {
+        "scene": "RoseCurveScene",
+        "title": "玫瑰线",
+        "k": 3,
+        "subtitle": "r = sin(3θ)"
+      }
+    },
+    {
+      "id": "archimedean",
+      "label": "阿基米德螺线",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "r = a + bθ",
+      "params": {
+        "scene": "ArchimedeanSpiralScene",
+        "title": "阿基米德螺线",
+        "subtitle": "r = a + bθ"
+      }
+    },
+    {
+      "id": "epicycloid",
+      "label": "摆线族",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "外摆线 / 内摆线",
+      "params": {
+        "scene": "EpicycloidScene",
+        "title": "摆线",
+        "subtitle": "圆在圆上滚动"
+      }
+    },
+    {
+      "id": "lissajous_2d",
+      "label": "李萨如 2D",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "x=sin(3θ), y=sin(4θ)",
+      "params": {
+        "scene": "LissajousScene",
+        "title": "李萨如图形",
+        "a": 3,
+        "b": 4,
+        "subtitle": "x=sin(3θ), y=sin(4θ)"
+      }
+    },
+    {
+      "id": "parametric_2d",
+      "label": "通用参数曲线",
+      "category": "curve_2d",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "内外摆线组合",
+      "params": {
+        "scene": "ParametricCurveScene",
+        "title": "参数曲线",
+        "subtitle": "cos(t)+0.5cos(2t), sin(t)+0.5sin(2t)"
+      }
+    },
+    {
+      "id": "curve_3d",
+      "label": "3D 螺旋曲线",
+      "category": "curve_3d",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "空间螺旋上升",
+      "params": {
+        "scene": "Curve3DScene",
+        "title": "3D 空间曲线",
+        "subtitle": "螺旋上升轨迹",
+        "t_max": 20
+      }
+    },
+    {
+      "id": "lissajous_3d",
+      "label": "3D 李萨如",
+      "category": "curve_3d",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "三维李萨如曲线",
+      "params": {
+        "scene": "Lissajous3DScene",
+        "title": "3D 李萨如",
+        "subtitle": "空间闭合曲线"
+      }
+    },
+    {
+      "id": "surface",
+      "label": "参数曲面",
+      "category": "curve_3d",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "z = sin(u)cos(v)",
+      "params": {
+        "scene": "SurfaceScene",
+        "title": "参数曲面",
+        "subtitle": "z = sin(u)cos(v)"
+      }
+    },
+    {
+      "id": "saddle",
+      "label": "马鞍面",
+      "category": "curve_3d",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "z = u² − v²",
+      "params": {
+        "scene": "SaddleSurfaceScene",
+        "title": "马鞍面",
+        "subtitle": "z = u² - v²"
+      }
+    },
+    {
+      "id": "lorenz_1",
+      "label": "洛伦兹·单轨迹",
+      "category": "chaos",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "经典蝴蝶吸引子",
+      "params": {
+        "scene": "LorenzScene",
+        "title": "洛伦兹吸引子",
+        "subtitle": "混沌中的蝴蝶",
+        "n": 1
+      }
+    },
+    {
+      "id": "lorenz_3",
+      "label": "洛伦兹·3 条彩色",
+      "category": "chaos",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "不同初值，三条轨迹",
+      "params": {
+        "scene": "LorenzScene",
+        "title": "洛伦兹吸引子",
+        "subtitle": "混沌中的蝴蝶",
+        "n": 3,
+        "colors": ["#e85d75", "#4a90d9", "#50c878"]
+      }
+    },
+    {
+      "id": "lorenz_5",
+      "label": "洛伦兹·5 条彩色",
+      "category": "chaos",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "扰动初值，五色轨迹",
+      "params": {
+        "scene": "LorenzScene",
+        "title": "洛伦兹吸引子",
+        "subtitle": "初值敏感 · 蝴蝶效应",
+        "n": 5,
+        "colors": ["#e85d75", "#4a90d9", "#50c878", "#f5a623", "#9b59b6"],
+        "perturbation": 0.3
+      }
+    },
+    {
+      "id": "lorenz_custom_ic",
+      "label": "洛伦兹·自定义初值",
+      "category": "chaos",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "initial_conditions 指定起点",
+      "params": {
+        "scene": "LorenzScene",
+        "title": "洛伦兹吸引子",
+        "subtitle": "自定义初值",
+        "initial_conditions": [[0.1, 0, 0], [0.5, 0.2, 0], [1.0, -0.1, 0.5]],
+        "colors": ["#ff6b6b", "#4ecdc4", "#ffe66d"]
+      }
+    },
+    {
+      "id": "rossler",
+      "label": "Rössler 吸引子",
+      "category": "chaos",
+      "type": "manim_custom",
+      "needsOpengl": true,
+      "desc": "另一种混沌系统",
+      "params": {
+        "scene": "RosslerScene",
+        "title": "Rössler 吸引子",
+        "subtitle": "混沌振子"
+      }
+    },
+    {
+      "id": "mandelbrot",
+      "label": "曼德布罗集",
+      "category": "fractal",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "经典分形全集",
+      "params": {
+        "scene": "MandelbrotScene",
+        "title": "曼德布罗集",
+        "subtitle": "z_{n+1} = z_n² + c"
+      }
+    },
+    {
+      "id": "julia_default",
+      "label": "朱利亚集",
+      "category": "fractal",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "c = −0.7 + 0.27i",
+      "params": {
+        "scene": "JuliaScene",
+        "title": "朱利亚集",
+        "subtitle": "c = -0.7 + 0.27i",
+        "c_real": -0.7,
+        "c_imag": 0.27015
+      }
+    },
+    {
+      "id": "julia_seahorse",
+      "label": "朱利亚·海马",
+      "category": "fractal",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "c = −0.4 + 0.6i",
+      "params": {
+        "scene": "JuliaScene",
+        "title": "朱利亚集",
+        "subtitle": "c = -0.4 + 0.6i",
+        "c_real": -0.4,
+        "c_imag": 0.6
+      }
+    },
+    {
+      "id": "koch",
+      "label": "Koch 雪花",
+      "category": "fractal",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "递归深度 4",
+      "params": {
+        "scene": "KochSnowflakeScene",
+        "title": "Koch 雪花",
+        "depth": 4
+      }
+    },
+    {
+      "id": "three_body",
+      "label": "三体问题",
+      "category": "dynamics",
+      "type": "manim_custom",
+      "needsOpengl": false,
+      "desc": "三质点引力轨道",
+      "params": {
+        "scene": "ThreeBodyScene",
+        "title": "三体问题",
+        "steps": 800
+      }
+    },
+    {
+      "id": "reg_lorenz",
+      "label": "洛伦兹（注册模板）",
+      "category": "registered",
+      "type": "manim_lorenz_attractor",
+      "needsOpengl": true,
+      "desc": "type=manim_lorenz_attractor，支持 n/colors",
+      "params": {
+        "title": "洛伦兹吸引子",
+        "subtitle": "混沌中的蝴蝶",
+        "n": 3,
+        "colors": ["#e85d75", "#4a90d9", "#50c878"]
+      }
+    },
+    {
+      "id": "reg_julia",
+      "label": "朱利亚（注册模板）",
+      "category": "registered",
+      "type": "manim_julia_set",
+      "needsOpengl": false,
+      "desc": "type=manim_julia_set",
+      "params": {
+        "title": "朱利亚集",
+        "c_real": -0.7,
+        "c_imag": 0.27015
+      }
+    },
+    {
+      "id": "reg_koch",
+      "label": "Koch（注册模板）",
+      "category": "registered",
+      "type": "manim_koch_snowflake",
+      "needsOpengl": false,
+      "desc": "type=manim_koch_snowflake",
+      "params": {
+        "title": "Koch 雪花",
+        "depth": 4
+      }
+    },
+    {
+      "id": "reg_rose",
+      "label": "玫瑰线（注册模板）",
+      "category": "registered",
+      "type": "manim_rose_curve",
+      "needsOpengl": false,
+      "desc": "type=manim_rose_curve",
+      "params": {
+        "title": "玫瑰线",
+        "k": 5,
+        "subtitle": "r = sin(5θ)"
+      }
+    },
+    {
+      "id": "reg_3d_curve",
+      "label": "3D 曲线（注册模板）",
+      "category": "registered",
+      "type": "manim_curve_3d",
+      "needsOpengl": true,
+      "desc": "type=manim_curve_3d",
+      "params": {
+        "title": "3D 空间曲线",
+        "t_max": 20
+      }
+    },
+    {
+      "id": "typewriter",
+      "label": "口播打字机",
+      "category": "text",
+      "type": "typewriter_text",
+      "needsOpengl": false,
+      "desc": "逐字显示口播文案",
+      "params": {
+        "text": "在这里填入口播文案，支持 highlight 关键词。",
+        "highlights": ["highlight"]
+      }
+    },
+    {
+      "id": "formula",
+      "label": "公式推导",
+      "category": "text",
+      "type": "manim_formula",
+      "needsOpengl": false,
+      "desc": "分步公式展示",
+      "params": {
+        "title": "欧拉公式",
+        "formula": "e^{i\\pi} + 1 = 0",
+        "steps": ["e^{i\\pi} = -1", "e^{i\\pi} + 1 = 0"]
+      }
+    }
+  ]
+}

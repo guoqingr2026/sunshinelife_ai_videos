@@ -154,6 +154,21 @@ export interface ManimStatus {
   }>;
 }
 
+export interface ManimSceneExample {
+  id: string;
+  label: string;
+  category: string;
+  type: string;
+  needsOpengl?: boolean;
+  desc?: string;
+  params: Record<string, unknown>;
+}
+
+export interface ManimExamplesResponse {
+  categories: Array<{ id: string; label: string }>;
+  examples: ManimSceneExample[];
+}
+
 export const api = {
   createSubtitle: (data: { rawText?: string; content?: string; type?: string }) =>
     request<Subtitle>("/api/subtitle", {
@@ -166,6 +181,8 @@ export const api = {
   getSubtitle: (id: string) => request<Subtitle>(`/api/subtitle/${id}`),
 
   getManimStatus: () => request<ManimStatus>("/api/manim/status"),
+
+  getManimExamples: () => request<ManimExamplesResponse>("/api/manim/examples"),
 
   createManimTask: (data: {
     type: string;

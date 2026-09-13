@@ -14,7 +14,7 @@ from templates._no_tex import apply_no_tex
 apply_no_tex()
 
 from templates._curves import (
-    build_lorenz_path,
+    build_lorenz_group,
     build_parametric,
     build_polar_curve,
     fit_curve_group,
@@ -169,8 +169,7 @@ class ManimLorenzAttractor(ThreeDScene):
         title = mk_title(str(p.get("title", "洛伦兹吸引子")))
         self.add_fixed_in_frame_mobjects(title)
 
-        path = build_lorenz_path()
-        path.set_color(theme.primary)
+        paths = build_lorenz_group(p, theme)
         axes = ThreeDAxes(
             x_range=[-4, 4, 2],
             y_range=[-4, 4, 2],
@@ -181,7 +180,7 @@ class ManimLorenzAttractor(ThreeDScene):
         )
         self.set_camera_orientation(phi=70 * DEGREES, theta=35 * DEGREES)
         self.play(Write(title), Create(axes), run_time=1)
-        self.play(Create(path), run_time=3)
+        self.play(Create(paths), run_time=3)
         sub = str(p.get("subtitle", ""))
         if sub:
             lbl = mk_text(sub, font_size=20, color=theme.muted)

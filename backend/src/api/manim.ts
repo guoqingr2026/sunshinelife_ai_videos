@@ -23,6 +23,27 @@ router.get("/catalog", (_req, res) => {
   }
 });
 
+function loadSceneExamples(manimRoot: string) {
+  const examplesPath = path.join(manimRoot, "scene_examples.json");
+  if (!fs.existsSync(examplesPath)) {
+    return { categories: [], examples: [] };
+  }
+  const data = JSON.parse(fs.readFileSync(examplesPath, "utf-8"));
+  return {
+    categories: Array.isArray(data.categories) ? data.categories : [],
+    examples: Array.isArray(data.examples) ? data.examples : [],
+  };
+}
+
+router.get("/examples", (_req, res) => {
+  try {
+    const manimRoot = path.resolve(__dirname, "../../../manim");
+    res.json(loadSceneExamples(manimRoot));
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
 router.get("/universe-scenes", (_req, res) => {
   try {
     const manimRoot = path.resolve(__dirname, "../../../manim");
@@ -34,18 +55,22 @@ router.get("/universe-scenes", (_req, res) => {
     const aliases = [
       ...raw.matchAll(/^\s*"([a-z_][a-z0-9_]*)":\s*"([A-Za-z][A-Za-z0-9_]*)"/gm),
     ].map((m) => ({ alias: m[1], scene: m[2] }));
+    const { categories, examples } = loadSceneExamples(manimRoot);
+    const exampleShots = examples.map((ex: { type: string; label: string; params: Record<string, unknown> }) => ({
+      type: ex.type,
+      label: ex.label,
+      params: ex.params,
+    }));
     res.json({
       scenes,
       aliases,
+      categories,
+      examples,
       usage: {
         type: "manim_custom",
-        params: { scene: "CardioidScene", title: "心形线" },
+        params: { scene: "CardioidScene", title: "心形线", subtitle: "r = 1 - cos θ" },
       },
-      exampleShots: [
-        { type: "manim_custom", label: "心形线", params: { scene: "CardioidScene", title: "心形线" } },
-        { type: "manim_custom", label: "洛伦兹", params: { scene: "LorenzScene" } },
-        { type: "manim_julia_set", label: "朱利亚集", params: { title: "朱利亚集" } },
-      ],
+      exampleShots,
     });
   } catch (err) {
     res.status(500).json({ error: String(err) });

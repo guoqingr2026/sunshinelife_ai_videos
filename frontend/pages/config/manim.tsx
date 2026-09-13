@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { api, ManimStatus, Task } from "../../utils/api";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { api, ManimSceneExample, ManimStatus, Task } from "../../utils/api";
 import {
   MANIM_CATEGORIES,
   MANIM_DOMAINS,
@@ -10,6 +10,7 @@ import {
   type ManimDomain,
 } from "../../utils/manim-catalog";
 import FontPresetSelect from "../../components/FontPresetSelect";
+import ManimExampleGallery from "../../components/ManimExampleGallery";
 import { DEFAULT_FONT_PRESET, getFontPreset } from "../../utils/typography-presets";
 
 type LayerFilter = "all" | 1 | 2 | 3;
@@ -25,14 +26,28 @@ export default function ManimConfig() {
   const [loading, setLoading] = useState(false);
   const [videoError, setVideoError] = useState(false);
   const [fontPresetId, setFontPresetId] = useState(DEFAULT_FONT_PRESET.id);
+  const [sceneExamples, setSceneExamples] = useState<ManimSceneExample[]>([]);
+  const [exampleCategories, setExampleCategories] = useState<Array<{ id: string; label: string }>>([]);
+  const skipTypeReset = useRef(false);
 
   const selected = getManimTemplate(type);
 
   useEffect(() => {
     api.getManimStatus().then(setStatus).catch(() => {});
+    api
+      .getManimExamples()
+      .then((data) => {
+        setSceneExamples(data.examples);
+        setExampleCategories(data.categories);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
+    if (skipTypeReset.current) {
+      skipTypeReset.current = false;
+      return;
+    }
     setParamsJson(JSON.stringify(getExampleParams(type), null, 2));
   }, [type]);
 
@@ -89,6 +104,15 @@ export default function ManimConfig() {
   };
 
   const fillExample = () => setParamsJson(JSON.stringify(getExampleParams(type), null, 2));
+
+  const applySceneExample = (example: ManimSceneExample) => {
+    const json = JSON.stringify(example.params, null, 2);
+    if (example.type !== type) {
+      skipTypeReset.current = true;
+      setType(example.type);
+    }
+    setParamsJson(json);
+  };
 
   const copyClipUrl = () => task?.outputUrl && navigator.clipboard.writeText(task.outputUrl);
   const copyClipJson = () => task?.clipJson && navigator.clipboard.writeText(JSON.stringify(task.clipJson, null, 2));
@@ -181,6 +205,15 @@ export default function ManimConfig() {
               ))}
             </select>
           </div>
+
+          {sceneExamples.length > 0 && (
+            <ManimExampleGallery
+              examples={sceneExamples}
+              categories={exampleCategories}
+              currentType={type}
+              onSelect={applySceneExample}
+            />
+          )}
 
           {selected && (
             <div className="panel text-sm space-y-3">
