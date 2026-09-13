@@ -7,7 +7,7 @@ BASE_PATH="/sunshinelife_ai_videos"
 
 cd "$APP_DIR"
 if git symbolic-ref -q HEAD >/dev/null 2>&1; then
-  git pull --ff-only
+  git -c http.version=HTTP/1.1 pull --ff-only origin main
 else
   git fetch --tags
   echo "detached HEAD，未执行 pull。可执行: git checkout main && git pull"
