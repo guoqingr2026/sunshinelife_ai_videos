@@ -7,6 +7,12 @@ import { getManimOutputPath } from "../lib/storage";
 
 const router = Router();
 
+type SceneExample = {
+  type: string;
+  label: string;
+  params: Record<string, unknown>;
+};
+
 router.get("/catalog", (_req, res) => {
   try {
     const manimRoot = path.resolve(__dirname, "../../../manim");
@@ -27,7 +33,7 @@ function loadSceneExamples(manimRoot: string) {
   const examplesPath = path.join(manimRoot, "scene_examples.json");
   const officialPath = path.join(manimRoot, "official_custom_examples.json");
   const categories: Array<{ id: string; label: string }> = [];
-  const examples: unknown[] = [];
+  const examples: SceneExample[] = [];
   const seenCat = new Set<string>();
 
   const mergeFile = (filePath: string) => {
@@ -42,7 +48,7 @@ function loadSceneExamples(manimRoot: string) {
       }
     }
     if (Array.isArray(data.examples)) {
-      examples.push(...data.examples);
+      examples.push(...(data.examples as SceneExample[]));
     }
   };
 
@@ -73,7 +79,7 @@ router.get("/universe-scenes", (_req, res) => {
       ...raw.matchAll(/^\s*"([a-z_][a-z0-9_]*)":\s*"([A-Za-z][A-Za-z0-9_]*)"/gm),
     ].map((m) => ({ alias: m[1], scene: m[2] }));
     const { categories, examples } = loadSceneExamples(manimRoot);
-    const exampleShots = examples.map((ex: { type: string; label: string; params: Record<string, unknown> }) => ({
+    const exampleShots = examples.map((ex) => ({
       type: ex.type,
       label: ex.label,
       params: ex.params,
