@@ -125,6 +125,45 @@
       }
     },
     {
+      "id": "formula_curve_harmonic",
+      "label": "公式曲线 · 谐波叠加",
+      "category": "curve_2d",
+      "type": "formula_curve",
+      "needsOpengl": false,
+      "desc": "输入 x(t),y(t) 公式自动生成",
+      "durationSeconds": 12,
+      "params": {
+        "title": "谐波叠加",
+        "mode": "parametric_2d",
+        "x": "sin(3*t) + 0.5*sin(5*t)",
+        "y": "cos(4*t) + 0.5*cos(6*t)",
+        "t_min": 0,
+        "t_max": 20,
+        "curve_run_time": 5,
+        "hold_seconds": 4
+      }
+    },
+    {
+      "id": "formula_curve_3d",
+      "label": "公式曲线 · 3D 光带",
+      "category": "curve_3d",
+      "type": "formula_curve",
+      "needsOpengl": true,
+      "desc": "x,y,z 公式驱动 3D 曲线",
+      "durationSeconds": 16,
+      "params": {
+        "title": "3D 谐波光带",
+        "mode": "parametric_3d",
+        "x": "sin(2*t) + 0.3*sin(5*t)",
+        "y": "cos(3*t) + 0.3*cos(7*t)",
+        "z": "0.6*sin(4*t)",
+        "t_min": 0,
+        "t_max": 20,
+        "hold_seconds": 8,
+        "rotate_seconds": 8
+      }
+    },
+    {
       "id": "harmonic_2d",
       "label": "谐波叠加 2D",
       "category": "curve_2d",

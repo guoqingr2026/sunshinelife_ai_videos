@@ -12,6 +12,7 @@ META = {
     "video_embed": {"renderer": "cairo"},
     "image_focus": {"renderer": "cairo"},
     "svg_icon": {"renderer": "cairo"},
+    "custom_python": {"renderer": "cairo", "xvfb": False},
 }
 
 

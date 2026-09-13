@@ -11,6 +11,7 @@ import {
 } from "../../utils/manim-catalog";
 import FontPresetSelect from "../../components/FontPresetSelect";
 import ManimExampleGallery from "../../components/ManimExampleGallery";
+import FormulaCurveBuilder, { type FormulaCurveParams } from "../../components/FormulaCurveBuilder";
 import { DEFAULT_FONT_PRESET, getFontPreset } from "../../utils/typography-presets";
 
 type LayerFilter = "all" | 1 | 2 | 3;
@@ -104,6 +105,14 @@ export default function ManimConfig() {
   };
 
   const fillExample = () => setParamsJson(JSON.stringify(getExampleParams(type), null, 2));
+
+  const applyFormulaCurve = (params: FormulaCurveParams) => {
+    if (type !== "formula_curve") {
+      skipTypeReset.current = true;
+      setType("formula_curve");
+    }
+    setParamsJson(JSON.stringify(params, null, 2));
+  };
 
   const applySceneExample = (example: ManimSceneExample) => {
     const json = JSON.stringify(example.params, null, 2);
@@ -206,6 +215,8 @@ export default function ManimConfig() {
             </select>
           </div>
 
+          <FormulaCurveBuilder onApply={applyFormulaCurve} />
+
           {sceneExamples.length > 0 && (
             <ManimExampleGallery
               examples={sceneExamples}
@@ -275,7 +286,15 @@ export default function ManimConfig() {
             />
             {type === "custom_python" && (
               <p className="text-xs text-yellow-500/90 mt-1">
-                粘贴 Manim 官方 Scene 代码。MathTex 需 ECS 安装 texlive；3D 需 install-opengl-deps.sh。
+                粘贴 Scene 类即可（可含 <code>from manim import *</code>，系统会自动去重）。
+                <strong>ThreeDScene</strong> 会自动启用 OpenGL + xvfb；请设置{" "}
+                <code>class_name</code> 与类名一致（如 HarmonicRibbon3D）。
+                MathTex 需 texlive；3D 需 install-opengl-deps.sh。
+              </p>
+            )}
+            {type === "formula_curve" && (
+              <p className="text-xs text-gray-500 mt-1">
+                使用上方「自动曲线生成器」填公式，或手写 mode / x / y / z / r。3D 模式需 OpenGL。
               </p>
             )}
             {(type === "scene_3d_surface" || type === "scene_3d_orbit") && (

@@ -12,6 +12,7 @@ from template_meta import get_template_meta
 CUSTOM_PYTHON_BOOTSTRAP = """
 import importlib.util
 import os
+import numpy as np
 _spec = importlib.util.spec_from_file_location(
     'templates._path',
     os.path.join(os.path.dirname(__file__), '..', 'templates', '_path.py'),
@@ -19,6 +20,7 @@ _spec = importlib.util.spec_from_file_location(
 _path_mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_path_mod)
 from manim import *
+from manim.utils.rate_functions import linear
 from templates._no_tex import apply_no_tex
 apply_no_tex()
 from templates._text import mk_text
@@ -28,21 +30,66 @@ from templates._theme import apply_scene_theme, theme_colors
 from templates._axes import make_axes, make_number_plane, make_bar_chart
 """
 
+_OPENGL_SCENE_BASES = frozenset({"ThreeDScene", "OpenGLScene", "ThreeD"})
+
+
+def _strip_redundant_user_imports(code: str) -> str:
+    lines = []
+    for line in code.splitlines():
+        s = line.strip()
+        if s in ("from manim import *", "import numpy as np", "import numpy"):
+            continue
+        if s.startswith("from manim import ") or s.startswith("from manim."):
+            continue
+        lines.append(line)
+    return "\n".join(lines).strip()
+
+
+def analyze_custom_python(code: str, params: dict) -> tuple[str, bool]:
+    """Return (class_name, needs_opengl)."""
+    raw = str(code or "")
+    class_name = str(params.get("class_name") or "").strip()
+    base_class = ""
+
+    if class_name:
+        m = re.search(
+            rf"class\s+{re.escape(class_name)}\s*\(\s*(\w+)\s*\)",
+            raw,
+        )
+        if m:
+            base_class = m.group(1)
+    else:
+        m = re.search(r"class\s+(\w+)\s*\(\s*(\w+)\s*\)", raw)
+        if m:
+            class_name = m.group(1)
+            base_class = m.group(2)
+        else:
+            class_name = "CustomScene"
+
+    renderer_hint = str(params.get("renderer") or "").strip().lower()
+    if renderer_hint == "opengl":
+        needs_opengl = True
+    elif renderer_hint == "cairo":
+        needs_opengl = False
+    else:
+        needs_opengl = base_class in _OPENGL_SCENE_BASES or bool(
+            re.search(r"\bThreeDScene\b|\bOpenGLScene\b", raw)
+        )
+    return class_name, needs_opengl
+
 
 def prepare_custom_python(params, task_id, root):
     code = params.get("code", "")
     if not str(code).strip():
         raise ValueError("custom_python requires params.code")
-    class_name = params.get("class_name") or ""
-    if not class_name:
-        m = re.search(r"class\s+(\w+)\s*\(\s*Scene", code)
-        class_name = m.group(1) if m else "CustomScene"
+    class_name, needs_opengl = analyze_custom_python(str(code), params if isinstance(params, dict) else {})
+    body = _strip_redundant_user_imports(str(code))
     custom_dir = os.path.join(root, "custom_scenes")
     os.makedirs(custom_dir, exist_ok=True)
     script_path = os.path.join(custom_dir, f"{task_id}.py")
     with open(script_path, "w", encoding="utf-8") as f:
-        f.write(CUSTOM_PYTHON_BOOTSTRAP.strip() + "\n\n" + code)
-    return f"custom_scenes/{task_id}.py", class_name
+        f.write(CUSTOM_PYTHON_BOOTSTRAP.strip() + "\n\n" + body + "\n")
+    return f"custom_scenes/{task_id}.py", class_name, needs_opengl
 
 
 def find_manim_cmd():
@@ -102,10 +149,22 @@ def main():
 
     if task_type == "custom_python":
         try:
-            script_file, class_name = prepare_custom_python(params, task_id, root)
+            script_file, class_name, custom_opengl = prepare_custom_python(
+                params, task_id, root
+            )
+            custom_renderer = "opengl" if custom_opengl else "cairo"
+            custom_xvfb = custom_opengl
         except ValueError as e:
             sys.stderr.write(str(e) + "\n")
             sys.exit(1)
+    elif task_type == "formula_curve":
+        mode = str(params.get("mode", "parametric_2d"))
+        script_file = "templates/formula_curve.py"
+        class_name = (
+            "FormulaCurve3DScene" if mode == "parametric_3d" else "FormulaCurveScene"
+        )
+        custom_renderer = "opengl" if mode == "parametric_3d" else "cairo"
+        custom_xvfb = mode == "parametric_3d"
     elif task_type == "manim_custom":
         from templates.math_universe.registry import resolve_universe_scene, scene_needs_opengl
         from templates._params import get_params
@@ -125,12 +184,15 @@ def main():
             )
             sys.exit(1)
         script_file, class_name = resolved
-        custom_renderer = "opengl" if scene_needs_opengl(scene_name) else "cairo"
+        if class_name == "FormulaCurveScene" and str(merged.get("mode")) == "parametric_3d":
+            script_file = "templates/formula_curve.py"
+            class_name = "FormulaCurve3DScene"
+        custom_renderer = "opengl" if scene_needs_opengl(scene_name) or class_name == "FormulaCurve3DScene" else "cairo"
         custom_xvfb = custom_renderer == "opengl"
     elif task_type not in TEMPLATES:
         sys.stderr.write(f"Unknown manim template: {task_type}\n")
         sys.stderr.write(
-            f"Valid types: {', '.join(sorted(TEMPLATES.keys()))}, custom_python, manim_custom\n"
+            f"Valid types: {', '.join(sorted(TEMPLATES.keys()))}, custom_python, formula_curve, manim_custom\n"
         )
         sys.exit(1)
     else:

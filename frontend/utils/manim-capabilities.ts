@@ -87,6 +87,7 @@ export const TEMPLATE_DOMAIN: Record<string, ManimDomain> = {
   manim_julia_set: "learning",
   manim_koch_snowflake: "learning",
   manim_three_body: "learning",
+  formula_curve: "media",
   vocab_card: "english",
   grammar_highlight: "english",
   dialogue_scene: "english",
@@ -807,6 +808,35 @@ export const MANIM_CAPABILITIES: ManimCapability[] = [
     paramHelp: { title: "标题", steps: "模拟步数" },
   },
   {
+    id: "formula_curve",
+    label: "公式曲线生成器",
+    desc: "输入 x(t),y(t) 或 r(t) 公式自动生成曲线动画",
+    category: "math",
+    layer: 2,
+    primitives: ["ParametricFunction", "build_parametric", "eval_curve_expr"],
+    defaultParams: {
+      title: "谐波叠加",
+      mode: "parametric_2d",
+      x: "sin(3*t) + 0.5*sin(5*t)",
+      y: "cos(4*t) + 0.5*cos(6*t)",
+      t_min: 0,
+      t_max: 20,
+      curve_run_time: 5,
+      hold_seconds: 3,
+    },
+    paramHelp: {
+      mode: "parametric_2d | polar_2d | parametric_3d",
+      x: "x(t) 表达式",
+      y: "y(t) 表达式",
+      z: "z(t) 表达式（3D）",
+      r: "r(t) 极坐标表达式",
+      t_min: "参数下限",
+      t_max: "参数上限",
+      hold_seconds: "结尾停留秒数",
+      rotate_seconds: "3D 旋转秒数",
+    },
+  },
+  {
     id: "custom_dsl",
     label: "JSON 场景 DSL",
     desc: "用 JSON 描述对象与动画序列（第三层）",
@@ -841,12 +871,25 @@ export const MANIM_CAPABILITIES: ManimCapability[] = [
     primitives: ["Scene", "construct", "任意 Manim API"],
     officialExample: { title: "Official examples", url: DOC },
     defaultParams: {
-      class_name: "CustomScene",
-      code: "class CustomScene(Scene):\n    def construct(self):\n        c = Circle()\n        self.play(Create(c))\n        self.wait(1)\n",
+      class_name: "HarmonicRibbon3D",
+      code:
+        "class HarmonicRibbon3D(ThreeDScene):\n" +
+        "    def construct(self):\n" +
+        "        axes = ThreeDAxes()\n" +
+        "        self.add(axes)\n" +
+        "        self.set_camera_orientation(phi=65*DEGREES, theta=45*DEGREES)\n" +
+        "        def curve(t):\n" +
+        "            x = np.sin(2*t) + 0.3*np.sin(5*t)\n" +
+        "            y = np.cos(3*t) + 0.3*np.cos(7*t)\n" +
+        "            z = 0.6*np.sin(4*t)\n" +
+        "            return np.array([x, y, z])\n" +
+        "        graph = ParametricFunction(curve, t_range=[0, 20], color=YELLOW)\n" +
+        "        self.play(Create(graph, rate_func=linear), run_time=6)\n",
     },
     paramHelp: {
-      class_name: "Scene 类名",
-      code: "完整 Python 代码，必须含 class X(Scene) 与 construct",
+      class_name: "Scene 类名（ThreeDScene 时必填且与 class 一致）",
+      code: "Scene 类定义；可省略 from manim import * / import numpy",
+      renderer: "可选 opengl | cairo；ThreeDScene 通常自动 opengl",
     },
   },
 ];
