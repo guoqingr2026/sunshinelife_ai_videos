@@ -112,6 +112,10 @@ export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
   // 高级
   { id: "custom_dsl", label: "JSON场景", category: "高级", desc: "JSON DSL 自定义", keywords: ["dsl", "json", "自定义场景"] },
   { id: "custom_python", label: "自定义Python", category: "高级", desc: "粘贴 Manim Scene 代码", keywords: ["python", "自定义代码", "scene", "manim代码"] },
+  // 蒙提霍尔 / 概率科普（ECS 自定义镜头）
+  { id: "manim_probability_tree", label: "概率树状图", category: "数学", desc: "分支路径与概率标注", keywords: ["概率树", "蒙提霍尔", "贝叶斯", "分支", "probability_tree"] },
+  { id: "manim_formula", label: "公式推导卡", category: "数学", desc: "主公式 + 分步说明", keywords: ["贝叶斯", "公式推导", "manim_formula", "概率公式"] },
+  { id: "manim_simulation_chart", label: "模拟实验图", category: "数学", desc: "蒙特卡洛收敛曲线", keywords: ["模拟", "蒙特卡洛", "收敛", "simulation_chart"] },
 ];
 
 for (const spec of MANIM_TYPE_SPECS) {
@@ -135,6 +139,7 @@ export function resolveRemotionType(type: string): string | null {
   const remotionTypes = new Set([
     "title", "chapter", "params", "bullet_list", "subtitle", "fade_text",
     "compare", "arrow", "quote", "stat", "flow_steps", "timeline_bar", "formula_card",
+    "remotion_doors", "remotion_open_door", "remotion_car_reveal",
   ]);
   if (remotionTypes.has(t)) return t;
   return REMOTION_TYPE_ALIASES[t] || null;

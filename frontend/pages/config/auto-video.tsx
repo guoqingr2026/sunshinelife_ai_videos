@@ -7,6 +7,7 @@ import {
   MATH_EXPONENTIAL_PROJECT_JSON,
   MATH_EXPONENTIAL_PROJECT_LITE_JSON,
 } from "../../utils/example-math-project";
+import { MONTY_HALL_PROJECT_JSON } from "../../utils/example-monty-hall-project";
 import { MANIM_TEMPLATES } from "../../utils/manim-catalog";
 import FontPresetSelect from "../../components/FontPresetSelect";
 import { COLOR_SCHEMES } from "../../utils/remotion-presets";
@@ -15,6 +16,7 @@ import { DEFAULT_FONT_PRESET, applyFontPresetToTheme } from "../../utils/typogra
 const REMOTION_SHOT_TYPES = new Set([
   "title", "chapter", "bullet_list", "fade_text", "subtitle", "quote",
   "flow_steps", "timeline_bar", "formula_card", "compare", "arrow", "stat", "params",
+  "remotion_doors", "remotion_open_door", "remotion_car_reveal",
 ]);
 const MANIM_IDS = new Set(MANIM_TEMPLATES.map((t) => t.id));
 
@@ -318,6 +320,18 @@ export default function AutoVideoPage() {
                   className="pill-tab text-xs py-1"
                 >
                   数学题·完整版
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetLocalTask();
+                    setProjectJson(MONTY_HALL_PROJECT_JSON);
+                    setPreviewPlan(null);
+                    setPlanError("");
+                  }}
+                  className="pill-tab text-xs py-1"
+                >
+                  蒙提霍尔
                 </button>
               </div>
             </div>

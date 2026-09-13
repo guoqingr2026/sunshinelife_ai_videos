@@ -221,6 +221,27 @@ function remotionItemFromSequence(item: SequenceItem): TimelineItem {
       return { type: "quote", durationInFrames: 100, quote: item.label, author: "" };
     case "fade_text":
       return { type: "fade_text", durationInFrames: 90, text: item.label };
+    case "remotion_doors":
+      return {
+        type: "remotion_doors",
+        durationInFrames: 150,
+        title: (item.params?.title as string) || item.label,
+        params: item.params,
+      };
+    case "remotion_open_door":
+      return {
+        type: "remotion_open_door",
+        durationInFrames: 150,
+        title: item.label,
+        params: item.params,
+      };
+    case "remotion_car_reveal":
+      return {
+        type: "remotion_car_reveal",
+        durationInFrames: 150,
+        title: item.label,
+        params: item.params,
+      };
     default:
       return { type: "chapter", durationInFrames: 90, title: item.label };
   }

@@ -55,4 +55,8 @@ TEMPLATES = {
     "dialogue_scene": "templates.dialogue_scene.DialogueScene",
     # Layer 3 — custom
     "custom_dsl": "templates.custom_dsl.CustomDSLScene",
+    # Monty Hall / 概率科普
+    "manim_probability_tree": "templates.manim_probability_tree.ManimProbabilityTree",
+    "manim_formula": "templates.manim_formula.ManimFormula",
+    "manim_simulation_chart": "templates.manim_simulation_chart.ManimSimulationChart",
 }

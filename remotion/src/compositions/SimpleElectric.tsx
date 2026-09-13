@@ -14,6 +14,9 @@ import { StatHighlight } from "./StatHighlight";
 import { FlowSteps } from "./FlowSteps";
 import { TimelineBar } from "./TimelineBar";
 import { FormulaCard } from "./FormulaCard";
+import { RemotionDoors } from "./RemotionDoors";
+import { RemotionOpenDoor } from "./RemotionOpenDoor";
+import { RemotionCarReveal } from "./RemotionCarReveal";
 import { ThemeFontProvider, resolveRemotionFontFamily } from "../theme-font";
 
 export interface TimelineItem {
@@ -210,6 +213,44 @@ export const SimpleElectric: React.FC<SimpleElectricProps> = ({
                 formula={item.formula}
                 caption={item.caption || item.title}
                 primaryColor={primaryColor}
+                backgroundColor={backgroundColor}
+              />
+            );
+            break;
+          case "remotion_doors":
+            content = (
+              <RemotionDoors
+                title={(item.params?.title as string) || item.title}
+                subtitle={item.params?.subtitle as string}
+                doors={item.params?.doors as string[]}
+                primaryColor={primaryColor}
+                secondaryColor={secondaryColor}
+                backgroundColor={backgroundColor}
+              />
+            );
+            break;
+          case "remotion_open_door":
+            content = (
+              <RemotionOpenDoor
+                selectedDoor={item.params?.selectedDoor as string}
+                openedDoor={item.params?.openedDoor as string}
+                reveal={item.params?.reveal as string}
+                text={item.params?.text as string}
+                doors={item.params?.doors as string[]}
+                primaryColor={primaryColor}
+                secondaryColor={secondaryColor}
+                backgroundColor={backgroundColor}
+              />
+            );
+            break;
+          case "remotion_car_reveal":
+            content = (
+              <RemotionCarReveal
+                door={item.params?.door as string}
+                effect={item.params?.effect as string}
+                text={item.params?.text as string}
+                primaryColor={primaryColor}
+                accentColor={theme.accentColor || "#ffd166"}
                 backgroundColor={backgroundColor}
               />
             );

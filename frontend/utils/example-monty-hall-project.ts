@@ -1,0 +1,79 @@
+/** 蒙提霍尔悖论 — 自定义 ECS 镜头示例（remotion_doors / manim_probability_tree 等） */
+
+export const MONTY_HALL_PROJECT = {
+  title: "蒙提霍尔悖论 · Monty Hall Problem",
+  shots: [
+    {
+      type: "remotion_doors",
+      label: "三扇门场景",
+      params: {
+        title: "蒙提霍尔悖论 · Monty Hall Problem",
+        doors: ["1号门", "2号门", "3号门"],
+        subtitle: "全球最火的数学题之一",
+      },
+    },
+    { type: "chapter", label: "01 游戏规则" },
+    {
+      type: "remotion_open_door",
+      label: "主持人开门",
+      params: {
+        selectedDoor: "1号门",
+        openedDoor: "3号门",
+        reveal: "goat",
+        text: "主持人打开 3 号门，露出一只山羊",
+      },
+    },
+    { type: "chapter", label: "02 换还是不换？" },
+    {
+      type: "manim_probability_tree",
+      label: "概率树状图",
+      params: {
+        title: "概率树",
+        branches: [
+          { path: "选中汽车 → 不换赢", prob: "1/3" },
+          { path: "选中山羊 → 换门赢", prob: "2/3" },
+        ],
+        highlight: "2/3 换门胜率",
+      },
+    },
+    { type: "chapter", label: "03 为什么换门是 2/3？" },
+    {
+      type: "manim_formula",
+      label: "贝叶斯推导",
+      params: {
+        title: "贝叶斯推导",
+        formula: "P(赢车|换门) = 2/3",
+        steps: [
+          "第一次选中汽车概率 = 1/3",
+          "第一次选中山羊概率 = 2/3",
+          "主持人行为提供额外信息",
+          "换门等于抓住 2/3 的概率空间",
+        ],
+      },
+    },
+    { type: "chapter", label: "04 模拟实验" },
+    {
+      type: "manim_simulation_chart",
+      label: "模拟实验图表",
+      params: {
+        title: "蒙特卡洛模拟",
+        trials: 10000,
+        chartType: "line",
+        targetValue: 0.666,
+        description: "模拟 10000 次，换门胜率收敛到 66.6%",
+      },
+    },
+    { type: "chapter", label: "05 最终揭示" },
+    {
+      type: "remotion_car_reveal",
+      label: "汽车揭示",
+      params: {
+        door: "2号门",
+        effect: "burst_light",
+        text: "换门 → 赢得汽车！",
+      },
+    },
+  ],
+};
+
+export const MONTY_HALL_PROJECT_JSON = JSON.stringify(MONTY_HALL_PROJECT, null, 2);
