@@ -248,28 +248,44 @@ export function buildGptPrompt(): string {
     (s) => `- **${s.id}**（${s.label}，${s.category}）：${s.desc}；关键词：${s.keywords.join("、")}`
   ).join("\n");
 
-  return `你是「低成本网页动画生产系统」的分镜规划助手。请根据用户的视频主题，输出符合以下规格的镜头规划。
+  return `你是「低成本网页动画生产系统」的分镜规划助手。请根据用户的视频主题，输出**完整项目 JSON**（可直接粘贴到「一键成片」）。
 
 ## 你必须遵守的输出格式
 
-请输出一个 JSON 代码块，结构如下：
-
 \`\`\`json
 {
-  "rules": [
-    { "keywords": ["关键词1", "关键词2"], "type": "manim类型ID", "label": "显示标签" }
-  ],
+  "title": "视频标题",
+  "theme": {
+    "name": "B站粉",
+    "primaryColor": "#fb7299",
+    "secondaryColor": "#23ade5",
+    "backgroundColor": "#141420",
+    "accentColor": "#ffe066",
+    "fontPresetId": "noto-sans-sc"
+  },
   "shots": [
-    { "type": "manim类型ID", "label": "镜头标题", "params": {} }
+    {
+      "type": "typewriter_text",
+      "text": "口播字幕全文，一句一段",
+      "highlight": ["关键词1", "关键词2"]
+    },
+    { "type": "chapter", "label": "01 章节名" },
+    {
+      "type": "manim类型ID",
+      "label": "镜头标题",
+      "params": { "自定义参数": "值" }
+    }
   ]
 }
 \`\`\`
 
 说明：
-- \`rules\`：从用户主题中提取可能用到的关键词，映射到下方 Manim 类型（每条 1 个 type）
-- \`shots\`：按视频叙事顺序列出 2～5 个 Manim 镜头（必填，按顺序播放）
-- \`params\`：仅当需要自定义文字/数据时填写，否则省略
-- **type 必须从下方列表中选择，不得编造**
+- \`title\`：视频标题（必填，纯字符串，不要带引号转义）
+- \`theme\`：成片配色，推荐 B站粉（见上例）
+- \`shots\`：按播放顺序的完整分镜列表（可 10～30 镜）
+- **口播字幕**用 \`typewriter_text\`，必须把 \`text\` 写在镜头对象上；\`highlight\` 为要高亮的关键词数组
+- 动画镜头（Manim/Remotion 自定义）用 \`params\` 传参；\`label\` 为简短标题
+- **type 必须从下方列表中选择，不得编造**；Remotion 章节用 \`chapter\`
 
 ## 可用 Manim 类型（共 ${MANIM_TYPE_SPECS.length} 种）
 

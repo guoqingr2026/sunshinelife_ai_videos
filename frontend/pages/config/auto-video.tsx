@@ -20,6 +20,7 @@ import {
   THEME_JSON_EXAMPLE,
 } from "../../utils/project-theme";
 import { DEFAULT_FONT_PRESET } from "../../utils/typography-presets";
+import { normalizeShotClient, validateProjectShots } from "../../utils/normalize-project-shots";
 
 const REMOTION_SHOT_TYPES = new Set([
   "title", "chapter", "bullet_list", "fade_text", "subtitle", "quote",
@@ -117,6 +118,20 @@ export default function AutoVideoPage() {
   const project = useMemo(() => parseProjectJson(projectJson), [projectJson]);
   const jsonValid = project !== null && (project.shots?.length ?? 0) > 0;
   const shotStats = useMemo(() => analyzeShots(project?.shots), [project?.shots]);
+  const shotWarnings = useMemo(
+    () => (project?.shots ? validateProjectShots(project.shots) : []),
+    [project?.shots]
+  );
+
+  const normalizedProject = useMemo(() => {
+    if (!project?.shots?.length) return project;
+    return {
+      ...project,
+      shots: project.shots
+        .map((s) => normalizeShotClient(s as Parameters<typeof normalizeShotClient>[0]))
+        .filter(Boolean) as typeof project.shots,
+    };
+  }, [project]);
 
   const isActive = task && task.status !== "success" && task.status !== "failed";
 
@@ -205,7 +220,7 @@ export default function AutoVideoPage() {
       const plan = await api.planVideo({
         brief: "",
         title: project.title,
-        project,
+        project: normalizedProject || project,
       });
       setPreviewPlan(plan);
     } catch (e) {
@@ -224,10 +239,11 @@ export default function AutoVideoPage() {
     setTask(null);
     try {
       const theme = buildComposeTheme(colorSchemeIndex, fontPresetId);
+      const composeProject = { ...(normalizedProject || project), theme };
       const { taskId } = await api.createComposeTask({
         brief: "",
         title: project.title,
-        project: { ...project, theme },
+        project: composeProject,
         preview,
         renderFinal,
         theme,
@@ -393,6 +409,16 @@ export default function AutoVideoPage() {
                   <p className="text-amber-700 font-semibold">
                     含 {shotStats.manim} 个 Manim，全片约 20–40 分钟；建议先用「快速版」或取消「自动合成成片」。
                   </p>
+                )}
+                {shotWarnings.length > 0 && (
+                  <ul className="text-amber-700 font-semibold space-y-0.5">
+                    {shotWarnings.slice(0, 5).map((w, i) => (
+                      <li key={i}>{w}</li>
+                    ))}
+                    {shotWarnings.length > 5 && (
+                      <li>…另有 {shotWarnings.length - 5} 个镜头缺 text</li>
+                    )}
+                  </ul>
                 )}
                 {shotStats.unknown.length > 0 && (
                   <p className="text-red-400">

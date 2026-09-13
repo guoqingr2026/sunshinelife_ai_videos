@@ -1,4 +1,10 @@
-import { ManimRule, parseShotLine, parseShotPlanArticle, ShotSpec } from "./shot-plan-parser";
+import {
+  ManimRule,
+  normalizeShot,
+  parseShotLine,
+  parseShotPlanArticle,
+  ShotSpec,
+} from "./shot-plan-parser";
 import { getActiveManimRules, getFixedShots } from "./shot-plan-store";
 import { resolveManimType, resolveRemotionType } from "./shot-plan-spec";
 
@@ -91,7 +97,9 @@ function normalize(text: string): string {
 
 function shotSpecToSequence(shots: ShotSpec[]): SequenceItem[] {
   const items: SequenceItem[] = [];
-  for (const s of shots) {
+  for (const raw of shots) {
+    const s = normalizeShot(raw);
+    if (!s) continue;
     const manim = resolveManimType(s.type);
     if (manim) {
       items.push({ kind: "manim", type: manim, label: s.label, params: s.params });

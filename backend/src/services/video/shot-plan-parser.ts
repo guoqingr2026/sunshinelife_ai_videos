@@ -11,10 +11,77 @@ export interface ShotSpec {
   params?: Record<string, unknown>;
 }
 
+export interface ProjectThemeMeta {
+  name?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  backgroundColor?: string;
+  accentColor?: string;
+  fontPresetId?: string;
+  fontFamily?: string;
+  manimCjkFont?: string;
+}
+
 export interface ParsedShotPlan {
+  title?: string;
+  theme?: ProjectThemeMeta;
   rules: ManimRule[];
   shots: ShotSpec[];
   errors: string[];
+}
+
+const SHOT_RESERVED_KEYS = new Set(["type", "label", "params"]);
+
+/** 将 GPT 常写在镜头根级的字段合并进 params，并生成可读 label */
+export function normalizeShot(raw: unknown): ShotSpec | null {
+  if (!raw || typeof raw !== "object") return null;
+  const s = raw as Record<string, unknown>;
+  const type = String(s.type || "").trim();
+  if (!type) return null;
+
+  const params: Record<string, unknown> =
+    typeof s.params === "object" && s.params && !Array.isArray(s.params)
+      ? { ...(s.params as Record<string, unknown>) }
+      : {};
+
+  for (const [key, value] of Object.entries(s)) {
+    if (SHOT_RESERVED_KEYS.has(key) || value === undefined || value === null) continue;
+    if (!(key in params)) params[key] = value;
+  }
+
+  let label = String(s.label || "").trim();
+  const text = String(params.text || "").trim();
+  if (!label || label === type) {
+    if (text) {
+      label = text.length > 28 ? `${text.slice(0, 28)}…` : text;
+    } else {
+      label = type;
+    }
+  }
+
+  return {
+    type,
+    label,
+    params: Object.keys(params).length > 0 ? params : undefined,
+  };
+}
+
+/** 导出时把常用字段还原到镜头根级（便于 GPT 再编辑） */
+export function expandShotForExport(shot: ShotSpec): Record<string, unknown> {
+  const out: Record<string, unknown> = { type: shot.type, label: shot.label };
+  const params = shot.params ? { ...shot.params } : {};
+
+  if (shot.type === "typewriter_text") {
+    if (params.text !== undefined) out.text = params.text;
+    if (params.highlight !== undefined) out.highlight = params.highlight;
+    if (params.subtitle !== undefined) out.subtitle = params.subtitle;
+    delete params.text;
+    delete params.highlight;
+    delete params.subtitle;
+  }
+
+  if (Object.keys(params).length > 0) out.params = params;
+  return out;
 }
 
 function normalizeRule(raw: unknown): ManimRule | null {
@@ -37,36 +104,34 @@ function normalizeRule(raw: unknown): ManimRule | null {
   };
 }
 
-function normalizeShot(raw: unknown): ShotSpec | null {
-  if (!raw || typeof raw !== "object") return null;
-  const s = raw as Record<string, unknown>;
-  const type = String(s.type || "").trim();
-  const label = String(s.label || type).trim();
-  if (!type) return null;
-  return {
-    type,
-    label,
-    params: typeof s.params === "object" && s.params ? (s.params as Record<string, unknown>) : undefined,
-  };
+function normalizeTheme(raw: unknown): ProjectThemeMeta | undefined {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const t = raw as Record<string, unknown>;
+  const theme: ProjectThemeMeta = {};
+  if (typeof t.name === "string") theme.name = t.name;
+  if (typeof t.primaryColor === "string") theme.primaryColor = t.primaryColor;
+  if (typeof t.secondaryColor === "string") theme.secondaryColor = t.secondaryColor;
+  if (typeof t.backgroundColor === "string") theme.backgroundColor = t.backgroundColor;
+  if (typeof t.accentColor === "string") theme.accentColor = t.accentColor;
+  if (typeof t.fontPresetId === "string") theme.fontPresetId = t.fontPresetId;
+  if (typeof t.fontFamily === "string") theme.fontFamily = t.fontFamily;
+  if (typeof t.manimCjkFont === "string") theme.manimCjkFont = t.manimCjkFont;
+  return Object.keys(theme).length > 0 ? theme : undefined;
 }
 
 /** 从文本中提取 JSON 字符串（兼容 GPT 多种粘贴格式） */
-function extractJsonString(article: string): string | null {
+export function extractJsonString(article: string): string | null {
   const trimmed = article.trim();
   if (!trimmed) return null;
 
-  // ```json ... ``` 或 ``` ... ```
   const fenceMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
   if (fenceMatch?.[1]?.trim()) return fenceMatch[1].trim();
 
-  // 单独一行 json 后接对象（GPT 常见）
   const jsonLabelMatch = trimmed.match(/^json\s*[\r\n]+([\s\S]+)$/i);
   if (jsonLabelMatch?.[1]?.trim()) return jsonLabelMatch[1].trim();
 
-  // 全文以 { 开头
   if (trimmed.startsWith("{")) return trimmed;
 
-  // 文中嵌入的第一个完整 JSON 对象
   const start = trimmed.indexOf("{");
   if (start >= 0) {
     const block = extractBalancedBraces(trimmed, start);
@@ -105,12 +170,14 @@ function extractBalancedBraces(text: string, start: number): string | null {
   return null;
 }
 
-function parseJsonPayload(jsonStr: string): ParsedShotPlan {
+export function parseJsonPayload(jsonStr: string): ParsedShotPlan {
   try {
     const data = JSON.parse(jsonStr);
     if (!data || typeof data !== "object") {
       return { rules: [], shots: [], errors: ["JSON 根节点必须是对象"] };
     }
+    const title = typeof data.title === "string" ? data.title.trim() : undefined;
+    const theme = normalizeTheme(data.theme);
     const rules: ManimRule[] = Array.isArray(data.rules)
       ? (data.rules.map(normalizeRule).filter(Boolean) as ManimRule[])
       : [];
@@ -119,12 +186,14 @@ function parseJsonPayload(jsonStr: string): ParsedShotPlan {
       : [];
     if (rules.length === 0 && shots.length === 0) {
       return {
+        title,
+        theme,
         rules,
         shots,
         errors: ["JSON 已识别，但 rules / shots 为空或格式不对"],
       };
     }
-    return { rules, shots, errors: [] };
+    return { title, theme, rules, shots, errors: [] };
   } catch (e) {
     return { rules: [], shots: [], errors: [`JSON 语法错误: ${e}`] };
   }
@@ -237,7 +306,7 @@ export function parseShotPlanArticle(article: string): ParsedShotPlan {
 
   if (rules.length === 0 && shots.length === 0) {
     errors.push(
-      "未解析到规则或镜头。支持：① ```json``` 代码块 ② 纯 JSON 对象 ③ 行格式「关键词 → type | 标签」"
+      "未解析到规则或镜头。支持：① 完整项目 JSON（含 title/theme/shots）② ```json``` ③ 行格式「关键词 → type | 标签」"
     );
   }
 

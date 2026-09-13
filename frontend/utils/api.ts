@@ -39,12 +39,16 @@ export interface ShotPlanShot {
 
 export interface ShotPlanConfig {
   article: string;
+  title?: string;
+  theme?: ThemeConfig;
   rules: ShotPlanRule[];
   shots: ShotPlanShot[];
   updatedAt: string;
 }
 
 export interface ShotPlanPreview {
+  title?: string;
+  theme?: ThemeConfig;
   rules: ShotPlanRule[];
   shots: ShotPlanShot[];
   errors: string[];

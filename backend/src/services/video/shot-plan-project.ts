@@ -1,23 +1,36 @@
 import { getShotPlanConfig } from "./shot-plan-store";
-import { ShotSpec } from "./shot-plan-parser";
+import {
+  expandShotForExport,
+  extractJsonString,
+  parseJsonPayload,
+  ShotSpec,
+} from "./shot-plan-parser";
 
 export interface ComposeProjectExport {
   title: string;
-  shots: ShotSpec[];
+  theme?: Record<string, unknown>;
+  shots: Record<string, unknown>[];
   projectJson: string;
   shotCount: number;
   updatedAt?: string;
 }
 
-function extractTitleFromArticle(article: string): string {
+function titleFromArticle(article: string, storedTitle?: string): string {
+  if (storedTitle?.trim()) return storedTitle.trim();
+  const jsonStr = extractJsonString(article);
+  if (jsonStr) {
+    try {
+      const parsed = parseJsonPayload(jsonStr);
+      if (parsed.title) return parsed.title;
+    } catch {
+      /* fall through */
+    }
+  }
   const lines = article.split(/\n/).map((l) => l.trim()).filter(Boolean);
   for (const line of lines) {
     if (line.startsWith("#")) {
       const t = line.replace(/^#+\s*/, "").trim();
       if (t && t.length <= 60) return t;
-    }
-    if (line.length >= 4 && line.length <= 40 && !line.startsWith("{") && !line.includes("→")) {
-      return line.replace(/^[#\-\d.\s]+/, "");
     }
   }
   return "科普视频";
@@ -27,11 +40,15 @@ export function buildComposeProjectFromShotPlan(): ComposeProjectExport | null {
   const config = getShotPlanConfig();
   if (!config.shots?.length) return null;
 
-  const title = extractTitleFromArticle(config.article);
-  const project = { title, shots: config.shots };
+  const title = titleFromArticle(config.article, config.title);
+  const shots = config.shots.map((s) => expandShotForExport(s));
+  const project: Record<string, unknown> = { title, shots };
+  if (config.theme) project.theme = config.theme;
+
   return {
     title,
-    shots: config.shots,
+    theme: config.theme as Record<string, unknown> | undefined,
+    shots,
     projectJson: JSON.stringify(project, null, 2),
     shotCount: config.shots.length,
     updatedAt: config.updatedAt,

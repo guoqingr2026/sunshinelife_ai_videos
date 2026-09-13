@@ -3,10 +3,17 @@ import path from "path";
 import { getStorageRoot } from "../../lib/storage";
 import { DEFAULT_MANIM_RULES } from "./plan-timeline-defaults";
 import { buildDefaultShotPlanArticle } from "./shot-plan-spec";
-import { ManimRule, ShotSpec, parseShotPlanArticle } from "./shot-plan-parser";
+import {
+  ManimRule,
+  ProjectThemeMeta,
+  ShotSpec,
+  parseShotPlanArticle,
+} from "./shot-plan-parser";
 
 export interface ShotPlanConfig {
   article: string;
+  title?: string;
+  theme?: ProjectThemeMeta;
   rules: ManimRule[];
   shots: ShotSpec[];
   updatedAt: string;
@@ -29,7 +36,7 @@ function readConfigFile(): ShotPlanConfig | null {
 
 export function getShotPlanConfig(): ShotPlanConfig {
   const stored = readConfigFile();
-  if (stored?.rules?.length) return stored;
+  if (stored && (stored.shots?.length || stored.rules?.length)) return stored;
 
   const parsed = parseShotPlanArticle(DEFAULT_SHOT_PLAN_ARTICLE);
   return {
@@ -51,6 +58,8 @@ export function saveShotPlanArticle(article: string): ShotPlanConfig {
 
   const config: ShotPlanConfig = {
     article,
+    title: parsed.title,
+    theme: parsed.theme,
     rules,
     shots: parsed.shots,
     updatedAt: new Date().toISOString(),

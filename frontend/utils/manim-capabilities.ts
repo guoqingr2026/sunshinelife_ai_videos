@@ -307,8 +307,12 @@ export const MANIM_CAPABILITIES: ManimCapability[] = [
     category: "text",
     layer: 1,
     primitives: ["AddTextLetterByLetter", "Write"],
-    defaultParams: { text: "Active Recall", subtitle: "Learning" },
-    paramHelp: { text: "正文", subtitle: "副标题" },
+    defaultParams: { text: "Active Recall", subtitle: "Learning", highlight: ["关键词"] },
+    paramHelp: {
+      text: "正文（可写在镜头根级 text 字段）",
+      subtitle: "副标题",
+      highlight: "高亮关键词字符串数组",
+    },
   },
   {
     id: "keyword_pop",

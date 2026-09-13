@@ -56,7 +56,13 @@ export default function ShotPlanPage() {
     try {
       const config = await api.saveShotPlan(article);
       setSaved(config);
-      setPreview({ rules: config.rules, shots: config.shots, errors: [] });
+      setPreview({
+        rules: config.rules,
+        shots: config.shots,
+        title: config.title,
+        theme: config.theme,
+        errors: [],
+      });
       setMessage(`已保存 ${config.shots.length} 个固定镜头。可点「发送到一键成片」导入项目 JSON。`);
     } finally {
       setSaving(false);
@@ -228,6 +234,14 @@ pn结, pn → pn_junction | PN 结
           {preview && (
             <div className="panel">
               <h3 className="font-bold mb-2 text-sm text-ink">解析结果</h3>
+              {preview.title && (
+                <p className="text-xs text-ink mb-1">
+                  标题: <strong>{preview.title}</strong>
+                  {preview.theme?.name && (
+                    <span className="text-muted ml-2">主题: {preview.theme.name}</span>
+                  )}
+                </p>
+              )}
               {preview.errors.length > 0 && (
                 <ul className="text-amber-700 text-xs mb-2 font-semibold">
                   {preview.errors.map((e, i) => (
@@ -239,8 +253,20 @@ pn结, pn → pn_junction | PN 结
                 规则 {preview.rules.length} 条 · 固定镜头 {preview.shots.length} 个
                 {preview.shots.length > 0 && "（按顺序使用，忽略关键词匹配）"}
               </p>
+              <p className="text-xs text-muted mb-2">
+                typewriter_text 应含 text / highlight；导出时会保留完整内容。
+              </p>
               <pre className="text-xs text-ink code-block max-h-48 whitespace-pre-wrap">
-                {JSON.stringify({ rules: preview.rules, shots: preview.shots }, null, 2)}
+                {JSON.stringify(
+                  {
+                    title: preview.title,
+                    theme: preview.theme,
+                    rules: preview.rules,
+                    shots: preview.shots,
+                  },
+                  null,
+                  2
+                )}
               </pre>
             </div>
           )}

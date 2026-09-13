@@ -15,9 +15,30 @@ from templates._layout import mk_title
 
 class TypewriterText(Scene):
     def construct(self):
-        p = get_params({"text": "Active Recall", "subtitle": "Learning"})
-        title = mk_title(p["subtitle"], font_size=28)
-        body = mk_text(p["text"], font_size=40).shift(DOWN * 0.4)
-        self.play(Write(title))
-        self.play(AddTextLetterByLetter(body, time_per_char=0.08))
+        p = get_params({"text": "Active Recall", "subtitle": "", "highlight": []})
+        subtitle = str(p.get("subtitle") or "").strip()
+        body_text = str(p.get("text") or "…").strip()
+        highlights = p.get("highlight") or []
+        if isinstance(highlights, str):
+            highlights = [highlights]
+        highlights = [str(h).strip() for h in highlights if str(h).strip()]
+
+        header = None
+        if subtitle:
+            header = mk_title(subtitle, font_size=26)
+        body = mk_text(body_text, font_size=36).shift(DOWN * (0.35 if subtitle else 0))
+
+        if header:
+            self.play(Write(header))
+        self.play(AddTextLetterByLetter(body, time_per_char=0.05))
+
+        if highlights:
+            chips = VGroup()
+            for h in highlights[:8]:
+                chip = mk_text(f"◆ {h}", font_size=22, color=YELLOW)
+                chips.add(chip)
+            chips.arrange(DOWN, aligned_edge=LEFT, buff=0.12)
+            chips.next_to(body, DOWN, buff=0.45)
+            self.play(LaggedStart(*[FadeIn(c, shift=RIGHT * 0.15) for c in chips], lag_ratio=0.08))
+
         self.wait(1)
