@@ -1,7 +1,7 @@
 # SunshineLife AI Videos — 产品规格书
 
-> **文档版本：** v1.1（2026-09）  
-> **适用代码：** `main` @ `9d706b7` 及之后  
+> **文档版本：** v1.2（2026-09）  
+> **适用代码：** `main` @ `c08e9b1` 及之后  
 > **在线地址（ECS）：** `http://47.99.184.249/sunshinelife_ai_videos/`
 
 ---
@@ -127,7 +127,7 @@
 | **导出项目 JSON** | 复制到剪贴板，可手动粘贴到一键成片 |
 | API | `GET /api/video/shot-plan/project` 返回 `{ title, shots, projectJson }` |
 
-**类型 ID 约束：** `type` 必须是系统已注册 ID。完整列表见镜头规划页右侧「全部 Manim 类型」表，或 `GET /api/video/shot-plan/spec`。勿使用 GPT 自造 ID（如 `memory_recall`），系统会自动映射部分别名，未知类型会导致成片失败。
+**类型 ID 约束：** `type` 必须是系统已注册 ID。完整列表见本文 **§7.4–7.6**、镜头规划页「全部 Manim 类型」表，或 `GET /api/video/shot-plan/spec`。勿使用 GPT 自造 ID；部分别名会自动映射（§7.5 别名表），未知类型会导致成片失败。
 
 ---
 
@@ -292,56 +292,380 @@
 ```typescript
 interface VideoProject {
   title?: string;
+  theme?: ThemeConfig;
+  autoWrap?: boolean;   // 默认 false：严格按 shots 顺序，不自动加片头片尾
   shots: Array<{
-    type: string;      // Manim 或 Remotion 类型 ID
-    label: string;     // 显示标题
-    params?: object;   // 可选，Manim 模板参数
+    type: string;              // Manim 或 Remotion 类型 ID（见 §7.3–7.6）
+    label: string;             // 显示标题
+    params?: object;           // Manim / Remotion 参数
+    durationSeconds?: number;  // 成片占用秒数（30fps，与 durationInFrames 二选一）
+    durationInFrames?: number; // 成片占用帧数（默认 Manim 槽位 150 帧 ≈ 5s）
   }>;
 }
 ```
+
+Manim 内部停留（绘制/旋转）与成片槽位独立，常用 `params` 字段：`hold_seconds`、`rotate_seconds`、`curve_run_time`、`intro_run_time`、`tail_wait`（见 `manim/templates/math_universe/_base.py`）。
 
 ### 7.2 镜头规划存储
 
 - 路径：`backend/storage/shot-plan.json`
 - 结构：`{ article, rules, shots, updatedAt }`
 - 导出 API：`GET /api/video/shot-plan/project`
+- 类型表 API：`GET /api/video/shot-plan/spec`（含 GPT 提示词）
+- Manim 宇宙场景：`GET /api/manim/universe-scenes`
+- 示例库：`GET /api/manim/examples`（`manim/scene_examples.json`）
 
-### 7.3 Remotion 镜头类型（非 Manim）
+### 7.3 成片流水线：ID 如何映射
 
-`title`, `chapter`, `bullet_list`, `fade_text`, `subtitle`, `quote`, `flow_steps`, `timeline_bar`, `formula_card`, `compare`, `arrow`, `stat`, `params`
+```
+shots[].type
+    │
+    ├─ resolveManimType() 命中 ──▶ Manim 渲染任务 (type = 规范 ID)
+    │         │                      render_task.py → template_catalog / manim_custom
+    │         ▼
+    │    timeline: manim_placeholder → (渲染后) manim_clip + sourceUrl
+    │
+    └─ resolveRemotionType() 命中 ─▶ timeline: 同名 Remotion 组件（不经 Manim）
+```
 
-### 7.4 Manim 镜头类型
+| 阶段 | timeline `type` | 来源 | 说明 |
+|------|-----------------|------|------|
+| 规划后（Manim 未渲染） | `manim_placeholder` | `plan-timeline.ts` | 占位，`manimType` = 规范 Manim ID |
+| Manim 完成后 | `manim_clip` | `compose.ts` | 嵌入 MP4，`manimType` 保留溯源 |
+| Remotion 包装镜 | 与 `shots[].type` 相同 | `plan-timeline.ts` | 如 `chapter`、`bullet_list` |
+| 仅手动 timeline | `device_toggle`、`hyperframes_clip` 等 | Remotion 页 / 工程包 | **不在** `resolveRemotionType`，不能写在 `shots` 里 |
 
-约 **42+** 种注册模板，分域：
+**默认帧长（30fps）：** Manim 槽位 **150 帧**；`title` 120；`chapter` 90；`quote` 100；`fade_text` 90。可通过镜头级 `durationSeconds` / `params.durationSeconds` 覆盖。
 
-| 域 | 示例 type |
-|----|-----------|
-| 工程 / 半导体 | `pn_junction`, `band_structure`, `mosfet_channel`, `buck_converter` |
-| 数学 | `function_graph`, `mathtex_formula`, `mathtex_derivation` |
-| 学习 / 科普 | `forgetting_curve`, `concept_network`, `typewriter_text`, `learning_curve` |
-| 英语 | `vocab_card`, `grammar_highlight`, `dialogue_scene` |
-| 媒体 / 3D | `image_focus`, `scene_3d_surface`（3D 需 OpenGL，ECS 慎用） |
+### 7.4 Remotion 包装类型（`shots[].type` 可直接使用）
 
-完整参数见 **`docs/manim-automation-guide.md`**。
+共 **16** 种，经 `resolveRemotionType()` 识别，由 `remotion/src/compositions/SimpleElectric.tsx` 渲染。
 
-### 7.5 自定义 ECS 镜头类型（非 Remotion/Manim 内置）
+| ID | 中文 | 默认帧 | 主要字段 / `params` |
+|----|------|--------|---------------------|
+| `title` | 标题 | 120 | `title` |
+| `chapter` | 章节 | 90 | `title` |
+| `params` | 键值参数 | 120 | `params: { 键: 值 }` |
+| `bullet_list` | 要点列表 | 150 | `title`, `items[]` |
+| `subtitle` | 底部字幕条 | 120 | `text` |
+| `fade_text` | 淡入文字 | 90 | `text` |
+| `compare` | 左右对比 | 120 | `leftTitle`, `rightTitle`, `leftText`, `rightText` |
+| `arrow` | 流程箭头 | 90 | — |
+| `quote` | 引用卡 | 100 | `quote`, `author` |
+| `stat` | 数据高亮 | 90 | `value`, `label` |
+| `flow_steps` | 流程步骤 | 150 | `steps[]` |
+| `timeline_bar` | 时间轴条 | 150 | `title`, `events[]` |
+| `formula_card` | 公式卡 | 120 | `formula`, `caption` |
+| `remotion_doors` | 三扇门 | 150 | `params.title`, `params.subtitle`, `params.doors[]` |
+| `remotion_open_door` | 开门揭示 | 150 | `params.selectedDoor`, `openedDoor`, `reveal`, `text` |
+| `remotion_car_reveal` | 汽车揭示 | 150 | `params.door`, `effect`, `text` |
 
-本系统的「镜头类型」是**在 ECS 中注册的组件 ID**，不是 Remotion 或 Manim 引擎自带名称。GPT 可输出自定义 ID，但必须在代码中完成注册后方能使用。
+**Remotion 别名（`REMOTION_TYPE_ALIASES` → 规范 ID）：**
 
-**已内置的蒙提霍尔专题镜头：**
+| 别名 | → 规范 ID |
+|------|-----------|
+| `cornell_notes`, `cornell`, `notes` | `bullet_list` |
+| `subtitle` | `subtitle` |
+| `quote` | `quote` |
+| `title_card`, `title` | `title` |
+| `outro`, `manim_clip` | `fade_text` |
 
-| type | 引擎 | 说明 |
-|------|------|------|
-| `remotion_doors` | Remotion | 三扇门场景（title / doors / subtitle） |
-| `remotion_open_door` | Remotion | 主持人开门（selectedDoor / openedDoor / reveal / text） |
-| `remotion_car_reveal` | Remotion | 汽车揭示（door / effect / text） |
-| `manim_probability_tree` | Manim | 概率树状图（branches / highlight） |
-| `manim_formula` | Manim | 公式 + 分步推导（formula / steps） |
-| `manim_simulation_chart` | Manim | 模拟收敛曲线（targetValue / description） |
+**仅 Remotion 手动 timeline（勿写入 `shots`）：** `device_toggle`、`manim_clip`、`hyperframes_clip`、`manim_placeholder`、`hyperframes_placeholder`。
 
-示例 JSON：`examples/projects/monty-hall/project.json`；一键成片页可点 **「蒙提霍尔」** 快速加载。
+### 7.5 Manim 内容动画类型（`shots[].type` 可直接使用）
 
-**新增自定义镜头需同步 5 处：** `shot-plan-spec.ts` → `plan-timeline.ts` → Remotion 组件 + `SimpleElectric.tsx` switch（或 Manim 模板 + `template_catalog.py`）→ `manim-capabilities.ts` → `auto-video.tsx` 类型校验 Set。
+共 **63** 种，经 `resolveManimType()` 识别；Python 注册于 `manim/template_catalog.py`（`custom_python` 另走代码粘贴，仍计入镜头规划类型表）。
+
+#### 7.5.1 工程 / 物理 / 电气（9）
+
+| ID | 中文 |
+|----|------|
+| `pn_junction` | PN 结 |
+| `band_structure` | 能带结构 |
+| `current_arrow` | 电路电流 |
+| `photon_breakdown` | 光子激发 |
+| `semiconductor_layers` | 半导体层 |
+| `mosfet_channel` | MOSFET |
+| `buck_converter` | Buck 拓扑 |
+| `sine_waveform` | 正弦波形 |
+| `llc_resonant` | LLC 谐振 |
+
+#### 7.5.2 数学 / 几何 / 图表（8）
+
+| ID | 中文 |
+|----|------|
+| `function_graph` | 函数曲线 |
+| `coordinate_grid` | 坐标系 |
+| `vector_sum` | 向量合成 |
+| `bar_chart` | 数据统计 |
+| `pie_chart` | 饼图 |
+| `line_chart_compare` | 折线对比 |
+| `manim_probability_tree` | 概率树状图 |
+| `manim_simulation_chart` | 模拟实验图 |
+
+#### 7.5.3 信息图表 / 学习科普（5）
+
+| ID | 中文 |
+|----|------|
+| `timeline_horizontal` | 时间轴 |
+| `flowchart` | 流程图 |
+| `forgetting_curve` | 遗忘曲线 |
+| `concept_network` | 概念网络 |
+| `learning_curve` | 学习效率 |
+
+#### 7.5.4 文本动画（5）
+
+| ID | 中文 |
+|----|------|
+| `typewriter_text` | 逐字出现 |
+| `keyword_pop` | 关键词高亮 |
+| `formula_steps` | 公式拆解 |
+| `chapter_banner` | 章节横幅 |
+| `code_highlight` | 代码高亮 |
+
+#### 7.5.5 结构 / 轨道（7）
+
+| ID | 中文 |
+|----|------|
+| `isometric_stack` | 层叠结构 |
+| `orbit_paths` | 轨道路径 |
+| `circuit_loop` | 电路回路 |
+| `band_temperature` | 能带温度 |
+| `crystal_lattice` | 晶体点阵 |
+| `transform_demo` | 变换动画 |
+| `manim_formula` | 公式推导卡 |
+
+#### 7.5.6 英语学习（3）
+
+| ID | 中文 |
+|----|------|
+| `vocab_card` | 单词卡 |
+| `grammar_highlight` | 语法高亮 |
+| `dialogue_scene` | 对话场景 |
+
+#### 7.5.7 媒体 / 公式 / 3D（7）
+
+| ID | 中文 | OpenGL |
+|----|------|--------|
+| `mathtex_formula` | MathTex 公式 | 否 |
+| `mathtex_derivation` | 公式推导 | 否 |
+| `scene_3d_surface` | 3D 曲面 | **是** |
+| `scene_3d_orbit` | 3D 轨道 | **是** |
+| `image_focus` | 图片聚焦 | 否 |
+| `svg_icon` | SVG 图标 | 否 |
+| `video_embed` | 视频嵌入 | 否 |
+
+#### 7.5.8 数学曲线（直注册 `type`，9）
+
+| ID | 中文 | OpenGL |
+|----|------|--------|
+| `manim_cardioid` | 心形线 | 否 |
+| `manim_rose_curve` | 玫瑰线 | 否 |
+| `manim_archimedean_spiral` | 阿基米德螺线 | 否 |
+| `manim_exponential_spiral` | 指数螺线 | 否 |
+| `manim_lemniscate` | 莱姆尼斯盖特 | 否 |
+| `manim_cycloid` | 摆线 | 否 |
+| `manim_lissajous` | 李萨如图形 | 否 |
+| `manim_lorenz_attractor` | 洛伦兹吸引子 | **是** |
+| `manim_mandelbrot_zoom` | 曼德布罗集 | 否 |
+
+#### 7.5.9 数学宇宙快捷 `type`（7）
+
+与 §7.6 宇宙场景等价，但 `type` 已固定，无需写 `params.scene`：
+
+| `shots[].type` | 默认宇宙场景类 |
+|----------------|----------------|
+| `manim_curve_3d` | `Curve3DScene` |
+| `manim_parametric_surface` | `SurfaceScene` |
+| `manim_parametric_curve` | `ParametricCurveScene` |
+| `manim_rossler` | `RosslerScene` |
+| `manim_julia_set` | `JuliaScene` |
+| `manim_koch_snowflake` | `KochSnowflakeScene` |
+| `manim_three_body` | `ThreeBodyScene` |
+
+#### 7.5.10 高级 / 自定义（3）
+
+| ID | 说明 |
+|----|------|
+| `manim_custom` | **推荐**：`params.scene` 指定宇宙场景名（§7.6），一个 `type` 覆盖全部宇宙镜头 |
+| `custom_python` | `params.code` 粘贴完整 Manim `Scene` 类 |
+| `custom_dsl` | `params` JSON DSL 场景 |
+
+**Manim 镜头别名（`MANIM_TYPE_ALIASES` → 规范 ID）：**
+
+| 别名 | → 规范 ID |
+|------|-----------|
+| `memory_recall`, `neural_connection`, `feynman`, `feynman_technique`, `knowledge_tree`, `mind_map`, `concept_tree`, `study_group` | `concept_network` |
+| `active_recall`, `learning_tips` | `typewriter_text` |
+| `concept_simplify` | `formula_steps` |
+| `spaced_repetition`, `ebbinghaus`, `spaced_repetition_curve` | `forgetting_curve` |
+| `interleave` | `flowchart` |
+| `deep_work` | `keyword_pop` |
+| `exam_simulation` | `timeline_horizontal` |
+| `brain_health` | `learning_curve` |
+| `vocabulary`, `vocab` | `vocab_card` |
+| `grammar` | `grammar_highlight` |
+| `dialogue`, `conversation` | `dialogue_scene` |
+| `mathtex`, `latex_formula` | `mathtex_formula` |
+| `derivation`, `formula_derivation` | `mathtex_derivation` |
+| `3d_surface`, `three_d` | `scene_3d_surface` |
+| `3d_orbit` | `scene_3d_orbit` |
+| `image`, `picture` | `image_focus` |
+| `svg` | `svg_icon` |
+| `video_clip` | `video_embed` |
+| `cardioid` | `manim_cardioid` |
+| `rose_curve` | `manim_rose_curve` |
+| `archimedean_spiral` | `manim_archimedean_spiral` |
+| `exponential_spiral` | `manim_exponential_spiral` |
+| `lemniscate` | `manim_lemniscate` |
+| `cycloid` | `manim_cycloid` |
+| `lissajous` | `manim_lissajous` |
+| `lorenz_attractor` | `manim_lorenz_attractor` |
+| `mandelbrot`, `mandelbrot_zoom` | `manim_mandelbrot_zoom` |
+| `custom_scene`, `universe_scene` | `manim_custom` |
+| `julia_set` | `manim_julia_set` |
+| `koch_snowflake` | `manim_koch_snowflake` |
+| `three_body` | `manim_three_body` |
+| `curve_3d` | `manim_curve_3d` |
+| `rossler` | `manim_rossler` |
+| `parametric_surface` | `manim_parametric_surface` |
+| `parametric_curve` | `manim_parametric_curve` |
+
+完整 `params` 说明见 **`docs/manim-automation-guide.md`**；前端能力表见 `frontend/utils/manim-capabilities.ts`。
+
+### 7.6 数学宇宙场景（`manim_custom` + `params.scene`）
+
+`type: "manim_custom"` 时，**必填** `params.scene`（或别名，见下表「scene 别名」）。注册表：`manim/templates/math_universe/registry.py`；分发：`manim/render_task.py`。
+
+共 **33** 个规范场景名：
+
+#### 2D 曲线（`curve_2d`，10）
+
+| `params.scene` | 中文 | OpenGL |
+|----------------|------|--------|
+| `ParametricCurveScene` | 通用参数曲线 | 否 |
+| `RoseCurveScene` | 玫瑰线 | 否 |
+| `CardioidScene` | 心形线 | 否 |
+| `ArchimedeanSpiralScene` | 阿基米德螺线 | 否 |
+| `EpicycloidScene` | 外摆线 | 否 |
+| `LissajousScene` | 李萨如 2D | 否 |
+| `SpirographScene` | 万花筒 / Spirograph | 否 |
+| `HarmonicCurveScene` | 谐波叠加 2D | 否 |
+| `IteratedFlowerScene` | 迭代花朵 | 否 |
+| `ComplexCurveScene` | 复平面曲线 | 否 |
+
+#### 3D 曲线 / 曲面（`curve_3d` + `surfaces`，7）
+
+| `params.scene` | 中文 | OpenGL |
+|----------------|------|--------|
+| `Curve3DScene` | 3D 螺旋曲线 | **是** |
+| `Lissajous3DScene` | 3D 李萨如 | **是** |
+| `Harmonic3DScene` | 3D 谐波曲线 | **是** |
+| `HarmonicRibbon3D` | 3D 谐波光带 | **是** |
+| `SpiralFlower3D` | 3D 螺旋花 | **是** |
+| `SurfaceScene` | 参数曲面 | **是** |
+| `SaddleSurfaceScene` | 马鞍面 | **是** |
+
+#### 混沌（`chaos`，3）
+
+| `params.scene` | 中文 | OpenGL |
+|----------------|------|--------|
+| `LorenzScene` | 洛伦兹吸引子（支持 `n` 条彩色轨迹） | **是** |
+| `ColorLorenz3D` | 渐变洛伦兹光轨 | **是** |
+| `RosslerScene` | Rössler 吸引子 | **是** |
+
+#### 分形（`fractals`，3）
+
+| `params.scene` | 中文 | OpenGL |
+|----------------|------|--------|
+| `MandelbrotScene` | 曼德布罗集 | 否 |
+| `JuliaScene` | 朱利亚集 | 否 |
+| `KochSnowflakeScene` | Koch 雪花 | 否 |
+
+#### 动力学（`dynamics`，1）
+
+| `params.scene` | 中文 | OpenGL |
+|----------------|------|--------|
+| `ThreeBodyScene` | 三体问题 | 否 |
+
+#### 兼容 `math_curves` 直调（9）
+
+与 §7.5.8 直注册 `type` 画面相同，也可写在 `manim_custom.params.scene`：
+
+`ManimCardioid`, `ManimRoseCurve`, `ManimArchimedeanSpiral`, `ManimExponentialSpiral`, `ManimLemniscate`, `ManimCycloid`, `ManimLissajous`, `ManimLorenzAttractor`, `ManimMandelbrotZoom`
+
+**`params.scene` 别名（`SCENE_ALIASES` → 规范 scene 名）：**
+
+| 别名 | → 规范 scene |
+|------|----------------|
+| `parametric_curve` | `ParametricCurveScene` |
+| `rose_curve` | `RoseCurveScene` |
+| `cardioid` | `CardioidScene` |
+| `archimedean_spiral` | `ArchimedeanSpiralScene` |
+| `epicycloid` | `EpicycloidScene` |
+| `lissajous` | `LissajousScene` |
+| `spirograph` | `SpirographScene` |
+| `harmonic_curve`, `harmonic_2d` | `HarmonicCurveScene` |
+| `iterated_flower` | `IteratedFlowerScene` |
+| `complex_curve` | `ComplexCurveScene` |
+| `curve_3d` | `Curve3DScene` |
+| `lissajous_3d` | `Lissajous3DScene` |
+| `harmonic_3d` | `Harmonic3DScene` |
+| `harmonic_ribbon_3d` | `HarmonicRibbon3D` |
+| `spiral_flower_3d` | `SpiralFlower3D` |
+| `surface` | `SurfaceScene` |
+| `saddle_surface` | `SaddleSurfaceScene` |
+| `lorenz`, `lorenz_attractor` | `LorenzScene` |
+| `color_lorenz_3d` | `ColorLorenz3D` |
+| `rossler` | `RosslerScene` |
+| `mandelbrot` | `MandelbrotScene` |
+| `julia`, `julia_set` | `JuliaScene` |
+| `koch`, `koch_snowflake` | `KochSnowflakeScene` |
+| `three_body` | `ThreeBodyScene` |
+| `manim_cardioid` … `manim_mandelbrot_zoom` | 同名 `Manim*` 类 |
+
+**示例（加长洛伦兹）：**
+
+```json
+{
+  "type": "manim_custom",
+  "label": "洛伦兹·5条彩色",
+  "durationSeconds": 16,
+  "params": {
+    "scene": "LorenzScene",
+    "title": "洛伦兹吸引子",
+    "n": 5,
+    "colors": ["#e85d75", "#4a90d9", "#50c878", "#f5a623", "#9b59b6"],
+    "hold_seconds": 8,
+    "rotate_seconds": 8
+  }
+}
+```
+
+### 7.7 `type` → Python 模板映射（Manim 渲染层）
+
+一键成片 Manim 任务最终调用 `POST` 内部 `renderManim({ type, params })` → `manim/render_task.py`：
+
+| `type` 分支 | Python 入口 |
+|-------------|-------------|
+| `manim_custom` | `resolve_universe_scene(params.scene)` → `math_universe/*.py` |
+| `custom_python` | `params.code` 临时 Scene 文件 |
+| 其余已注册 `type` | `template_catalog.TEMPLATES[type]` → `manim/templates/*.py` |
+
+### 7.8 蒙提霍尔专题（示例工程）
+
+| `shots[].type` | 引擎 | 说明 |
+|----------------|------|------|
+| `remotion_doors` | Remotion | 三扇门 |
+| `remotion_open_door` | Remotion | 开门揭示 |
+| `remotion_car_reveal` | Remotion | 汽车揭示 |
+| `manim_probability_tree` | Manim | 概率树 |
+| `manim_formula` | Manim | 公式卡 |
+| `manim_simulation_chart` | Manim | 收敛曲线 |
+
+示例：`examples/projects/monty-hall/project.json`；一键成片 **「蒙提霍尔」** 按钮。
+
+**新增自定义镜头需同步：** `shot-plan-spec.ts` → `plan-timeline.ts` → `SimpleElectric.tsx`（Remotion）或 `template_catalog.py` + 模板文件（Manim）→ `manim-capabilities.ts` →（可选）`scene_examples.json`。
 
 ---
 
@@ -501,6 +825,7 @@ pm2 logs sunshinelife-videos-api
 |------|------|------|
 | v1.0 | 2026-03 | 字幕、Manim、HyperFrames、Remotion、B 站文案、任务管理 |
 | v1.1 | 2026-09 | 镜头规划 → 一键成片衔接；提示词库；HyperFrames 环境检测；导航工作流重排；字体预设；output 工程包自动导出 |
+| v1.2 | 2026-09 | 完整罗列 Remotion 16 种 + Manim 63 种 + 数学宇宙 33 scene；流水线映射表；时长参数；谐波/Spirograph 场景 @ `c08e9b1` |
 
 ---
 
