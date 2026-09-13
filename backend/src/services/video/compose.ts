@@ -7,6 +7,7 @@ import {
 } from "./compose-progress";
 import type { ComposePayload } from "./compose-progress";
 import { createComposeOutputBundle } from "./output-bundle";
+import { resolveManimCjkFont } from "./manim-font";
 import { injectThemeIntoManimParams } from "./manim-theme";
 import { COMPOSE_FPS } from "./shot-plan-parser";
 
@@ -91,6 +92,7 @@ export async function renderCompose(
   });
 
   const manimResults: ComposePayload["manimResults"] = [];
+  const composeManimFont = resolveManimCjkFont(theme);
 
   for (let i = 0; i < manimJobs!.length; i++) {
     const job = manimJobs![i];
@@ -106,6 +108,7 @@ export async function renderCompose(
       { ...(job.params || {}) },
       theme
     );
+    const shotFont = resolveManimCjkFont(theme, manimParams) ?? composeManimFont;
     if (job.type === "manim_custom") {
       const scene =
         manimParams.scene ?? manimParams.class_name ?? (job.params || {}).scene;
@@ -116,14 +119,14 @@ export async function renderCompose(
       }
       manimParams.scene = String(scene).trim();
     }
-    if (theme?.manimCjkFont && !manimParams.cjk_font) {
-      manimParams.cjk_font = theme.manimCjkFont;
+    if (shotFont && !manimParams.cjk_font) {
+      manimParams.cjk_font = shotFont;
     }
 
     const result = await renderManim(manimTaskId, {
       type: job.type,
       params: manimParams,
-      manimCjkFont: theme?.manimCjkFont,
+      manimCjkFont: shotFont,
     });
 
     const clipUrl = toRemotionMediaUrl(result.outputUrl);

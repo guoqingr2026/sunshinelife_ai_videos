@@ -188,6 +188,7 @@ export const api = {
     type: string;
     params?: Record<string, unknown>;
     subtitleId?: string;
+    manimCjkFont?: string;
   }) =>
     request<{ taskId: string; status: string }>("/api/manim/task", {
       method: "POST",

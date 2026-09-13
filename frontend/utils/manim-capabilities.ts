@@ -960,10 +960,11 @@ export const MANIM_CAPABILITIES: ManimCapability[] = [
       highlight_indices: [1, 3],
     },
     paramHelp: {
-      title: "标题",
-      parts: "MathTex 分段字符串数组",
+      title: "标题（中文，走字体预设 / cjk_font）",
+      parts: "MathTex 分段（LaTeX 数学字体，不受 cjk_font 影响）",
       highlight_indices: "依次框选的下标，如 [1, 3]",
       frame_color: "框线颜色十六进制（可选）",
+      cjk_font: "可选，覆盖成片字体预设，如 KaiTi、Noto Sans SC",
     },
   },
   {

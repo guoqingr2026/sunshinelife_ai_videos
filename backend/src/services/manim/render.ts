@@ -4,6 +4,7 @@ import path from "path";
 import { checkManimModule, spawnPythonStdin } from "../../lib/python";
 import { getManimOutputPath, getStorageRoot, toPublicUrl } from "../../lib/storage";
 import { isPlayableMp4 } from "../../lib/video-utils";
+import { resolveManimCjkFont } from "../video/manim-font";
 
 const MANIM_ROOT = path.resolve(__dirname, "../../../../manim");
 const RENDER_SCRIPT = path.join(MANIM_ROOT, "render_task.py");
@@ -92,9 +93,14 @@ export async function renderManim(
     : MANIM_ROOT;
 
   const manimEnv: NodeJS.ProcessEnv = { ...process.env, PYTHONPATH: pyPath };
-  const cjkFont =
-    payload.manimCjkFont ||
-    (typeof payload.params?.cjk_font === "string" ? payload.params.cjk_font : undefined);
+  const cjkFont = resolveManimCjkFont(
+    undefined,
+    {
+      ...(payload.params ?? {}),
+      manimCjkFont: payload.manimCjkFont,
+      cjk_font: payload.manimCjkFont ?? payload.params?.cjk_font,
+    }
+  );
   if (cjkFont) {
     manimEnv.MANIM_CJK_FONT = cjkFont;
   }

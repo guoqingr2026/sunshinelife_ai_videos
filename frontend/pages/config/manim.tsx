@@ -119,7 +119,11 @@ export default function ManimConfig() {
         setLoading(false);
         return;
       }
-      const result = await api.createManimTask({ type: submitType, params: finalParams });
+      const result = await api.createManimTask({
+        type: submitType,
+        params: finalParams,
+        manimCjkFont: preset.manimFont,
+      });
       setTask(await api.getManimTask(result.taskId));
     } finally {
       setLoading(false);

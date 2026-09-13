@@ -130,7 +130,7 @@ router.get("/status", async (_req, res) => {
 
 router.post("/task", async (req, res) => {
   try {
-    const { type, params, subtitleId } = req.body;
+    const { type, params, subtitleId, manimCjkFont } = req.body;
     if (!type) {
       return res.status(400).json({ error: "type is required" });
     }
@@ -138,7 +138,7 @@ router.post("/task", async (req, res) => {
     const task = db.task.create({
       kind: "manim",
       status: "pending",
-      payload: JSON.stringify({ type, params, subtitleId }),
+      payload: JSON.stringify({ type, params, subtitleId, manimCjkFont }),
     });
 
     res.json({

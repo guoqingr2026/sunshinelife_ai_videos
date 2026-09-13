@@ -212,7 +212,16 @@ def main():
     os.environ["MANIM_PARAMS"] = json.dumps(params)
     os.environ["MANIM_OUTPUT"] = output_path
     os.environ["MANIM_RENDERER"] = renderer
-    os.environ.setdefault("MANIM_CJK_FONT", "Noto Sans CJK SC")
+    cjk_from_params = (
+        params.get("cjk_font")
+        or params.get("manimCjkFont")
+        or params.get("font")
+        or payload.get("manimCjkFont")
+    )
+    if cjk_from_params:
+        os.environ["MANIM_CJK_FONT"] = str(cjk_from_params)
+    else:
+        os.environ.setdefault("MANIM_CJK_FONT", "Noto Sans CJK SC")
 
     output_dir = os.path.dirname(output_path)
     os.makedirs(output_dir, exist_ok=True)
