@@ -63,6 +63,16 @@ export const MANIM_TYPE_ALIASES: Record<string, string> = {
   parametric_curve: "manim_parametric_curve",
   moving_frame_box: "manim_moving_frame_box",
   point_with_trace: "manim_point_with_trace",
+  vector_arrow: "manim_vector_arrow",
+  brace_annotation: "manim_brace_annotation",
+  sin_cos_plot: "manim_sin_cos_plot",
+  point_on_path: "manim_point_on_path",
+  moving_angle: "manim_moving_angle",
+  sine_unit_circle: "manim_sine_unit_circle",
+  boolean_ops: "manim_boolean_ops",
+  following_camera: "manim_following_camera",
+  graph_area: "manim_graph_area",
+  heat_diagram: "manim_heat_diagram",
   formula_curve: "formula_curve",
   curve_formula: "formula_curve",
   image: "image_focus",
@@ -172,6 +182,16 @@ export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
   // Manim 官方画廊精选
   { id: "manim_moving_frame_box", label: "公式框选", category: "数学", desc: "分段 MathTex + 框选高亮切换（乘积求导等）", keywords: ["movingframebox", "框选", "mathtex", "求导", "surrounding"] },
   { id: "manim_point_with_trace", label: "动点轨迹", category: "数学", desc: "动点留痕；demo 旋转平移或 parametric 公式曲线", keywords: ["pointwithtrace", "轨迹", "trace", "updater", "参数曲线"] },
+  { id: "manim_vector_arrow", label: "向量箭头", category: "数学", desc: "NumberPlane + Arrow + 坐标标注（官方 VectorArrow）", keywords: ["vectorarrow", "向量", "箭头", "坐标平面", "numberplane"] },
+  { id: "manim_brace_annotation", label: "括号标注", category: "数学", desc: "Brace 距离/公式标注（官方 BraceAnnotation）", keywords: ["brace", "括号", "标注", "距离", "braceannotation"] },
+  { id: "manim_sin_cos_plot", label: "正弦余弦图", category: "数学", desc: "sin/cos 双曲线（官方 SinAndCosFunctionPlot）", keywords: ["sin", "cos", "三角函数", "sincos", "正弦", "余弦"] },
+  { id: "manim_point_on_path", label: "路径动点", category: "数学", desc: "沿圆运动 + 旋转（官方 PointMovingOnShapes）", keywords: ["movealongpath", "路径", "圆周", "动点", "pointmoving"] },
+  { id: "manim_moving_angle", label: "动态角度", category: "数学", desc: "ValueTracker 驱动角度（官方 MovingAngle）", keywords: ["angle", "角度", "valuetracker", "theta", "movingangle"] },
+  { id: "manim_sine_unit_circle", label: "单位圆正弦", category: "数学", desc: "单位圆推导正弦曲线（官方 SineCurveUnitCircle）", keywords: ["单位圆", "正弦", "sinecurve", "三角", "unitcircle"] },
+  { id: "manim_boolean_ops", label: "布尔运算", category: "数学", desc: "椭圆交/并/差/补（官方 BooleanOperations）", keywords: ["boolean", "交集", "并集", "差集", "union", "intersection"] },
+  { id: "manim_following_camera", label: "相机跟随", category: "数学", desc: "沿曲线跟拍动点（官方 FollowingGraphCamera）", keywords: ["followingcamera", "跟拍", "movingcamera", "相机跟随"] },
+  { id: "manim_graph_area", label: "曲线面积", category: "数学", desc: "黎曼和与两曲线间面积（官方 GraphAreaPlot）", keywords: ["grapharea", "面积", "黎曼", "积分", "areaplot"] },
+  { id: "manim_heat_diagram", label: "热图折线", category: "数学", desc: "热力学折线示意（官方 HeatDiagramPlot）", keywords: ["heatdiagram", "热图", "折线", "热力学", "温度"] },
 ];
 
 for (const spec of MANIM_TYPE_SPECS) {

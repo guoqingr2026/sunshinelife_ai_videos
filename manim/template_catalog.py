@@ -93,4 +93,14 @@ TEMPLATES = {
     # Manim 官方画廊精选
     "manim_moving_frame_box": "templates.gallery_scenes.ManimMovingFrameBox",
     "manim_point_with_trace": "templates.gallery_scenes.ManimPointWithTrace",
+    "manim_vector_arrow": "templates.gallery_scenes.ManimVectorArrow",
+    "manim_brace_annotation": "templates.gallery_scenes.ManimBraceAnnotation",
+    "manim_sin_cos_plot": "templates.gallery_scenes.ManimSinCosPlot",
+    "manim_point_on_path": "templates.gallery_scenes.ManimPointOnPath",
+    "manim_moving_angle": "templates.gallery_scenes.ManimMovingAngle",
+    "manim_sine_unit_circle": "templates.gallery_scenes.ManimSineUnitCircle",
+    "manim_boolean_ops": "templates.gallery_scenes.ManimBooleanOps",
+    "manim_following_camera": "templates.gallery_scenes.ManimFollowingCamera",
+    "manim_graph_area": "templates.gallery_scenes.ManimGraphArea",
+    "manim_heat_diagram": "templates.gallery_scenes.ManimHeatDiagram",
 }

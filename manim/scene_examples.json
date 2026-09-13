@@ -614,6 +614,96 @@
         "t_max": 6.283185307179586,
         "run_time": 4
       }
+    },
+    {
+      "id": "gallery_vector_arrow",
+      "label": "VectorArrow",
+      "category": "gallery",
+      "type": "manim_vector_arrow",
+      "needsOpengl": false,
+      "desc": "坐标平面 + 向量箭头",
+      "params": { "title": "向量与坐标", "arrow_end": [2, 2, 0] }
+    },
+    {
+      "id": "gallery_brace_annotation",
+      "label": "BraceAnnotation",
+      "category": "gallery",
+      "type": "manim_brace_annotation",
+      "needsOpengl": false,
+      "desc": "Brace 距离标注",
+      "params": { "title": "距离标注", "horizontal_label": "水平距离" }
+    },
+    {
+      "id": "gallery_sin_cos_plot",
+      "label": "SinAndCosFunctionPlot",
+      "category": "gallery",
+      "type": "manim_sin_cos_plot",
+      "needsOpengl": false,
+      "desc": "sin/cos 双曲线",
+      "params": { "title": "sin(x) 与 cos(x)" }
+    },
+    {
+      "id": "gallery_point_on_path",
+      "label": "PointMovingOnShapes",
+      "category": "gallery",
+      "type": "manim_point_on_path",
+      "needsOpengl": false,
+      "desc": "沿圆运动 + 旋转",
+      "params": { "title": "沿路径运动" }
+    },
+    {
+      "id": "gallery_moving_angle",
+      "label": "MovingAngle",
+      "category": "gallery",
+      "type": "manim_moving_angle",
+      "needsOpengl": false,
+      "desc": "动态角度 θ",
+      "params": { "title": "角度变化" }
+    },
+    {
+      "id": "gallery_sine_unit_circle",
+      "label": "SineCurveUnitCircle",
+      "category": "gallery",
+      "type": "manim_sine_unit_circle",
+      "needsOpengl": false,
+      "desc": "单位圆推导正弦",
+      "params": { "title": "单位圆与正弦曲线", "run_seconds": 6 }
+    },
+    {
+      "id": "gallery_boolean_ops",
+      "label": "BooleanOperations",
+      "category": "gallery",
+      "type": "manim_boolean_ops",
+      "needsOpengl": false,
+      "desc": "椭圆布尔运算",
+      "params": { "header_label": "集合运算" }
+    },
+    {
+      "id": "gallery_following_camera",
+      "label": "FollowingGraphCamera",
+      "category": "gallery",
+      "type": "manim_following_camera",
+      "needsOpengl": false,
+      "desc": "相机沿曲线跟拍",
+      "params": { "title": "相机跟随曲线", "follow_run_time": 3 }
+    },
+    {
+      "id": "gallery_graph_area",
+      "label": "GraphAreaPlot",
+      "category": "gallery",
+      "type": "manim_graph_area",
+      "needsOpengl": false,
+      "desc": "黎曼和与曲线面积",
+      "params": { "title": "曲线与面积" }
+    },
+    {
+      "id": "gallery_heat_diagram",
+      "label": "HeatDiagramPlot",
+      "category": "gallery",
+      "type": "manim_heat_diagram",
+      "needsOpengl": false,
+      "desc": "热力学折线示意",
+      "params": { "title": "热图示意" }
     }
   ]
 }

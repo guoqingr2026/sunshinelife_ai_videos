@@ -1,7 +1,7 @@
 # SunshineLife AI Videos — 产品规格书
 
-> **文档版本：** v1.4（2026-09）  
-> **适用代码：** `main` @ `b07403f` 及之后  
+> **文档版本：** v1.5（2026-09）  
+> **适用代码：** `main` @ `gallery-p0-p2` 及之后  
 > **在线地址（ECS）：** `http://47.99.184.249/sunshinelife_ai_videos/`
 
 ---
@@ -385,7 +385,7 @@ shots[].type
 
 ### 7.5 Manim 内容动画类型（`shots[].type` 可直接使用）
 
-共 **75** 种，经 `resolveManimType()` 识别；其中 **74** 种在 `manim/template_catalog.py` 有 Python 模板，`custom_python` 另走代码粘贴（仍计入镜头规划类型表）。
+共 **85** 种，经 `resolveManimType()` 识别；其中 **84** 种在 `manim/template_catalog.py` 有 Python 模板，`custom_python` 另走代码粘贴（仍计入镜头规划类型表）。
 
 #### 7.5.1 工程 / 物理 / 电气（9）
 
@@ -511,14 +511,24 @@ shots[].type
 
 示例：`examples/projects/reading-study/project.json`；一键成片 **「读书训练」** 按钮（约 50 镜，含 `typewriter_text`、`chapter` 与数学曲线隐喻）。
 
-#### 7.5.11 官方画廊精选（2）
+#### 7.5.11 官方画廊精选（12）
 
 | ID | 中文 | 说明 |
 |----|------|------|
-| `manim_moving_frame_box` | 公式框选 | 官方 MovingFrameBox：分段 `MathTex` + `SurroundingRectangle` 切换（**建议 texlive**） |
-| `manim_point_with_trace` | 动点轨迹 | 官方 PointWithTrace：`mode=demo` 旋转留痕；`mode=parametric` + `x(t),y(t)` 动态绘曲线 |
+| `manim_moving_frame_box` | 公式框选 | MovingFrameBox：分段 MathTex + 框选（**建议 texlive**） |
+| `manim_point_with_trace` | 动点轨迹 | PointWithTrace：`demo` / `parametric` |
+| `manim_vector_arrow` | 向量箭头 | VectorArrow：NumberPlane + Arrow |
+| `manim_brace_annotation` | 括号标注 | BraceAnnotation：Brace + 文字/公式 |
+| `manim_sin_cos_plot` | 正弦余弦图 | SinAndCosFunctionPlot：双曲线 |
+| `manim_point_on_path` | 路径动点 | PointMovingOnShapes：沿圆运动 + 旋转 |
+| `manim_moving_angle` | 动态角度 | MovingAngle：ValueTracker + θ |
+| `manim_sine_unit_circle` | 单位圆正弦 | SineCurveUnitCircle：圆推导正弦 |
+| `manim_boolean_ops` | 布尔运算 | BooleanOperations：交/并/差/补 |
+| `manim_following_camera` | 相机跟随 | FollowingGraphCamera：沿曲线跟拍 |
+| `manim_graph_area` | 曲线面积 | GraphAreaPlot：黎曼和 + 面积 |
+| `manim_heat_diagram` | 热图折线 | HeatDiagramPlot：折线热力学示意 |
 
-示例见 `manim/scene_examples.json`（Manim 页画廊 →「官方画廊精选」）。
+示例见 `manim/scene_examples.json`（Manim 页画廊 →「官方画廊精选」）；实现于 `manim/templates/gallery_scenes.py`。
 
 #### 7.5.12 高级 / 自定义（4）
 
@@ -713,7 +723,7 @@ shots[].type
 
 | 问题 | 答案 |
 |------|------|
-| 能否「一键成片」直接选官方画廊里的每一个示例？ | **部分可以**。已内置 `manim_moving_frame_box`、`manim_point_with_trace` 等精选镜头；其余仍用 **75 个注册 `type`** + `custom_python` 粘贴官方代码。 |
+| 能否「一键成片」直接选官方画廊里的每一个示例？ | **大部分可以**。§7.5.11 共 **12** 个画廊 `type` 覆盖 P0–P2；3D 变焦等仍用 `custom_python`。 |
 | 能否在本系统里**渲染出与官方一致的画面**？ | **可以**。把官方 `class Xxx(Scene)` 粘贴为 `custom_python`（或 Manim 页示例画廊 →「应用到任务」），即可走同一套 Manim 渲染链。 |
 | 与「官网案例」的定位差异 | 本系统是 **分镜流水线 + 模板库**；官方文档是 **完整 Manim API 参考**。两者互补，不是 1:1 菜单对应。 |
 
@@ -732,18 +742,18 @@ shots[].type
 | 官方示例 | 本系统 |
 |----------|--------|
 | ManimCELogo | 🔵 + 🟠（`MathTex` 字母 M；形状部分可用 `custom_python`） |
-| BraceAnnotation | 🔵（已收录 `official_custom_examples.json`）；🟠 `get_tex` |
-| VectorArrow | 🔵（已收录）；🟡 `coordinate_grid` + `vector_sum` |
+| BraceAnnotation | 🟢 `manim_brace_annotation`；🟠 `get_tex` |
+| VectorArrow | 🟢 `manim_vector_arrow` |
 | GradientImageFromArray | 🔵；🟡 `image_focus` |
-| BooleanOperations | 🔵 |
+| BooleanOperations | 🟢 `manim_boolean_ops` |
 
 #### Animations（8）
 
 | 官方示例 | 本系统 |
 |----------|--------|
-| PointMovingOnShapes | 🔵 |
+| PointMovingOnShapes | 🟢 `manim_point_on_path` |
 | MovingAround | 🔵 |
-| MovingAngle | 🔵 |
+| MovingAngle | 🟢 `manim_moving_angle`；🟠 MathTex θ |
 | MovingDots | 🔵 |
 | MovingGroupToDestination | 🔵 |
 | MovingFrameBox | 🟢 `manim_moving_frame_box`；🟠 texlive |
@@ -754,17 +764,17 @@ shots[].type
 
 | 官方示例 | 本系统 |
 |----------|--------|
-| SinAndCosFunctionPlot | 🟢 `function_graph`；🔵 完整版 |
+| SinAndCosFunctionPlot | 🟢 `manim_sin_cos_plot` |
 | ArgMinExample | 🔵；🟢 `function_graph` |
-| GraphAreaPlot | 🔵；🟡 `bar_chart` / `function_graph` |
+| GraphAreaPlot | 🟢 `manim_graph_area` |
 | PolygonOnAxes | 🔵；🟢 `coordinate_grid` |
-| HeatDiagramPlot | 🔵（`numpy` + `ImageMobject`） |
+| HeatDiagramPlot | 🟢 `manim_heat_diagram` |
 
 #### Special Camera Settings（7）
 
 | 官方示例 | 本系统 |
 |----------|--------|
-| FollowingGraphCamera | 🔵 + 🟣（`MovingCameraScene`） |
+| FollowingGraphCamera | 🟢 `manim_following_camera`（MovingCameraScene；无则降级为沿路径动点） |
 | MovingZoomedSceneAround | 🔵 + 🟣（`ZoomedScene`） |
 | FixedInFrameMObjectTest | 🔵 + 🟣（`ThreeDScene`） |
 | ThreeDLightSourcePosition | 🔵 + 🟣；🟢 `scene_3d_surface` / `manim_parametric_surface`（曲面类，非同款灯光演示） |
@@ -777,7 +787,7 @@ shots[].type
 | 官方示例 | 本系统 |
 |----------|--------|
 | OpeningManim | 🔵 + 🟠（`Tex` / `MathTex` / 网格非线性变换） |
-| SineCurveUnitCircle | 🔵；🟡 `sine_waveform` / `function_graph`（示意，非单位圆推导全流程） |
+| SineCurveUnitCircle | 🟢 `manim_sine_unit_circle` |
 
 **推荐用法：**
 
@@ -792,24 +802,24 @@ shots[].type
 | # | 官方示例 | 状态 | 本系统用法 | 依赖 / 条件 | 备注 |
 |---|----------|------|------------|-------------|------|
 | 1 | ManimCELogo | 🔵 | `custom_python` | 🟠 texlive | Logo + MathTex `\mathbb{M}` |
-| 2 | BraceAnnotation | 🔵 | `custom_python`；`official_custom_examples.json` | 🟠 `get_tex` | 括号标注 |
-| 3 | VectorArrow | 🔵 | `custom_python`；`official_custom_examples.json` | — | 🟡 近似：`coordinate_grid` + `vector_sum` |
+| 2 | BraceAnnotation | 🟢 | **`manim_brace_annotation`** | 🟠 `get_tex` | 括号标注 |
+| 3 | VectorArrow | 🟢 | **`manim_vector_arrow`** | — | NumberPlane + Arrow |
 | 4 | GradientImageFromArray | 🔵 | `custom_python` | numpy | 🟡 近似：`image_focus` |
-| 5 | BooleanOperations | 🔵 | `custom_python` | — | 并/交/差/补集动画 |
-| 6 | PointMovingOnShapes | 🔵 | `custom_python` | — | **建议注册** `manim_point_on_path` |
+| 5 | BooleanOperations | 🟢 | **`manim_boolean_ops`** | — | 并/交/差/补集动画 |
+| 6 | PointMovingOnShapes | 🟢 | **`manim_point_on_path`** | — | 沿圆 MoveAlongPath |
 | 7 | MovingAround | 🔵 | `custom_python` | — | 🟡 近似：`transform_demo` |
-| 8 | MovingAngle | 🔵 | `custom_python` | 🟠 MathTex θ | ValueTracker + Angle |
+| 8 | MovingAngle | 🟢 | **`manim_moving_angle`** | 🟠 MathTex θ | ValueTracker + Angle |
 | 9 | MovingDots | 🔵 | `custom_python` | — | 双点连线 updater |
 | 10 | MovingGroupToDestination | 🔵 | `custom_python` | — | VGroup 对齐移动 |
 | 11 | MovingFrameBox | 🟢 | **`manim_moving_frame_box`** | 🟠 公式 texlive；中文标题走字体预设 | Manim 页「官方画廊精选」 |
 | 12 | RotationUpdater | 🔵 | `custom_python` | — | `add_updater` 旋转 |
 | 13 | PointWithTrace | 🟢 | **`manim_point_with_trace`**（`demo` / `parametric`） | — | 参数模式可画 2D 公式轨迹 |
-| 14 | SinAndCosFunctionPlot | 🟡 | `function_graph`；🔵 完整版 | 🟠 轴标签 MathTex | **建议增强** `function_graph` 双曲线 |
+| 14 | SinAndCosFunctionPlot | 🟢 | **`manim_sin_cos_plot`** | — | sin/cos 双曲线 |
 | 15 | ArgMinExample | 🔵 | `custom_python` | — | ValueTracker 求极值 |
-| 16 | GraphAreaPlot | 🔵 | `custom_python` | — | 黎曼和/面积；🟡 `bar_chart` 不等价 |
+| 16 | GraphAreaPlot | 🟢 | **`manim_graph_area`** | — | 黎曼和/面积 |
 | 17 | PolygonOnAxes | 🔵 | `custom_python` | — | 反比例矩形；🟡 `coordinate_grid` |
-| 18 | HeatDiagramPlot | 🔵 | `custom_python` | 🟠 Tex 轴标 | 折线热图 |
-| 19 | FollowingGraphCamera | 🔵 | `custom_python` | 🟣 MovingCameraScene | **建议注册**（相机跟随） |
+| 18 | HeatDiagramPlot | 🟢 | **`manim_heat_diagram`** | — | 折线热图 |
+| 19 | FollowingGraphCamera | 🟢 | **`manim_following_camera`** | MovingCameraScene（无则降级） | 相机跟随 |
 | 20 | MovingZoomedSceneAround | 🔵 | `custom_python` | 🟣 ZoomedScene | 放大镜场景 |
 | 21 | FixedInFrameMObjectTest | 🔵 | `custom_python` | 🟣 ThreeDScene | 固定 HUD 文字 |
 | 22 | ThreeDLightSourcePosition | 🟡 | `manim_parametric_surface` / `scene_3d_surface` | 🟣 OpenGL | 曲面近似，非灯光教程 |
@@ -817,15 +827,15 @@ shots[].type
 | 24 | ThreeDCameraIllusionRotation | 🔵 | `custom_python` | 🟣 OpenGL | 错觉旋转 |
 | 25 | ThreeDSurfacePlot | 🟢 | **`manim_parametric_surface`**（`SurfaceScene`） | 🟣 OpenGL | 高斯曲面类 |
 | 26 | OpeningManim | 🔵 | `custom_python` | 🟠 texlive | 网格非线性变换综合示例 |
-| 27 | SineCurveUnitCircle | 🔵 | `custom_python` | 🟠 | 🟡 `sine_waveform` 仅波形；**建议注册**完整版 |
+| 27 | SineCurveUnitCircle | 🟢 | **`manim_sine_unit_circle`** | 🟠 | 单位圆推导正弦 |
 
 **统计（27 行含 SineCurveUnitCircle）：**
 
 | 状态 | 数量 | 说明 |
 |------|------|------|
-| 🟢 已内置 `type` | **3** | `manim_moving_frame_box`、`manim_point_with_trace`、`manim_parametric_surface`（及宇宙 scene） |
-| 🟡 内置近似 | **8** | 可用但画面/交互与官方不完全一致 |
-| 🔵 仅 `custom_python` | **16** | 粘贴官方 Scene 即可渲染 |
+| 🟢 已内置 `type` | **14** | §7.5.11 画廊 12 种 + `manim_parametric_surface`（ThreeDSurfacePlot）等 |
+| 🟡 内置近似 | **3** | 3D 灯光/旋转等与官方不完全一致 |
+| 🔵 仅 `custom_python` | **10** | ManimCELogo、MovingZoomed、OpeningManim 等 |
 | 🟠 需 texlive | **10+** | 含 MathTex / Tex / `get_tex` |
 | 🟣 需 OpenGL | **7** | 3D / 变焦 / 跟拍相机 |
 
@@ -970,24 +980,17 @@ shots[].type
 
 ### 7.11 官方画廊缺口与建议新增镜头（路线图）
 
-按**教学价值 × 实现成本**排序，建议下一批注册为独立 `type`（当前均可先用 `custom_python`）：
+**已实现（P0–P2，见 §7.5.11）：** `manim_vector_arrow`、`manim_brace_annotation`、`manim_sin_cos_plot`、`manim_point_on_path`、`manim_moving_angle`、`manim_sine_unit_circle`、`manim_boolean_ops`、`manim_following_camera`、`manim_graph_area`、`manim_heat_diagram`。
+
+**待实现（P3，仍建议 `custom_python`）：**
 
 | 优先级 | 建议 `type` | 对应官方示例 | 理由 |
 |--------|-------------|--------------|------|
-| P0 | `manim_vector_arrow` | VectorArrow | 科普极高频；与现有 `vector_sum` 互补 |
-| P0 | `manim_brace_annotation` | BraceAnnotation | 尺寸/距离标注 |
-| P0 | `manim_sin_cos_plot` | SinAndCosFunctionPlot | 强化 `function_graph` 为官方同级 |
-| P1 | `manim_point_on_path` | PointMovingOnShapes | 路径运动入门 |
-| P1 | `manim_moving_angle` | MovingAngle | 角度 / ValueTracker |
-| P1 | `manim_sine_unit_circle` | SineCurveUnitCircle | 三角函数经典推导 |
-| P1 | `manim_boolean_ops` | BooleanOperations | 集合可视化 |
-| P2 | `manim_following_camera` | FollowingGraphCamera | 需 `MovingCameraScene` 模板基建 |
-| P2 | `manim_graph_area` | GraphAreaPlot | 面积 / 黎曼和 |
-| P2 | `manim_heat_diagram` | HeatDiagramPlot | 热力学示意 |
 | P3 | `manim_zoomed_scene` | MovingZoomedSceneAround | 需 ZoomedScene + OpenGL |
 | P3 | `manim_opening_demo` | OpeningManim | 综合演示片头（片段化） |
+| P3 | `manim_gradient_image` | GradientImageFromArray | 像素渐变，低频 |
 
-**暂不建议做成一键 `type`（保持 `custom_python`）：** ManimCELogo、OpeningManim 全片、MovingZoomedSceneAround 长代码维护成本高。
+**暂不建议做成一键 `type`：** ManimCELogo、OpeningManim 全片、MovingZoomedSceneAround 长代码维护成本高。
 
 ---
 
@@ -1178,6 +1181,7 @@ pm2 logs sunshinelife-videos-api
 | v1.2 | 2026-09 | 完整罗列 Remotion 16 种 + Manim 63 种 + 数学宇宙 33 scene；流水线映射表；时长参数；谐波/Spirograph 场景 @ `c08e9b1` |
 | v1.3 | 2026-09 | 读书训练 10 种 + 官方画廊精选（公式框选、动点轨迹）；本地归档 / 站点门户；§7.9 Gallery 对照；Manim 75 种 |
 | v1.4 | 2026-09 | §7.9.1 官方 27 例完整对照表；§7.10 配置手册（theme/字体/时长/ECS）；§7.11 缺口与新增路线图；Manim 字体 `fontPresetId` 传递修复 @ `b07403f` |
+| v1.5 | 2026-09 | P0–P2 官方画廊 10 种新 `type`（`gallery_scenes.py`）；Manim **85** 种；§7.5.11 扩展为 12 种画廊镜头 |
 
 ---
 

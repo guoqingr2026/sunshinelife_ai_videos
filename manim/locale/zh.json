@@ -74,5 +74,15 @@
     "title": "\u52a8\u70b9\u7559\u8f68\u8ff9",
     "mode": "demo",
     "moves": [[0, 1, 0], [-1, 0, 0]]
-  }
+  },
+  "manim_vector_arrow": { "title": "\u5411\u91cf\u4e0e\u5750\u6807", "arrow_end": [2, 2, 0] },
+  "manim_brace_annotation": { "title": "\u8ddd\u79bb\u6807\u6ce8", "horizontal_label": "\u6c34\u5e73\u8ddd\u79bb" },
+  "manim_sin_cos_plot": { "title": "sin(x) \u4e0e cos(x)" },
+  "manim_point_on_path": { "title": "\u6cbf\u8def\u5f84\u8fd0\u52a8" },
+  "manim_moving_angle": { "title": "\u89d2\u5ea6\u53d8\u5316" },
+  "manim_sine_unit_circle": { "title": "\u5355\u4f4d\u5706\u4e0e\u6b63\u5f26\u66f2\u7ebf" },
+  "manim_boolean_ops": { "header_label": "\u96c6\u5408\u8fd0\u7b97" },
+  "manim_following_camera": { "title": "\u76f8\u673a\u8ddf\u968f\u66f2\u7ebf" },
+  "manim_graph_area": { "title": "\u66f2\u7ebf\u4e0e\u9762\u79ef" },
+  "manim_heat_diagram": { "title": "\u70ed\u56fe\u793a\u610f" }
 }
