@@ -108,8 +108,14 @@ def main():
             sys.exit(1)
     elif task_type == "manim_custom":
         from templates.math_universe.registry import resolve_universe_scene, scene_needs_opengl
+        from templates._params import get_params
 
-        scene_name = str(params.get("scene") or params.get("class_name") or "")
+        # Merge locale defaults (zh.json) before resolving scene class
+        os.environ["MANIM_TEMPLATE_ID"] = task_type
+        os.environ["MANIM_PARAMS"] = json.dumps(params if isinstance(params, dict) else {})
+        merged = get_params(params if isinstance(params, dict) else {})
+        scene_name = str(merged.get("scene") or merged.get("class_name") or "").strip()
+        params = merged
         resolved = resolve_universe_scene(scene_name)
         if not resolved:
             sys.stderr.write(f"Unknown manim_custom scene: {scene_name}\n")

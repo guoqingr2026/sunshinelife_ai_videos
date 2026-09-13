@@ -51,7 +51,7 @@
   "manim_lissajous": { "title": "\u674e\u6492\u5982\u56fe\u5f62", "a": 3, "b": 4 },
   "manim_lorenz_attractor": { "title": "\u6d1b\u4f26\u8328\u5438\u5f15\u5b50", "subtitle": "\u6df7\u6c8c\u4e2d\u7684\u8774\u8776", "n": 3, "colors": ["#e85d75", "#4a90d9", "#50c878"] },
   "manim_mandelbrot_zoom": { "title": "\u66fc\u5fb7\u5e03\u7f57\u96c6", "subtitle": "z_{n+1} = z_n\u00b2 + c" },
-  "manim_custom": { "scene": "CardioidScene", "title": "\u5fc3\u5f62\u7ebf" },
+  "manim_custom": { "scene": "LorenzScene", "title": "\u6d1b\u4f26\u8328\u5438\u5f15\u5b50", "subtitle": "\u6df7\u6c8c\u4e2d\u7684\u8774\u8776", "n": 3, "colors": ["#e85d75", "#4a90d9", "#50c878"] },
   "manim_curve_3d": { "title": "3D \u7a7a\u95f4\u66f2\u7ebf", "subtitle": "\u8718\u86ba\u4e0a\u5347\u8f68\u8ff9" },
   "manim_parametric_surface": { "title": "\u53c2\u6570\u66f2\u9762" },
   "manim_parametric_curve": { "title": "\u53c2\u6570\u66f2\u7ebf" },

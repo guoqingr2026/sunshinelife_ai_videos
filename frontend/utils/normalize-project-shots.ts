@@ -1,5 +1,7 @@
 /** 与 backend shot-plan-parser normalizeShot 对齐（前端校验用） */
 
+const SHOT_RESERVED_KEYS = new Set(["type", "label", "params"]);
+
 export function normalizeShotClient(raw: {
   type: string;
   label?: string;
@@ -7,14 +9,21 @@ export function normalizeShotClient(raw: {
   text?: string;
   highlight?: unknown;
   subtitle?: string;
+  scene?: string;
+  [key: string]: unknown;
 }): { type: string; label: string; params?: Record<string, unknown> } | null {
   const type = String(raw.type || "").trim();
   if (!type) return null;
 
-  const params: Record<string, unknown> = raw.params ? { ...raw.params } : {};
-  if (raw.text !== undefined && params.text === undefined) params.text = raw.text;
-  if (raw.highlight !== undefined && params.highlight === undefined) params.highlight = raw.highlight;
-  if (raw.subtitle !== undefined && params.subtitle === undefined) params.subtitle = raw.subtitle;
+  const params: Record<string, unknown> =
+    raw.params && typeof raw.params === "object" && !Array.isArray(raw.params)
+      ? { ...raw.params }
+      : {};
+
+  for (const [key, value] of Object.entries(raw)) {
+    if (SHOT_RESERVED_KEYS.has(key) || value === undefined || value === null) continue;
+    if (!(key in params)) params[key] = value;
+  }
 
   let label = String(raw.label || "").trim();
   const text = String(params.text || "").trim();
@@ -38,6 +47,11 @@ export function validateProjectShots(
     if (!n) continue;
     if (n.type === "typewriter_text" && !String(n.params?.text || "").trim()) {
       warnings.push(`镜头 ${i + 1} typewriter_text 缺少 text 口播内容`);
+    }
+    if (n.type === "manim_custom" && !String(n.params?.scene || "").trim()) {
+      warnings.push(
+        `镜头 ${i + 1} manim_custom 缺少 params.scene（如 LorenzScene、CardioidScene）`
+      );
     }
   }
   return warnings;

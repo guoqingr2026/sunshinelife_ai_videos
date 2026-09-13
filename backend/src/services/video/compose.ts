@@ -92,6 +92,16 @@ export async function renderCompose(
       { ...(job.params || {}) },
       theme
     );
+    if (job.type === "manim_custom") {
+      const scene =
+        manimParams.scene ?? manimParams.class_name ?? (job.params || {}).scene;
+      if (!scene || !String(scene).trim()) {
+        throw new Error(
+          `Manim 镜头「${job.label}」缺少 params.scene（例如 LorenzScene、CardioidScene）`
+        );
+      }
+      manimParams.scene = String(scene).trim();
+    }
     if (theme?.manimCjkFont && !manimParams.cjk_font) {
       manimParams.cjk_font = theme.manimCjkFont;
     }
