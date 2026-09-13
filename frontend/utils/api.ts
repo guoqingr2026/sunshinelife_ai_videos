@@ -318,5 +318,12 @@ export const api = {
   getTask: (id: string) => request<Task>(`/api/tasks/${id}`),
 
   deleteTask: (id: string) =>
-    request<{ success: boolean }>(`/api/tasks/${id}`, { method: "DELETE" }),
+    request<{ success: boolean; removedCount?: number }>(`/api/tasks/${id}`, {
+      method: "DELETE",
+    }),
+
+  purgeTaskAssets: (id: string) =>
+    request<{ success: boolean; removedCount: number }>(`/api/tasks/${id}/purge-assets`, {
+      method: "POST",
+    }),
 };

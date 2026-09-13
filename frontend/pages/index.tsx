@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom";
+import { getPortalSites } from "../utils/site-portal";
 
 const modules = [
   {
@@ -45,12 +46,33 @@ const modules = [
 ];
 
 export default function Home() {
+  const portals = getPortalSites();
+
   return (
     <div>
       <h1 className="text-3xl font-extrabold text-ink mb-2">低成本网页端动画生产系统</h1>
-      <p className="text-muted mb-8 text-lg">
+      <p className="text-muted mb-4 text-lg">
         Remotion + Manim + HyperFrames + AI 文案生成
       </p>
+      <div className="panel mb-8 flex flex-wrap gap-3 items-center text-sm">
+        <span className="text-muted font-semibold">同域站点（知识库导航）：</span>
+        {portals.map((p) =>
+          p.id === "videos" ? (
+            <span key={p.id} className="badge bg-primary/10 text-primary border-primary/30">
+              当前 · 动画生产
+            </span>
+          ) : (
+            <a
+              key={p.id}
+              href={p.href}
+              className="text-primary hover:underline font-medium"
+              title={p.desc}
+            >
+              {p.label} →
+            </a>
+          )
+        )}
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {modules.map((m) => (
           <Link key={m.href} to={m.href} className="module-card">

@@ -1,8 +1,6 @@
 import { Router } from "express";
-import fs from "fs";
-import path from "path";
 import { db } from "../lib/db";
-import { getStorageRoot } from "../lib/storage";
+import { purgeTaskAssets } from "../lib/purge-task-assets";
 
 const router = Router();
 
@@ -34,32 +32,26 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+/** 仅删除 ECS 磁盘文件，保留任务记录（归档后释放空间） */
+router.post("/:id/purge-assets", async (req, res) => {
+  try {
+    const task = db.task.findFirst({ id: req.params.id });
+    if (!task) return res.status(404).json({ error: "Not found" });
+    const removed = purgeTaskAssets(task);
+    res.json({ success: true, removedCount: removed.length, removed });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
 router.delete("/:id", async (req, res) => {
   try {
     const task = db.task.findFirst({ id: req.params.id });
     if (!task) return res.status(404).json({ error: "Not found" });
 
-    const storageRoot = getStorageRoot();
-    if (task.outputUrl) {
-      const altPath = path.join(storageRoot, "..", task.outputUrl.replace(/^\//, ""));
-      const directPath = path.join(storageRoot, task.outputUrl.replace(/^\//, ""));
-      for (const p of [altPath, directPath]) {
-        if (fs.existsSync(p)) fs.unlinkSync(p);
-      }
-    }
-    if (task.framesUrl) {
-      const framesDir = path.join(
-        storageRoot,
-        "frames",
-        task.framesUrl.replace(/^\/frames\//, "").replace(/\/$/, "")
-      );
-      if (fs.existsSync(framesDir)) {
-        fs.rmSync(framesDir, { recursive: true, force: true });
-      }
-    }
-
+    const removed = purgeTaskAssets(task);
     db.task.delete({ id: req.params.id });
-    res.json({ success: true });
+    res.json({ success: true, removedCount: removed.length });
   } catch (err) {
     res.status(500).json({ error: String(err) });
   }

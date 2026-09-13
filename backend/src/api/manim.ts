@@ -17,7 +17,7 @@ router.get("/catalog", (_req, res) => {
     const catalogPath = path.join(manimRoot, "template_catalog.py");
     const raw = fs.readFileSync(catalogPath, "utf-8");
     const types = [...raw.matchAll(/"([a-z_]+)":\s*"templates\./g)].map((m) => m[1]);
-    res.json({ types, locale, customTypes: ["custom_python", "manim_custom"] });
+    res.json({ types, locale, customTypes: ["custom_python", "manim_custom", "formula_curve"] });
   } catch (err) {
     res.status(500).json({ error: String(err) });
   }
@@ -25,14 +25,31 @@ router.get("/catalog", (_req, res) => {
 
 function loadSceneExamples(manimRoot: string) {
   const examplesPath = path.join(manimRoot, "scene_examples.json");
-  if (!fs.existsSync(examplesPath)) {
-    return { categories: [], examples: [] };
-  }
-  const data = JSON.parse(fs.readFileSync(examplesPath, "utf-8"));
-  return {
-    categories: Array.isArray(data.categories) ? data.categories : [],
-    examples: Array.isArray(data.examples) ? data.examples : [],
+  const officialPath = path.join(manimRoot, "official_custom_examples.json");
+  const categories: Array<{ id: string; label: string }> = [];
+  const examples: unknown[] = [];
+  const seenCat = new Set<string>();
+
+  const mergeFile = (filePath: string) => {
+    if (!fs.existsSync(filePath)) return;
+    const data = JSON.parse(fs.readFileSync(filePath, "utf-8"));
+    if (Array.isArray(data.categories)) {
+      for (const c of data.categories) {
+        if (c?.id && !seenCat.has(c.id)) {
+          seenCat.add(c.id);
+          categories.push(c);
+        }
+      }
+    }
+    if (Array.isArray(data.examples)) {
+      examples.push(...data.examples);
+    }
   };
+
+  mergeFile(examplesPath);
+  mergeFile(officialPath);
+
+  return { categories, examples };
 }
 
 router.get("/examples", (_req, res) => {

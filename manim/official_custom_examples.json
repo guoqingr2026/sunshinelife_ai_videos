@@ -1,0 +1,73 @@
+{
+  "categories": [{ "id": "official", "label": "Manim 官方示例 (custom_python)" }],
+  "examples": [
+    {
+      "id": "official_square_to_circle",
+      "label": "SquareToCircle",
+      "category": "official",
+      "type": "custom_python",
+      "desc": "官方入门：方形变圆",
+      "params": {
+        "class_name": "SquareToCircle",
+        "code": "class SquareToCircle(Scene):\n    def construct(self):\n        square = Square()\n        circle = Circle()\n        self.play(Create(square))\n        self.play(Transform(square, circle))\n        self.wait(1)\n"
+      }
+    },
+    {
+      "id": "official_circle",
+      "label": "Circle 创建",
+      "category": "official",
+      "type": "custom_python",
+      "desc": "官方 Creating shapes",
+      "params": {
+        "class_name": "CircleExample",
+        "code": "class CircleExample(Scene):\n    def construct(self):\n        circle = Circle()\n        circle.set_fill(PINK, opacity=0.5)\n        self.play(Create(circle))\n        self.wait(1)\n"
+      }
+    },
+    {
+      "id": "official_vector_arrow",
+      "label": "VectorArrow",
+      "category": "official",
+      "type": "custom_python",
+      "desc": "向量与坐标平面",
+      "params": {
+        "class_name": "VectorArrow",
+        "code": "class VectorArrow(Scene):\n    def construct(self):\n        dot = Dot(ORIGIN)\n        arrow = Arrow(ORIGIN, [2, 2, 0], buff=0)\n        numberplane = NumberPlane()\n        origin_text = Text('(0, 0)').next_to(dot, DOWN)\n        tip_text = Text('(2, 2)').next_to(arrow.get_end(), RIGHT)\n        self.add(numberplane, dot, arrow, origin_text, tip_text)\n        self.wait(1)\n"
+      }
+    },
+    {
+      "id": "official_brace",
+      "label": "BraceAnnotation",
+      "category": "official",
+      "type": "custom_python",
+      "desc": "括号标注（需 texlive 才有完整 LaTeX）",
+      "params": {
+        "class_name": "BraceAnnotation",
+        "code": "class BraceAnnotation(Scene):\n    def construct(self):\n        dot = Dot([-2, -1, 0])\n        dot2 = Dot([2, 1, 0])\n        line = Line(dot.get_center(), dot2.get_center()).set_color(ORANGE)\n        b1 = Brace(line)\n        b1text = b1.get_text('Horizontal distance')\n        self.add(line, dot, dot2, b1, b1text)\n        self.wait(1)\n"
+      }
+    },
+    {
+      "id": "official_harmonic_ribbon_3d",
+      "label": "HarmonicRibbon3D",
+      "category": "official",
+      "type": "custom_python",
+      "needsOpengl": true,
+      "desc": "3D 谐波光带（OpenGL + xvfb）",
+      "params": {
+        "class_name": "HarmonicRibbon3D",
+        "code": "class HarmonicRibbon3D(ThreeDScene):\n    def construct(self):\n        axes = ThreeDAxes()\n        self.add(axes)\n        self.set_camera_orientation(phi=65*DEGREES, theta=45*DEGREES)\n        def curve(t):\n            x = np.sin(2*t) + 0.3*np.sin(5*t)\n            y = np.cos(3*t) + 0.3*np.cos(7*t)\n            z = 0.6*np.sin(4*t)\n            return np.array([x, y, z])\n        graph = ParametricFunction(curve, t_range=[0, 20], color=YELLOW)\n        self.play(Create(graph, rate_func=linear), run_time=6)\n"
+      }
+    },
+    {
+      "id": "official_parametric_3d",
+      "label": "ParametricFunction 3D",
+      "category": "official",
+      "type": "custom_python",
+      "needsOpengl": true,
+      "desc": "3D 参数曲线",
+      "params": {
+        "class_name": "ThreeDParametricSpring",
+        "code": "class ThreeDParametricSpring(ThreeDScene):\n    def construct(self):\n        curve = ParametricFunction(\n            lambda t: np.array([np.cos(2*t), np.sin(2*t), t/4]),\n            t_range=[0, 8*PI],\n            color=BLUE,\n        )\n        self.set_camera_orientation(phi=70*DEGREES, theta=30*DEGREES)\n        self.play(Create(curve), run_time=4)\n        self.wait(1)\n"
+      }
+    }
+  ]
+}

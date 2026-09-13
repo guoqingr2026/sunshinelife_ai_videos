@@ -7,6 +7,7 @@ export interface ManimSceneExample {
   type: string;
   needsOpengl?: boolean;
   desc?: string;
+  durationSeconds?: number;
   params: Record<string, unknown>;
 }
 
@@ -31,45 +32,45 @@ export default function ManimExampleGallery({
   compact = false,
 }: ManimExampleGalleryProps) {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [typeFilter, setTypeFilter] = useState<string>("all");
 
-  const relevant = useMemo(() => {
-    if (currentType === "manim_custom") {
-      return examples.filter((e) => e.type === "manim_custom");
-    }
-    return examples.filter((e) => e.type === currentType);
-  }, [examples, currentType]);
+  const typeOptions = useMemo(() => {
+    const types = new Set(examples.map((e) => e.type));
+    return Array.from(types).sort();
+  }, [examples]);
 
   const filtered = useMemo(() => {
-    if (categoryFilter === "all") return relevant;
-    return relevant.filter((e) => e.category === categoryFilter);
-  }, [relevant, categoryFilter]);
+    let list = examples;
+    if (categoryFilter !== "all") {
+      list = list.filter((e) => e.category === categoryFilter);
+    }
+    if (typeFilter !== "all") {
+      list = list.filter((e) => e.type === typeFilter);
+    }
+    return list;
+  }, [examples, categoryFilter, typeFilter]);
 
-  const usedCategories = useMemo(() => {
-    const ids = new Set(relevant.map((e) => e.category));
-    return categories.filter((c) => ids.has(c.id));
-  }, [relevant, categories]);
-
-  if (relevant.length === 0) return null;
+  if (examples.length === 0) return null;
 
   return (
     <div className="panel space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-semibold text-ink">
-          {currentType === "manim_custom" ? "数学宇宙示例库" : "场景示例"}
+          场景示例库（{examples.length}）— 点击即切换类型并填入 JSON
         </p>
-        <p className="text-xs text-muted">点击填入参数 JSON，再按需修改</p>
+        <p className="text-xs text-muted">当前场景：{currentType}</p>
       </div>
 
-      {!compact && usedCategories.length > 1 && (
+      {!compact && (
         <div className="flex flex-wrap gap-1.5 text-xs">
           <button
             type="button"
             onClick={() => setCategoryFilter("all")}
             className={categoryFilter === "all" ? "pill-tab pill-tab-active" : "pill-tab"}
           >
-            全部
+            全部分类
           </button>
-          {usedCategories.map((c) => (
+          {categories.map((c) => (
             <button
               key={c.id}
               type="button"
@@ -82,16 +83,45 @@ export default function ManimExampleGallery({
         </div>
       )}
 
+      {!compact && typeOptions.length > 1 && (
+        <div className="flex flex-wrap gap-1.5 text-xs">
+          <button
+            type="button"
+            onClick={() => setTypeFilter("all")}
+            className={typeFilter === "all" ? "pill-tab pill-tab-active" : "pill-tab"}
+          >
+            全部 type
+          </button>
+          {typeOptions.map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setTypeFilter(t)}
+              className={typeFilter === t ? "pill-tab pill-tab-active" : "pill-tab"}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className={`grid gap-2 ${compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
         {filtered.map((ex) => (
           <button
             key={ex.id}
             type="button"
             onClick={() => onSelect(ex)}
-            className="text-left rounded-lg border border-border bg-surface hover:border-primary/40 hover:bg-primary/5 px-3 py-2 transition-colors"
+            className={`text-left rounded-lg border px-3 py-2 transition-colors ${
+              ex.type === currentType
+                ? "border-primary bg-primary/10"
+                : "border-border bg-surface hover:border-primary/40 hover:bg-primary/5"
+            }`}
           >
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-sm font-medium text-ink">{ex.label}</span>
+              <span className="badge bg-surface text-muted border-border font-mono text-[10px]">
+                {ex.type}
+              </span>
               {ex.needsOpengl && (
                 <span className="badge bg-purple-50 text-purple-800 border-purple-200 text-[10px]">
                   3D
@@ -99,7 +129,7 @@ export default function ManimExampleGallery({
               )}
               {ex.type === "manim_custom" && typeof ex.params.scene === "string" && (
                 <span className="badge bg-blue-50 text-blue-800 border-blue-200 font-mono text-[10px]">
-                  {ex.params.scene}
+                  {String(ex.params.scene)}
                 </span>
               )}
             </div>
@@ -108,16 +138,8 @@ export default function ManimExampleGallery({
         ))}
       </div>
 
-      {currentType === "manim_custom" && (
-        <p className="text-xs text-muted leading-relaxed">
-          高级用法：{" "}
-          <code className="text-primary">manim_custom</code> +{" "}
-          <code className="text-primary">params.scene</code> 指定场景类名。
-          洛伦兹支持 <code className="text-primary">n</code>、
-          <code className="text-primary">colors</code>、
-          <code className="text-primary">initial_conditions</code>。
-          完整列表见 <code className="text-primary">GET /api/manim/universe-scenes</code>。
-        </p>
+      {filtered.length === 0 && (
+        <p className="text-xs text-muted">当前筛选无示例，请切换分类或 type。</p>
       )}
     </div>
   );

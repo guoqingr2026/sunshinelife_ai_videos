@@ -12,6 +12,11 @@ import {
 import FontPresetSelect from "../../components/FontPresetSelect";
 import ManimExampleGallery from "../../components/ManimExampleGallery";
 import FormulaCurveBuilder, { type FormulaCurveParams } from "../../components/FormulaCurveBuilder";
+import {
+  exampleToParamsJson,
+  exampleToTaskPayload,
+  parseOfficialManimCode,
+} from "../../utils/manim-example-apply";
 import { DEFAULT_FONT_PRESET, getFontPreset } from "../../utils/typography-presets";
 
 type LayerFilter = "all" | 1 | 2 | 3;
@@ -97,7 +102,24 @@ export default function ManimConfig() {
       }
       const preset = getFontPreset(fontPresetId);
       finalParams.cjk_font = preset.manimFont;
-      const result = await api.createManimTask({ type, params: finalParams });
+      let submitType = type;
+      if (type === "custom_python") {
+        if (!finalParams.class_name && finalParams.code) {
+          try {
+            const parsed = parseOfficialManimCode(String(finalParams.code));
+            finalParams.class_name = parsed.class_name;
+            finalParams.code = parsed.code;
+          } catch {
+            /* user may already have correct shape */
+          }
+        }
+      }
+      if (type === "manim_custom" && !finalParams.scene) {
+        alert("manim_custom 需要 params.scene（可从示例库点击填入）");
+        setLoading(false);
+        return;
+      }
+      const result = await api.createManimTask({ type: submitType, params: finalParams });
       setTask(await api.getManimTask(result.taskId));
     } finally {
       setLoading(false);
@@ -115,12 +137,24 @@ export default function ManimConfig() {
   };
 
   const applySceneExample = (example: ManimSceneExample) => {
-    const json = JSON.stringify(example.params, null, 2);
-    if (example.type !== type) {
+    const { type: exType } = exampleToTaskPayload(example);
+    if (exType !== type) {
       skipTypeReset.current = true;
-      setType(example.type);
+      setType(exType);
     }
-    setParamsJson(json);
+    setParamsJson(exampleToParamsJson(example));
+  };
+
+  const pasteOfficialCode = async () => {
+    try {
+      const raw = await navigator.clipboard.readText();
+      const parsed = parseOfficialManimCode(raw);
+      skipTypeReset.current = true;
+      setType("custom_python");
+      setParamsJson(JSON.stringify(parsed, null, 2));
+    } catch (e) {
+      alert(String(e));
+    }
   };
 
   const copyClipUrl = () => task?.outputUrl && navigator.clipboard.writeText(task.outputUrl);
@@ -271,11 +305,18 @@ export default function ManimConfig() {
           )}
 
           <div>
-            <div className="flex justify-between items-center mb-1">
+            <div className="flex justify-between items-center mb-1 flex-wrap gap-2">
               <label className="text-sm text-muted font-semibold">参数 JSON</label>
-              <button type="button" onClick={fillExample} className="btn-ghost text-xs">
-                一键填充示例
-              </button>
+              <div className="flex gap-2">
+                {type === "custom_python" && (
+                  <button type="button" onClick={pasteOfficialCode} className="btn-ghost text-xs">
+                    剪贴板 → custom_python JSON
+                  </button>
+                )}
+                <button type="button" onClick={fillExample} className="btn-ghost text-xs">
+                  一键填充示例
+                </button>
+              </div>
             </div>
             <textarea
               value={paramsJson}
