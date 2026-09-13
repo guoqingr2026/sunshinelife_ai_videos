@@ -2,7 +2,11 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, ComposePayload, ComposeTask } from "../../utils/api";
 import { consumeProjectHandoff } from "../../utils/project-bridge";
-import { MVP_PROJECT_JSON, MVP_WORKFLOW_HELP } from "../../utils/mvp-project";
+import {
+  DEFAULT_COMPOSE_PROJECT_JSON,
+  MVP_PROJECT_JSON,
+  MVP_WORKFLOW_HELP,
+} from "../../utils/mvp-project";
 import {
   MATH_EXPONENTIAL_PROJECT_JSON,
   MATH_EXPONENTIAL_PROJECT_LITE_JSON,
@@ -89,7 +93,7 @@ function parseProjectJson(text: string): {
 }
 
 export default function AutoVideoPage() {
-  const [projectJson, setProjectJson] = useState(MVP_PROJECT_JSON);
+  const [projectJson, setProjectJson] = useState(DEFAULT_COMPOSE_PROJECT_JSON);
   const [previewPlan, setPreviewPlan] = useState<{
     title: string;
     resolvedShots?: Array<{ kind: string; type: string; label: string }>;

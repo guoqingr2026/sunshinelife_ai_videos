@@ -16,7 +16,7 @@ export const DEFAULT_MANIM_RULES: ManimRule[] = [
     keywords: ["间隔重复", "主动回忆", "费曼"],
     type: "typewriter_text",
     label: "学习技巧",
-    params: { text: "主动回忆 · 间隔重复", subtitle: "学习技巧" },
+    params: { text: "间隔重复与主动回忆可显著提升长期记忆。", subtitle: "学习技巧" },
   },
   {
     keywords: ["流程", "步骤"],

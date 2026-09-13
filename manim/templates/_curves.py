@@ -90,6 +90,41 @@ def mandelbrot_rgba(
     return img
 
 
+def julia_rgba(
+    c_real: float = -0.7,
+    c_imag: float = 0.27015,
+    width: int = 320,
+    height: int = 240,
+    xmin: float = -1.5,
+    xmax: float = 1.5,
+    ymin: float = -1.5,
+    ymax: float = 1.5,
+    max_iter: int = 64,
+) -> np.ndarray:
+    c = complex(c_real, c_imag)
+    img = np.zeros((height, width, 4), dtype=np.uint8)
+    xs = np.linspace(xmin, xmax, width)
+    ys = np.linspace(ymin, ymax, height)
+    for j, y0 in enumerate(ys):
+        for i, x0 in enumerate(xs):
+            z = complex(x0, y0)
+            n = 0
+            while abs(z) <= 2 and n < max_iter:
+                z = z * z + c
+                n += 1
+            if n >= max_iter:
+                img[j, i] = [15, 10, 35, 255]
+            else:
+                t = n / max_iter
+                img[j, i] = [
+                    int(50 + 200 * t),
+                    int(30 + 100 * (1 - t)),
+                    int(120 + 100 * t),
+                    255,
+                ]
+    return img
+
+
 def fit_curve_group(curve, max_size: float = 5.5):
     curve.scale_to_fit_width(max_size)
     if curve.height > max_size:

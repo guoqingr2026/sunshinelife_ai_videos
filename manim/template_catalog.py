@@ -69,4 +69,13 @@ TEMPLATES = {
     "manim_lissajous": "templates.math_curves.ManimLissajous",
     "manim_lorenz_attractor": "templates.math_curves.ManimLorenzAttractor",
     "manim_mandelbrot_zoom": "templates.math_curves.ManimMandelbrotZoom",
+    # 数学宇宙 — 万能调度 + 常用直注册
+    "manim_custom": "templates.math_universe.curve_2d.ParametricCurveScene",
+    "manim_curve_3d": "templates.math_universe.curve_3d.Curve3DScene",
+    "manim_parametric_surface": "templates.math_universe.surfaces.SurfaceScene",
+    "manim_rossler": "templates.math_universe.chaos.RosslerScene",
+    "manim_julia_set": "templates.math_universe.fractals.JuliaScene",
+    "manim_koch_snowflake": "templates.math_universe.fractals.KochSnowflakeScene",
+    "manim_three_body": "templates.math_universe.dynamics.ThreeBodyScene",
+    "manim_parametric_curve": "templates.math_universe.curve_2d.ParametricCurveScene",
 }

@@ -97,15 +97,35 @@ def main():
     task_id = payload.get("taskId", "custom")
     root = os.path.dirname(os.path.abspath(__file__))
 
+    custom_renderer = None
+    custom_xvfb = None
+
     if task_type == "custom_python":
         try:
             script_file, class_name = prepare_custom_python(params, task_id, root)
         except ValueError as e:
             sys.stderr.write(str(e) + "\n")
             sys.exit(1)
+    elif task_type == "manim_custom":
+        from templates.math_universe.registry import resolve_universe_scene, scene_needs_opengl
+
+        scene_name = str(params.get("scene") or params.get("class_name") or "")
+        resolved = resolve_universe_scene(scene_name)
+        if not resolved:
+            sys.stderr.write(f"Unknown manim_custom scene: {scene_name}\n")
+            sys.stderr.write(
+                "Valid scene names: CardioidScene, LorenzScene, MandelbrotScene, ... "
+                "(see GET /api/manim/universe-scenes)\n"
+            )
+            sys.exit(1)
+        script_file, class_name = resolved
+        custom_renderer = "opengl" if scene_needs_opengl(scene_name) else "cairo"
+        custom_xvfb = custom_renderer == "opengl"
     elif task_type not in TEMPLATES:
         sys.stderr.write(f"Unknown manim template: {task_type}\n")
-        sys.stderr.write(f"Valid types: {', '.join(sorted(TEMPLATES.keys()))}, custom_python\n")
+        sys.stderr.write(
+            f"Valid types: {', '.join(sorted(TEMPLATES.keys()))}, custom_python, manim_custom\n"
+        )
         sys.exit(1)
     else:
         scene_class = TEMPLATES[task_type]
@@ -113,8 +133,8 @@ def main():
         script_file = f"{module_path.replace('.', '/')}.py"
 
     meta = get_template_meta(task_type)
-    renderer = meta.get("renderer", "cairo")
-    use_xvfb = meta.get("xvfb", False)
+    renderer = custom_renderer if custom_renderer else meta.get("renderer", "cairo")
+    use_xvfb = custom_xvfb if custom_xvfb is not None else meta.get("xvfb", False)
 
     storage_root = payload.get("storageRoot", "")
     if storage_root:

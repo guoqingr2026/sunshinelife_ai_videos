@@ -420,6 +420,24 @@ LaTeX 在 JSON 中转义：`"\\frac{V}{R}"`
 }
 ```
 
+#### `manim_custom`（数学曲线宇宙 · 推荐）
+
+无需为每条曲线单独注册 `type`，用 `params.scene` 指定场景类名即可：
+
+```json
+{
+  "type": "manim_custom",
+  "label": "心形线",
+  "params": { "scene": "CardioidScene", "title": "心形线", "subtitle": "r = 1 - cos θ" }
+}
+```
+
+**常用 scene 名：** `CardioidScene` · `RoseCurveScene` · `ArchimedeanSpiralScene` · `LorenzScene` · `MandelbrotScene` · `JuliaScene` · `KochSnowflakeScene` · `ThreeBodyScene` · `Curve3DScene` · `SurfaceScene`
+
+完整列表：`GET /api/manim/universe-scenes`
+
+也可直接用已注册别名：`manim_cardioid`、`manim_julia_set`、`manim_three_body` 等。
+
 ---
 
 ## 七、按选题推荐分镜

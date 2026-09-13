@@ -17,7 +17,7 @@
   "forgetting_curve": { "title": "\u9057\u5fd8\u66f2\u7ebf", "x_label": "\u65f6\u95f4", "y_label": "\u8bb0\u5fc6\u4fdd\u7559" },
   "concept_network": { "center": "\u6838\u5fc3\u6982\u5ff5", "nodes": ["A", "B", "C", "D"], "title": "\u6982\u5ff5\u7f51\u7edc" },
   "learning_curve": { "title": "\u5b66\u4e60\u6548\u7387\u66f2\u7ebf", "hint": "\u7406\u89e3\u4f18\u5148 \u2192 \u957f\u671f\u7559\u5b58" },
-  "typewriter_text": { "text": "\u4e3b\u52a8\u56de\u60f6 \u00b7 \u95f4\u9694\u91cd\u590d", "subtitle": "\u5b66\u4e60\u6280\u5de7" },
+  "typewriter_text": { "text": "\u5728\u6b64\u8f93\u5165\u53e3\u64ad\u6587\u6848", "subtitle": "" },
   "keyword_pop": { "keywords": ["\u7406\u89e3", "\u8bb0\u5fc6", "\u5e94\u7528", "\u53cd\u9988"], "title": "\u5173\u952e\u8bcd\u9ad8\u4eae" },
   "formula_steps": { "steps": ["P = V * I", "V = I * R", "P = I^2 * R"], "title": "\u516c\u5f0f\u62c6\u89e3" },
   "chapter_banner": { "chapter": "\u7b2c\u4e00\u7ae0", "title": "\u534a\u5bfc\u4f53\u57fa\u7840" },
@@ -50,5 +50,13 @@
   "manim_cycloid": { "title": "\u6446\u7ebf", "subtitle": "\u8f6e\u5b50\u6eda\u52a8\u8f68\u8ff9" },
   "manim_lissajous": { "title": "\u674e\u6492\u5982\u56fe\u5f62", "a": 3, "b": 4 },
   "manim_lorenz_attractor": { "title": "\u6d1b\u4f26\u8328\u5438\u5f15\u5b50", "subtitle": "\u6df7\u6c8c\u4e2d\u7684\u8774\u8776" },
-  "manim_mandelbrot_zoom": { "title": "\u66fc\u5fb7\u5e03\u7f57\u96c6", "subtitle": "z_{n+1} = z_n\u00b2 + c" }
+  "manim_mandelbrot_zoom": { "title": "\u66fc\u5fb7\u5e03\u7f57\u96c6", "subtitle": "z_{n+1} = z_n\u00b2 + c" },
+  "manim_custom": { "scene": "CardioidScene", "title": "\u5fc3\u5f62\u7ebf" },
+  "manim_curve_3d": { "title": "3D \u7a7a\u95f4\u66f2\u7ebf", "subtitle": "\u8718\u86ba\u4e0a\u5347\u8f68\u8ff9" },
+  "manim_parametric_surface": { "title": "\u53c2\u6570\u66f2\u9762" },
+  "manim_parametric_curve": { "title": "\u53c2\u6570\u66f2\u7ebf" },
+  "manim_rossler": { "title": "R\u00f6ssler \u5438\u5f15\u5b50" },
+  "manim_julia_set": { "title": "\u6731\u5229\u4e9a\u96c6", "c_real": -0.7, "c_imag": 0.27015 },
+  "manim_koch_snowflake": { "title": "Koch \u96ea\u82b1", "depth": 4 },
+  "manim_three_body": { "title": "\u4e09\u4f53\u95ee\u9898", "steps": 800 }
 }

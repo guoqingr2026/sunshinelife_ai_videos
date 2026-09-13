@@ -17,7 +17,36 @@ router.get("/catalog", (_req, res) => {
     const catalogPath = path.join(manimRoot, "template_catalog.py");
     const raw = fs.readFileSync(catalogPath, "utf-8");
     const types = [...raw.matchAll(/"([a-z_]+)":\s*"templates\./g)].map((m) => m[1]);
-    res.json({ types, locale, customTypes: ["custom_python"] });
+    res.json({ types, locale, customTypes: ["custom_python", "manim_custom"] });
+  } catch (err) {
+    res.status(500).json({ error: String(err) });
+  }
+});
+
+router.get("/universe-scenes", (_req, res) => {
+  try {
+    const manimRoot = path.resolve(__dirname, "../../../manim");
+    const registryPath = path.join(manimRoot, "templates", "math_universe", "registry.py");
+    const raw = fs.readFileSync(registryPath, "utf-8");
+    const scenes = [
+      ...raw.matchAll(/^\s*"([A-Za-z][A-Za-z0-9_]*)":\s*"templates\./gm),
+    ].map((m) => m[1]);
+    const aliases = [
+      ...raw.matchAll(/^\s*"([a-z_][a-z0-9_]*)":\s*"([A-Za-z][A-Za-z0-9_]*)"/gm),
+    ].map((m) => ({ alias: m[1], scene: m[2] }));
+    res.json({
+      scenes,
+      aliases,
+      usage: {
+        type: "manim_custom",
+        params: { scene: "CardioidScene", title: "心形线" },
+      },
+      exampleShots: [
+        { type: "manim_custom", label: "心形线", params: { scene: "CardioidScene", title: "心形线" } },
+        { type: "manim_custom", label: "洛伦兹", params: { scene: "LorenzScene" } },
+        { type: "manim_julia_set", label: "朱利亚集", params: { title: "朱利亚集" } },
+      ],
+    });
   } catch (err) {
     res.status(500).json({ error: String(err) });
   }
@@ -45,7 +74,7 @@ router.get("/status", async (_req, res) => {
     ffmpegInstalled: ffmpegOk,
     mode: manimOk ? "real" : "placeholder",
     hint: manimOk
-      ? "42 种注册场景 + custom_python（L3）。可选: install-texlive-optional.sh（MathTex）、install-opengl-deps.sh（3D）。手册: docs/manim-automation-guide.md"
+      ? "注册场景 + manim_custom（数学宇宙）+ custom_python（L3）。GET /api/manim/universe-scenes 列出 scene 名。可选: install-texlive-optional.sh、install-opengl-deps.sh（3D）。"
       : "未检测到 Manim，将生成占位视频。本地: pip install manim · ECS: deploy/ecs/update-manim.sh",
     recentTasks: recent,
   });

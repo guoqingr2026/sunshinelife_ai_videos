@@ -50,6 +50,8 @@ export interface VideoProject {
   title?: string;
   theme?: ThemeConfig;
   shots?: ShotSpec[];
+  /** 为 true 时在显式 shots 外再自动加标题/引言/片尾；默认 false（完全按 JSON 顺序） */
+  autoWrap?: boolean;
 }
 
 export interface VideoPlan {
@@ -293,9 +295,11 @@ export function planFromBrief(
   const sequence = resolveVideoSequence(brief, project);
   const timeline: TimelineItem[] = [];
   const manimJobs: ManimJob[] = [];
+  const hasExplicitShots = (project?.shots?.length ?? 0) > 0;
+  const autoWrap = project?.autoWrap === true;
 
   const hasTitleShot = sequence.some((s) => s.kind === "remotion" && s.type === "title");
-  if (!hasTitleShot) {
+  if ((!hasExplicitShots || autoWrap) && !hasTitleShot) {
     timeline.push({ type: "title", durationInFrames: 120, title: videoTitle });
     timeline.push({
       type: "quote",
@@ -307,7 +311,7 @@ export function planFromBrief(
 
   if (sequence.length > 0) {
     appendSequence(sequence, timeline, manimJobs);
-  } else {
+  } else if (!hasExplicitShots) {
     const typesToRender =
       detectManimTypes(brief, rules).length > 0
         ? detectManimTypes(brief, rules)
@@ -322,7 +326,7 @@ export function planFromBrief(
               keywords: [],
               type: "typewriter_text",
               label: "学习技巧",
-              params: { text: "主动回忆", subtitle: "技巧" },
+              params: { text: "在此填写口播文案", subtitle: "" },
             },
           ];
 
@@ -345,7 +349,7 @@ export function planFromBrief(
   }
 
   const bullets = extractBullets(brief);
-  if (bullets.length >= 2) {
+  if ((!hasExplicitShots || autoWrap) && bullets.length >= 2) {
     timeline.push({
       type: "bullet_list",
       durationInFrames: 150,
@@ -354,11 +358,13 @@ export function planFromBrief(
     });
   }
 
-  timeline.push({
-    type: "fade_text",
-    durationInFrames: 90,
-    text: "感谢观看 · 点赞收藏",
-  });
+  if (!hasExplicitShots || autoWrap) {
+    timeline.push({
+      type: "fade_text",
+      durationInFrames: 90,
+      text: "感谢观看 · 点赞收藏",
+    });
+  }
 
   const autoTheme = pickTheme(brief);
   const theme = project?.theme ? { ...autoTheme, ...project.theme } : autoTheme;
