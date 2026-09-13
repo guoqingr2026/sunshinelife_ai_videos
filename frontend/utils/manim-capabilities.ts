@@ -79,7 +79,7 @@ export const TEMPLATE_DOMAIN: Record<string, ManimDomain> = {
   manim_lissajous: "learning",
   manim_lorenz_attractor: "media",
   manim_mandelbrot_zoom: "learning",
-  manim_custom: "advanced",
+  manim_custom: "media",
   manim_curve_3d: "media",
   manim_parametric_surface: "media",
   manim_parametric_curve: "learning",
