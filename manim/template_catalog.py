@@ -59,4 +59,14 @@ TEMPLATES = {
     "manim_probability_tree": "templates.manim_probability_tree.ManimProbabilityTree",
     "manim_formula": "templates.manim_formula.ManimFormula",
     "manim_simulation_chart": "templates.manim_simulation_chart.ManimSimulationChart",
+    # 数学曲线美学系列
+    "manim_cardioid": "templates.math_curves.ManimCardioid",
+    "manim_rose_curve": "templates.math_curves.ManimRoseCurve",
+    "manim_archimedean_spiral": "templates.math_curves.ManimArchimedeanSpiral",
+    "manim_exponential_spiral": "templates.math_curves.ManimExponentialSpiral",
+    "manim_lemniscate": "templates.math_curves.ManimLemniscate",
+    "manim_cycloid": "templates.math_curves.ManimCycloid",
+    "manim_lissajous": "templates.math_curves.ManimLissajous",
+    "manim_lorenz_attractor": "templates.math_curves.ManimLorenzAttractor",
+    "manim_mandelbrot_zoom": "templates.math_curves.ManimMandelbrotZoom",
 }

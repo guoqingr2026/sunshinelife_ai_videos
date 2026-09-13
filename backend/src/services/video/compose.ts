@@ -7,6 +7,7 @@ import {
 } from "./compose-progress";
 import type { ComposePayload } from "./compose-progress";
 import { createComposeOutputBundle } from "./output-bundle";
+import { injectThemeIntoManimParams } from "./manim-theme";
 
 export type { ComposePayload };
 
@@ -87,7 +88,10 @@ export async function renderCompose(
       log: `[${i + 1}/${manimJobs!.length}] 开始渲染 ${job.type} — ${job.label}`,
     });
 
-    const manimParams = { ...(job.params || {}) };
+    const manimParams = injectThemeIntoManimParams(
+      { ...(job.params || {}) },
+      theme
+    );
     if (theme?.manimCjkFont && !manimParams.cjk_font) {
       manimParams.cjk_font = theme.manimCjkFont;
     }

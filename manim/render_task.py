@@ -24,6 +24,7 @@ apply_no_tex()
 from templates._text import mk_text
 from templates._layout import mk_title, drop_content
 from templates._params import get_params
+from templates._theme import apply_scene_theme, theme_colors
 from templates._axes import make_axes, make_number_plane, make_bar_chart
 """
 

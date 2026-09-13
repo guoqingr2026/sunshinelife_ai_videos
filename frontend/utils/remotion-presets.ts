@@ -49,6 +49,13 @@ export const COLOR_SCHEMES: ThemeConfig[] = [
     accentColor: "#ef4444",
   },
   {
+    name: "清新浅蓝",
+    primaryColor: "#2563eb",
+    secondaryColor: "#38bdf8",
+    backgroundColor: "#e8f4fc",
+    accentColor: "#fb7299",
+  },
+  {
     name: "B站粉",
     primaryColor: "#fb7299",
     secondaryColor: "#23ade5",

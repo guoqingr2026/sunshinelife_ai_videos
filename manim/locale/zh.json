@@ -41,5 +41,14 @@
   "video_embed": { "title": "\u89c6\u9891\u7247\u6bb5", "videoPath": "", "max_duration": 3 },
   "vocab_card": { "title": "\u5355\u8bcd\u5361", "word": "recall", "phonetic": "/rI'ko:l/", "meaning": "\u56de\u60f3\u3001\u56de\u60f6", "example": "Active recall improves memory." },
   "grammar_highlight": { "title": "\u8bed\u6cd5", "pattern": "S + V + O", "sentence": "I love learning English.", "highlight": "love" },
-  "dialogue_scene": { "title": "\u5bf9\u8bdd", "lines": [{ "speaker": "A", "text": "How do you study vocabulary?" }, { "speaker": "B", "text": "I use active recall and spaced repetition." }] }
+  "dialogue_scene": { "title": "\u5bf9\u8bdd", "lines": [{ "speaker": "A", "text": "How do you study vocabulary?" }, { "speaker": "B", "text": "I use active recall and spaced repetition." }] },
+  "manim_cardioid": { "title": "\u5fc3\u5f62\u7ebf", "subtitle": "r = 1 - cos \u03b8" },
+  "manim_rose_curve": { "title": "\u73ab\u7470\u7ebf", "k": 5, "subtitle": "r = sin(k\u03b8)" },
+  "manim_archimedean_spiral": { "title": "\u963f\u57fa\u7c73\u5fb7\u87ba\u7ebf", "subtitle": "r = a + b\u03b8" },
+  "manim_exponential_spiral": { "title": "\u6307\u6570\u87ba\u7ebf", "subtitle": "r = a\u00b7e^(b\u03b8)" },
+  "manim_lemniscate": { "title": "\u83b1\u59c6\u5c3c\u65af\u76d6\u7279", "subtitle": "(\u221e \u5f62\u5bf9\u79f0\u66f2\u7ebf)" },
+  "manim_cycloid": { "title": "\u6446\u7ebf", "subtitle": "\u8f6e\u5b50\u6eda\u52a8\u8f68\u8ff9" },
+  "manim_lissajous": { "title": "\u674e\u6492\u5982\u56fe\u5f62", "a": 3, "b": 4 },
+  "manim_lorenz_attractor": { "title": "\u6d1b\u4f26\u8328\u5438\u5f15\u5b50", "subtitle": "\u6df7\u6c8c\u4e2d\u7684\u8774\u8776" },
+  "manim_mandelbrot_zoom": { "title": "\u66fc\u5fb7\u5e03\u7f57\u96c6", "subtitle": "z_{n+1} = z_n\u00b2 + c" }
 }

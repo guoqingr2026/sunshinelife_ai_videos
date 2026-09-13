@@ -13,10 +13,12 @@ from templates._text import mk_text
 from templates._params import get_params
 from templates._layout import mk_title, drop_content
 from templates._axes import make_axes
+from templates._theme import apply_scene_theme
 
 
 class ManimSimulationChart(Scene):
     def construct(self):
+        theme = apply_scene_theme(self)
         p = get_params({
             "trials": 10000,
             "chartType": "line",
@@ -32,20 +34,20 @@ class ManimSimulationChart(Scene):
         # 收敛曲线：从 0.5 渐近到 target
         curve = axes.plot(
             lambda x: target - (target - 0.5) * math.exp(-0.6 * x),
-            color=BLUE,
+            color=theme.secondary,
         )
         target_line = DashedLine(
             axes.c2p(0, target),
             axes.c2p(10, target),
-            color=YELLOW,
+            color=theme.accent,
         )
-        target_lbl = mk_text(f"{target:.1%}", font_size=20, color=YELLOW)
+        target_lbl = mk_text(f"{target:.1%}", font_size=20, color=theme.accent)
         target_lbl.next_to(axes.c2p(10, target), RIGHT, buff=0.2)
 
         chart = VGroup(axes, curve, target_line, target_lbl)
         drop_content(chart)
 
-        desc_text = mk_text(desc, font_size=22, color=GRAY)
+        desc_text = mk_text(desc, font_size=22, color=theme.muted)
         desc_text.to_edge(DOWN, buff=0.5)
 
         self.play(Write(title), Create(axes))

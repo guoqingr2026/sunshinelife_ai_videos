@@ -11,10 +11,12 @@ apply_no_tex()
 from templates._text import mk_text
 from templates._params import get_params
 from templates._layout import mk_title
+from templates._theme import apply_scene_theme
 
 
 class ManimFormula(Scene):
     def construct(self):
+        theme = apply_scene_theme(self)
         p = get_params({
             "formula": "P(赢车|换门) = 2/3",
             "steps": [
@@ -26,13 +28,13 @@ class ManimFormula(Scene):
             "title": "贝叶斯推导",
         })
         title = mk_title(p.get("title", "公式推导"))
-        formula = mk_text(str(p.get("formula", "")), font_size=40, color=YELLOW)
+        formula = mk_text(str(p.get("formula", "")), font_size=40, color=theme.accent)
         formula.next_to(title, DOWN, buff=0.8)
 
         steps = p.get("steps") or []
         step_group = VGroup()
         for i, s in enumerate(steps):
-            t = mk_text(f"{i+1}. {s}", font_size=24, color=WHITE)
+            t = mk_text(f"{i+1}. {s}", font_size=24, color=theme.text)
             t.align_to(formula, LEFT)
             step_group.add(t)
         step_group.arrange(DOWN, aligned_edge=LEFT, buff=0.35)

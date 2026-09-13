@@ -13,8 +13,9 @@
 | **成片包装** | Remotion | **背景色、全局配色、字体层级、章节卡、字幕、转场、BGM、logo、水印** |
 | **主题** | Remotion `theme` | `primaryColor` / `secondaryColor` / `backgroundColor` / `accentColor`（见 `frontend/utils/remotion-presets.ts`） |
 
-**结论：背景、字体、配色由 Remotion 统一接管；Manim 只输出透明或深色底的 `.mp4` 动画片段。**  
-一键成片时在 compose 请求里传 `theme`，Remotion 模板套用配色；Manim 侧中文字体由 ECS 的 `Noto Sans CJK SC`（`MANIM_CJK_FONT`）保证可读，**不与 Remotion 主题联动**。
+**结论：成片主题 `theme` 同时作用于 Remotion 包装层与 Manim 内容层。**  
+一键成片时在 compose 请求里传 `theme`：`backgroundColor` / `primaryColor` / `secondaryColor` / `accentColor` 会注入每个 Manim 任务的 `params`，模板内调用 `apply_scene_theme(self)` 设置镜头背景与文字对比色。  
+楷体预设（`KaiTi`）在 Linux ECS 自动映射为 **文鼎楷体**（`AR PL UKai CN`，见 `deploy/ecs/install-fonts.sh`）。
 
 ```
 选题/文章 → project.shots JSON

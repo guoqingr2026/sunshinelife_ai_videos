@@ -39,7 +39,7 @@ export const FONT_PRESETS: FontPreset[] = [
     label: "楷体（教材感）",
     remotionFamily: '"KaiTi", "STKaiti", "楷体", serif',
     manimFont: "KaiTi",
-    desc: "适合语文、古诗词类内容",
+    desc: "适合语文、古诗词；Linux ECS 自动映射为文鼎楷体（AR PL UKai CN）",
   },
   {
     id: "arial",

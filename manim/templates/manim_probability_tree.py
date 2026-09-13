@@ -11,10 +11,12 @@ apply_no_tex()
 from templates._text import mk_text
 from templates._params import get_params
 from templates._layout import mk_title
+from templates._theme import apply_scene_theme
 
 
 class ManimProbabilityTree(Scene):
     def construct(self):
+        theme = apply_scene_theme(self)
         p = get_params({
             "title": "概率树",
             "branches": [
@@ -27,7 +29,7 @@ class ManimProbabilityTree(Scene):
         branches = p.get("branches") or []
         highlight = str(p.get("highlight", ""))
 
-        root = mk_text("开始", font_size=28, color=YELLOW)
+        root = mk_text("开始", font_size=28, color=theme.accent)
         root.shift(UP * 2.5)
 
         nodes = VGroup(root)
@@ -37,21 +39,21 @@ class ManimProbabilityTree(Scene):
             path = str(b.get("path", f"分支{i+1}"))
             prob = str(b.get("prob", ""))
             is_hi = highlight and (highlight in path or highlight in prob)
-            color = GREEN if is_hi else WHITE
+            color = theme.primary if is_hi else theme.text
 
             y = 0.8 - i * 1.4
             node = VGroup(
                 mk_text(path, font_size=22, color=color),
-                mk_text(prob, font_size=26, color=YELLOW if is_hi else GRAY),
+                mk_text(prob, font_size=26, color=theme.accent if is_hi else theme.muted),
             ).arrange(DOWN, buff=0.15)
             node.shift(DOWN * (i * 1.2) + LEFT * 0.5)
 
-            edge = Line(root.get_bottom(), node.get_top(), color=GRAY)
+            edge = Line(root.get_bottom(), node.get_top(), color=theme.muted)
             edges.add(edge)
             nodes.add(node)
 
         if highlight:
-            hi = mk_text(f"★ {highlight}", font_size=24, color=GREEN)
+            hi = mk_text(f"★ {highlight}", font_size=24, color=theme.primary)
             hi.to_edge(DOWN, buff=0.6)
             nodes.add(hi)
 
