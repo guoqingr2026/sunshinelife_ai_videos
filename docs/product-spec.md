@@ -1,7 +1,7 @@
 # SunshineLife AI Videos — 产品规格书
 
-> **文档版本：** v1.5（2026-09）  
-> **适用代码：** `main` @ `gallery-p0-p2` 及之后  
+> **文档版本：** v1.6（2026-09）  
+> **适用代码：** `main` @ `gallery-params` 及之后  
 > **在线地址（ECS）：** `http://47.99.184.249/sunshinelife_ai_videos/`
 
 ---
@@ -530,6 +530,43 @@ shots[].type
 
 示例见 `manim/scene_examples.json`（Manim 页画廊 →「官方画廊精选」）；实现于 `manim/templates/gallery_scenes.py`。
 
+#### 7.5.11.1 画廊镜头通用 `params` 字段
+
+所有 §7.5.11 镜头均支持以下**通用字段**（写入 `shots[].params` 或 Manim 单镜页 JSON）：
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `title` | string | 中文标题（走 `cjk_font` / `fontPresetId`） |
+| `title_font_size` | number | 标题字号，默认 32 |
+| `label_font_size` / `font_size` | number | 标注、轴标签字号 |
+| `formula_font_size` | number | MathTex 字号（公式类镜头） |
+| `hold_seconds` | number | 场景结尾停留秒数 |
+| `run_times` | object | 分步动画秒数，如 `{ "axes": 1, "curves": 1.2 }` |
+| `{step}_run_time` | number | 单步时长别名，如 `follow_run_time` ≡ `run_times.follow` |
+| `primaryColor` 等 | string | 可覆盖成片 `theme` 颜色 |
+| `cjk_font` | string | 覆盖中文字体 |
+
+**表达式约定：** 绘图类 `*_expr` 使用 `x` 或 `t` 为自变量，支持 `sin/cos/exp/pow/**` 等（见 `manim/templates/_formula_eval.py`）。
+
+**分类型关键字段（节选）：**
+
+| `type` | 除通用外的重要字段 |
+|--------|-------------------|
+| `manim_sin_cos_plot` | `sin_expr`, `cos_expr`, `x_range`, `y_range`, `vertical_at` |
+| `manim_graph_area` | `curve_1_expr`, `curve_2_expr`, `riemann_x_range`, `area_x_range`, `vertical_lines_at`, `riemann_dx` |
+| `manim_following_camera` | `curve_expr`, `camera_scale`, `curve_x_min`/`curve_x_max`, `restore_camera` |
+| `manim_vector_arrow` | `arrow_start`, `arrow_end`, `plane_x_range`, `plane_y_range` |
+| `manim_brace_annotation` | `dot1`, `dot2`, `horizontal_label`, `formula_label` |
+| `manim_point_on_path` | `circle_center`, `circle_radius`, `rotate_about`, `line_start`/`line_end` |
+| `manim_moving_angle` | `theta_start`/`theta_mid`/`theta_end`, `theta_increment`, `angle_radius` |
+| `manim_sine_unit_circle` | `origin_x`, `circle_radius`, `curve_x_scale`, `run_seconds` |
+| `manim_boolean_ops` | `operations`, `ellipse_width`/`height`, `ellipse1_shift`/`ellipse2_shift` |
+| `manim_heat_diagram` | `x_vals`, `y_vals`, `x_range`, `y_range` |
+| `manim_moving_frame_box` | `parts`, `highlight_indices`, `frame_buff` |
+| `manim_point_with_trace` | `mode`, `x`/`y`, `moves`, `move_run_times` |
+
+完整默认值与说明：`frontend/utils/manim-capabilities.ts` 各条目的 `defaultParams` / `paramHelp`。
+
 #### 7.5.12 高级 / 自定义（4）
 
 | ID | 说明 |
@@ -911,17 +948,18 @@ shots[].type
 
 成片槽位与 Manim 动画时长**独立**：槽位太短会截断 MP4 尾部。
 
-#### 7.10.4 单镜 `params` 能力边界（诚实说明）
+#### 7.10.4 单镜 `params` 能力边界
 
-| 能力 | 成片 `theme` | 单镜 `params` | 全类型通用 JSON？ |
-|------|-------------|---------------|-------------------|
+| 能力 | 成片 `theme` | 单镜 `params` | 说明 |
+|------|-------------|---------------|------|
 | 背景色 / 主色 / 强调色 | ✅ | ✅ 可覆盖 | 主题级 |
-| 中文字体 | ✅ `fontPresetId` | ✅ `cjk_font` | 所有 `mk_text` 模板 |
-| 标题字号 | ❌ | ⚠️ 仅部分模板有专用字段 | **未**统一 `title_font_size` |
-| 元素 xy 坐标 | ❌ | ⚠️ 极少数 | **未**统一布局 API |
-| 公式 MathTex 样式 | ❌ | ⚠️ `parts` 等专用字段 | 仅公式类镜头 |
+| 中文字体 | ✅ `fontPresetId` | ✅ `cjk_font` | 所有 `mk_text` |
+| 标题 / 标注字号 | — | ✅ 画廊 12 种 | `title_font_size` / `label_font_size` / `formula_font_size` |
+| 分步动画时长 | — | ✅ 画廊 12 种 | `run_times` 或 `{step}_run_time` |
+| 坐标 / 数值 / 表达式 | — | ✅ 画廊 12 种 | 见 §7.5.11.1；非画廊类型仍较有限 |
+| 公式 MathTex 内容 | — | ✅ | `parts`、`*_expr` 等 |
 
-完全自由布局 → **`custom_python`** 或 **`custom_dsl`**（能力有限）。
+仍无法用 JSON 配置的极端布局 → **`custom_python`**。
 
 #### 7.10.5 示例：`manim_moving_frame_box` 完整 params
 
@@ -1182,6 +1220,7 @@ pm2 logs sunshinelife-videos-api
 | v1.3 | 2026-09 | 读书训练 10 种 + 官方画廊精选（公式框选、动点轨迹）；本地归档 / 站点门户；§7.9 Gallery 对照；Manim 75 种 |
 | v1.4 | 2026-09 | §7.9.1 官方 27 例完整对照表；§7.10 配置手册（theme/字体/时长/ECS）；§7.11 缺口与新增路线图；Manim 字体 `fontPresetId` 传递修复 @ `b07403f` |
 | v1.5 | 2026-09 | P0–P2 官方画廊 10 种新 `type`（`gallery_scenes.py`）；Manim **85** 种；§7.5.11 扩展为 12 种画廊镜头 |
+| v1.6 | 2026-09 | 画廊 12 种 `params` 补全（表达式/坐标/字号/`run_times`）；§7.5.11.1 参数手册 |
 
 ---
 
