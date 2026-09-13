@@ -72,7 +72,7 @@ export const SimpleElectric: React.FC<SimpleElectricProps> = ({
 
   return (
     <ThemeFontProvider fontFamily={fontFamily}>
-    <AbsoluteFill style={{ backgroundColor }}>
+    <AbsoluteFill style={{ backgroundColor, fontWeight: 700 }}>
       {timeline.map((item, index) => {
         const duration = item.durationInFrames || 90;
         const from = offset;

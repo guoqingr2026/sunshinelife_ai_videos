@@ -64,6 +64,7 @@ export interface ComposeStep {
 
 export interface VideoProject {
   title?: string;
+  theme?: ThemeConfig;
   shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }>;
 }
 

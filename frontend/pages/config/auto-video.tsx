@@ -10,8 +10,16 @@ import {
 import { MONTY_HALL_PROJECT_JSON } from "../../utils/example-monty-hall-project";
 import { MANIM_TEMPLATES } from "../../utils/manim-catalog";
 import FontPresetSelect from "../../components/FontPresetSelect";
-import { COLOR_SCHEMES } from "../../utils/remotion-presets";
-import { DEFAULT_FONT_PRESET, applyFontPresetToTheme } from "../../utils/typography-presets";
+import ThemeSchemeSelect from "../../components/ThemeSchemeSelect";
+import type { ThemeConfig } from "../../utils/remotion-presets";
+import {
+  buildComposeTheme,
+  getDefaultColorSchemeIndex,
+  syncUiFromProjectTheme,
+  themeBlockForJson,
+  THEME_JSON_EXAMPLE,
+} from "../../utils/project-theme";
+import { DEFAULT_FONT_PRESET } from "../../utils/typography-presets";
 
 const REMOTION_SHOT_TYPES = new Set([
   "title", "chapter", "bullet_list", "fade_text", "subtitle", "quote",
@@ -63,7 +71,11 @@ function formatTime(iso: string): string {
   }
 }
 
-function parseProjectJson(text: string): { title?: string; shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }> } | null {
+function parseProjectJson(text: string): {
+  title?: string;
+  theme?: ThemeConfig;
+  shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }>;
+} | null {
   const trimmed = text.trim();
   if (!trimmed) return null;
   try {
@@ -91,6 +103,7 @@ export default function AutoVideoPage() {
   const [planning, setPlanning] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [fontPresetId, setFontPresetId] = useState(DEFAULT_FONT_PRESET.id);
+  const [colorSchemeIndex, setColorSchemeIndex] = useState(getDefaultColorSchemeIndex());
   const [videoError, setVideoError] = useState(false);
   const [importMessage, setImportMessage] = useState("");
   const [pendingShotPlan, setPendingShotPlan] = useState<{
@@ -111,6 +124,24 @@ export default function AutoVideoPage() {
     setTask(null);
     setSubmitError("");
     setVideoError(false);
+  };
+
+  useEffect(() => {
+    const parsed = parseProjectJson(projectJson);
+    if (parsed?.theme) {
+      const synced = syncUiFromProjectTheme(parsed.theme);
+      setColorSchemeIndex(synced.colorSchemeIndex);
+      setFontPresetId(synced.fontPresetId);
+    }
+  }, [projectJson]);
+
+  const injectThemeToJson = () => {
+    const parsed = parseProjectJson(projectJson);
+    if (!parsed?.shots?.length) return;
+    const theme = themeBlockForJson(colorSchemeIndex, fontPresetId);
+    const next = { ...parsed, theme };
+    setProjectJson(JSON.stringify(next, null, 2));
+    setImportMessage("已将当前配色与字体写入项目 JSON 的 theme 块。");
   };
 
   useEffect(() => {
@@ -192,11 +223,11 @@ export default function AutoVideoPage() {
     setSubmitError("");
     setTask(null);
     try {
-      const theme = applyFontPresetToTheme(COLOR_SCHEMES[3], fontPresetId);
+      const theme = buildComposeTheme(colorSchemeIndex, fontPresetId);
       const { taskId } = await api.createComposeTask({
         brief: "",
         title: project.title,
-        project,
+        project: { ...project, theme },
         preview,
         renderFinal,
         theme,
@@ -400,12 +431,32 @@ export default function AutoVideoPage() {
             )}
           </div>
 
-          <FontPresetSelect
-            value={fontPresetId}
-            onChange={setFontPresetId}
-            disabled={!!isActive}
-            className="max-w-md"
-          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl">
+            <ThemeSchemeSelect
+              value={colorSchemeIndex}
+              onChange={setColorSchemeIndex}
+              disabled={!!isActive}
+            />
+            <FontPresetSelect
+              value={fontPresetId}
+              onChange={setFontPresetId}
+              disabled={!!isActive}
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2 items-center text-sm">
+            <button
+              type="button"
+              onClick={injectThemeToJson}
+              disabled={!!isActive || !jsonValid}
+              className="btn-outline text-xs py-1.5"
+            >
+              将配色写入 JSON theme
+            </button>
+            <span className="text-xs text-muted">
+              JSON 可选字段示例：{THEME_JSON_EXAMPLE.split("\n")[0]}…
+            </span>
+          </div>
 
           <div className="flex flex-wrap gap-4 text-sm">
             <label className="flex items-center gap-2 text-muted font-semibold">

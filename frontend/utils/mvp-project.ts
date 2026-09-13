@@ -1,7 +1,10 @@
 /** MVP 测试用 — 唯一有效的项目 JSON 格式（一键成片直接粘贴） */
 
+import { DEFAULT_PROJECT_THEME } from "./project-theme";
+
 export const MVP_LEARNING_PROJECT = {
   title: "学习与记忆 MVP",
+  theme: DEFAULT_PROJECT_THEME,
   shots: [
     { type: "forgetting_curve", label: "遗忘曲线", params: { title: "艾宾浩斯遗忘曲线" } },
     { type: "chapter", label: "02 间隔重复" },
@@ -14,8 +17,9 @@ export const MVP_LEARNING_PROJECT = {
 export const MVP_PROJECT_JSON = JSON.stringify(MVP_LEARNING_PROJECT, null, 2);
 
 export const MVP_WORKFLOW_HELP = `
-【唯一有效 JSON】一键成片页「项目 JSON」框内的内容即为最终分镜。
+【项目 JSON】含 title、可选 theme（配色/字体）、shots 分镜数组。
 系统流程：项目 JSON → 规划时间轴 → Manim 渲染 → Remotion 合成 → 自动打包 output 工程（ZIP 可下载到本地）。
+页面「成片配色」默认 B站粉；也可在 JSON 写 theme 块，或点「将配色写入 JSON theme」。
 
 type 说明：
 - Manim：forgetting_curve, typewriter_text, concept_network, learning_curve, flowchart 等（见镜头规划规格表）

@@ -1,5 +1,5 @@
 import os
-from manim import Text as ManimText, WHITE
+from manim import Text as ManimText, WHITE, BOLD
 
 CJK_FONT_CANDIDATES = [
     "Noto Sans CJK SC",
@@ -29,13 +29,17 @@ def get_cjk_font() -> str | None:
     return CJK_FONT_CANDIDATES[0]
 
 
-def mk_text(content, font_size=36, color=WHITE, **kwargs):
-    """CJK-capable Text (requires fonts-noto-cjk on ECS)."""
+def mk_text(content, font_size=36, color=WHITE, weight=BOLD, **kwargs):
+    """CJK-capable Text (requires fonts-noto-cjk on ECS). Default weight=BOLD."""
     text = str(content)
     font = kwargs.pop("font", None) or get_cjk_font()
+    w = kwargs.pop("weight", weight)
     if font:
         try:
-            return ManimText(text, font=font, font_size=font_size, color=color, **kwargs)
+            return ManimText(text, font=font, font_size=font_size, color=color, weight=w, **kwargs)
         except Exception:
             pass
-    return ManimText(text, font_size=font_size, color=color, **kwargs)
+    try:
+        return ManimText(text, font_size=font_size, color=color, weight=w, **kwargs)
+    except Exception:
+        return ManimText(text, font_size=font_size, color=color, **kwargs)

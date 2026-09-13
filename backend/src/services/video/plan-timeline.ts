@@ -42,6 +42,7 @@ export interface ManimJob {
 
 export interface VideoProject {
   title?: string;
+  theme?: ThemeConfig;
   shots?: ShotSpec[];
 }
 
@@ -351,11 +352,14 @@ export function planFromBrief(
     text: "感谢观看 · 点赞收藏",
   });
 
+  const autoTheme = pickTheme(brief);
+  const theme = project?.theme ? { ...autoTheme, ...project.theme } : autoTheme;
+
   return {
     title: videoTitle,
     timeline,
     manimJobs,
-    theme: pickTheme(brief),
+    theme,
     resolvedShots: sequence.map((s) => ({
       kind: s.kind,
       type: s.type,

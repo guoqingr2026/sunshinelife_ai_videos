@@ -1,7 +1,10 @@
 /** 蒙提霍尔悖论 — 自定义 ECS 镜头示例（remotion_doors / manim_probability_tree 等） */
 
+import { DEFAULT_PROJECT_THEME } from "./project-theme";
+
 export const MONTY_HALL_PROJECT = {
   title: "蒙提霍尔悖论 · Monty Hall Problem",
+  theme: DEFAULT_PROJECT_THEME,
   shots: [
     {
       type: "remotion_doors",

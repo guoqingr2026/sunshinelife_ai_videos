@@ -1,5 +1,13 @@
 {
   "title": "蒙提霍尔悖论 · Monty Hall Problem",
+  "theme": {
+    "name": "B站粉",
+    "primaryColor": "#fb7299",
+    "secondaryColor": "#23ade5",
+    "backgroundColor": "#141420",
+    "accentColor": "#ffe066",
+    "fontPresetId": "noto-sans-sc"
+  },
   "shots": [
     {
       "type": "remotion_doors",

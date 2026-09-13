@@ -47,7 +47,10 @@ export async function renderCompose(
     const plan = planFromBrief(payload.brief, payload.title, payload.project);
     timeline = plan.timeline;
     manimJobs = plan.manimJobs;
-    theme = payload.theme ? { ...plan.theme, ...payload.theme } : plan.theme;
+    const projectTheme = payload.project?.theme;
+    theme = payload.theme
+      ? { ...plan.theme, ...projectTheme, ...payload.theme }
+      : { ...plan.theme, ...projectTheme };
     patchComposeProgress(taskId, {
       phase: "planned",
       progress: `规划完成：${manimJobs.length} 个 Manim 镜头`,
