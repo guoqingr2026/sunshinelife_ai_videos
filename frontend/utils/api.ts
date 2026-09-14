@@ -169,6 +169,19 @@ export interface ManimExamplesResponse {
   examples: ManimSceneExample[];
 }
 
+export interface MediaAsset {
+  id: string;
+  filename: string;
+  url: string;
+  sceneIndex: number;
+  englishName: string;
+  originalName: string;
+  mime: string;
+  kind: "image" | "video" | "svg";
+  size: number;
+  uploadedAt: string;
+}
+
 export const api = {
   createSubtitle: (data: { rawText?: string; content?: string; type?: string }) =>
     request<Subtitle>("/api/subtitle", {
@@ -183,6 +196,38 @@ export const api = {
   getManimStatus: () => request<ManimStatus>("/api/manim/status"),
 
   getManimExamples: () => request<ManimExamplesResponse>("/api/manim/examples"),
+
+  listMediaAssets: () =>
+    request<{ assets: MediaAsset[]; nextSceneIndex: number }>("/api/assets"),
+
+  uploadMediaAsset: async (
+    file: File,
+    opts?: { sceneIndex?: number; englishName?: string }
+  ) => {
+    const form = new FormData();
+    form.append("file", file);
+    if (opts?.sceneIndex != null) form.append("sceneIndex", String(opts.sceneIndex));
+    if (opts?.englishName) form.append("englishName", opts.englishName);
+    const res = await fetch(`${API_BASE}/api/assets/upload`, {
+      method: "POST",
+      body: form,
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ error: res.statusText }));
+      throw new Error(err.error || res.statusText);
+    }
+    return res.json() as Promise<{
+      asset: MediaAsset;
+      nextSceneIndex: number;
+      suggestedFilename: string;
+    }>;
+  },
+
+  deleteMediaAsset: (filename: string) =>
+    request<{ success: boolean; nextSceneIndex: number }>(
+      `/api/assets/${encodeURIComponent(filename)}`,
+      { method: "DELETE" }
+    ),
 
   createManimTask: (data: {
     type: string;

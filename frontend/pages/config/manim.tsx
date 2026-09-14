@@ -11,6 +11,7 @@ import {
 } from "../../utils/manim-catalog";
 import CustomPythonEditor from "../../components/CustomPythonEditor";
 import FontPresetSelect from "../../components/FontPresetSelect";
+import ManimAssetLibrary from "../../components/ManimAssetLibrary";
 import ManimExampleCatalogTable from "../../components/ManimExampleCatalogTable";
 import ManimExampleGallery from "../../components/ManimExampleGallery";
 import UserSceneRegistry from "../../components/UserSceneRegistry";
@@ -30,6 +31,10 @@ import {
   loadUserSceneExamples,
   userExampleToSceneExample,
 } from "../../utils/user-scene-examples";
+import {
+  applyMediaUrlToParams,
+  suggestManimTypeForKind,
+} from "../../utils/manim-media-params";
 import { DEFAULT_FONT_PRESET, getFontPreset } from "../../utils/typography-presets";
 
 type LayerFilter = "all" | 1 | 2 | 3;
@@ -209,6 +214,29 @@ export default function ManimConfig() {
       setParamsJson(JSON.stringify(params, null, 2));
     }
   };
+
+  const applyAssetToParams = useCallback(
+    (url: string, kind: "image" | "video" | "svg", suggestedType?: string) => {
+      const mediaType = suggestedType || suggestManimTypeForKind(kind);
+      if (mediaType !== type) {
+        skipTypeReset.current = true;
+        setType(mediaType);
+      }
+      let base: Record<string, unknown>;
+      if (mediaType === type) {
+        try {
+          base = JSON.parse(paramsJson || "{}") as Record<string, unknown>;
+        } catch {
+          base = getExampleParams(mediaType) as Record<string, unknown>;
+        }
+      } else {
+        base = getExampleParams(mediaType) as Record<string, unknown>;
+      }
+      const next = applyMediaUrlToParams(mediaType, base, url);
+      setParamsJson(JSON.stringify(next, null, 2));
+    },
+    [type, paramsJson]
+  );
 
   const getCurrentSceneConfig = useCallback(() => {
     if (type === "custom_python") {
@@ -496,6 +524,8 @@ export default function ManimConfig() {
               </div>
             )}
           </div>
+
+          <ManimAssetLibrary currentType={type} onApplyAsset={applyAssetToParams} />
 
           <UserSceneRegistry
             getCurrentConfig={getCurrentSceneConfig}

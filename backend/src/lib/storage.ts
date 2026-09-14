@@ -11,6 +11,7 @@ export function ensureStorageDirs() {
     path.join(STORAGE_ROOT, "files", "manim"),
     path.join(STORAGE_ROOT, "files", "remotion"),
     path.join(STORAGE_ROOT, "files", "output"),
+    path.join(STORAGE_ROOT, "files", "uploads"),
     path.join(STORAGE_ROOT, "frames"),
     path.join(STORAGE_ROOT, "video"),
     path.join(STORAGE_ROOT, "uploads"),
