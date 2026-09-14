@@ -1,7 +1,7 @@
 # SunshineLife AI Videos — 产品规格书
 
-> **文档版本：** v1.6（2026-09）  
-> **适用代码：** `main` @ `gallery-params` 及之后  
+> **文档版本：** v1.7（2026-09）  
+> **适用代码：** `main` @ `d449a12` 及之后  
 > **在线地址（ECS）：** `http://47.99.184.249/sunshinelife_ai_videos/`
 
 ---
@@ -25,7 +25,7 @@
 | ① | **镜头规划** | `/config/shot-plan` | 从主题生成分镜 JSON，一键成片的**唯一上游** |
 | ② | **一键成片** | `/config/auto-video` | 主流水线：Manim → Remotion → 导出工程包 |
 | ③ | 字幕编辑 | `/editor/subtitle` | SRT/TXT 上传、断句；供 B 站文案使用 |
-| ④ | Manim | `/config/manim` | 单镜头调试、能力索引、自定义 Python |
+| ④ | Manim | `/config/manim` | 单镜调试、**开放 params JSON**、示例对照表、素材库、我的示例库、`custom_python` |
 | ⑤ | HyperFrames | `/config/hyperframes` | AI 关键帧手绘动画（需 API Key + ffmpeg） |
 | ⑥ | Remotion | `/config/remotion` | 手动编辑 timeline 并单独渲染 |
 | ⑦ | B 站文案 | `/packaging/bilibili` | 标题 / 简介 / 钩子 / 封面文案 |
@@ -129,7 +129,7 @@
 | **导出项目 JSON** | 复制到剪贴板，可手动粘贴到一键成片 |
 | API | `GET /api/video/shot-plan/project` 返回 `{ title, shots, projectJson }` |
 
-**类型 ID 约束：** `type` 必须是系统已注册 ID。完整列表见本文 **§7.4–7.6**、镜头规划页「全部 Manim 类型」表，或 `GET /api/video/shot-plan/spec`。勿使用 GPT 自造 ID；部分别名会自动映射（§7.5 别名表），未知类型会导致成片失败。
+**类型 ID 约束：** `type` 必须是系统已注册 ID（见 §7.5、§7.7）。**`params` 不做白名单校验**——任意 JSON 键会透传到 Manim `get_params()`（§7.5.13）。勿使用 GPT 自造 `type`；别名见 §7.5.12，未知 `type` 会导致成片失败。
 
 ---
 
@@ -244,13 +244,22 @@
 
 **场景：** 验证某个模板参数、测试 `custom_python`、查看 Manim 环境是否就绪。
 
-- **能力索引**：按领域浏览全部已注册 `type` 与默认 `params`
-- **示例画廊**：展示 `scene_examples.json` + `official_custom_examples.json` 全部条目；一键应用到任务或复制为 `custom_python` JSON
-- **官方示例**：已内置 6 个 [Manim Example Gallery](https://docs.manim.community/en/stable/examples.html) 片段（`SquareToCircle`、`VectorArrow`、`BraceAnnotation`、`HarmonicRibbon3D` 等），见 §7.9
+| 区域 | 功能 |
+|------|------|
+| 左侧 | 场景类型下拉、**快捷示例**（可收起）、**开放 params JSON 编辑器**（非白名单，任意键） |
+| 右侧预览下 | **素材库**（上传图片/视频 → `/files/uploads/sceneN_英文名.ext`）、**我的示例库**（浏览器本地保存 type+params）、**场景示例对照表**（58+ 条：type / 分类 / 可改 params） |
+| 特殊编辑器 | `custom_python` 多行 Scene 代码；`formula_curve` 公式构建器 |
 
-1. **Manim** → 能力索引选类型 → 填 `params` JSON → 提交。
-2. `GET /api/manim/status` 可查看 `manimInstalled` / `mode: real|placeholder`。
-3. 成片在一键成片时会**自动批量**提交 Manim，通常无需单独操作。
+- **能力索引**：左侧面板展示 `paramHelp`；**不要求**为每个字段单独做表单注册
+- **示例库**：`GET /api/manim/examples`（`scene_examples.json` + `official_custom_examples.json`）；点击行即填入 `type` + `params`
+- **官方画廊**：§7.5.11 共 12 种 `type`；其余官方示例经 `custom_python` 粘贴，见 §7.9
+
+**推荐工作流：**
+
+1. 选 `type` → 在对照表或示例库点一行 → 在 JSON 中**自由增删改** `params`（见 §7.5.13）
+2. 需图片/视频 → 素材库上传 → 自动写入 `imagePath` / `videoPath` / `svgPath`
+3. 调满意 → 「我的示例库」保存 → 一键成片 `shots[]` 复用相同 `params`
+4. `GET /api/manim/status` 查看 `manimInstalled` / `mode: real|placeholder`
 
 ### 5.2 HyperFrames（AI 手绘帧）
 
@@ -567,6 +576,76 @@ shots[].type
 
 完整默认值与说明：`frontend/utils/manim-capabilities.ts` 各条目的 `defaultParams` / `paramHelp`。
 
+#### 7.5.13 开放参数原则（**无需为每个字段注册**）
+
+> **产品原则：** 制作视频时应能**自由设置** Manim 能力对应的全部参数；**只注册 `type` 一次**，不为 `params` 里每个键单独做 UI/后端注册。
+
+| 层级 | 需要注册？ | 位置 | 说明 |
+|------|------------|------|------|
+| **`shots[].type`** | ✅ 必须 | `manim/template_catalog.py` | 路由到 Python `Scene` 类；共 **85** 种 + `custom_python` |
+| **`shots[].params` 任意键** | ❌ 不需要 | 成片 / Manim 页 JSON | **透传**，后端无字段白名单 |
+| **`paramHelp` / `defaultParams`** | 文档用 | `frontend/utils/manim-capabilities.ts` | 能力说明与一键填充默认值；**非运行时门禁** |
+| **locale 默认值** | 可选 | `manim/locale/zh.json` | 与 `get_params(fallback)` 合并，API 传入优先 |
+
+**参数合并顺序（Python `templates/_params.py`）：**
+
+```
+locale/zh.json[type]  <  模板内 fallback  <  MANIM_PARAMS（API / shots[].params）
+```
+
+**成片传递链：**
+
+```
+project.shots[].params  →  compose.renderManim  →  MANIM_PARAMS  →  Scene.get_params()
+```
+
+因此：GPT 分镜、一键成片、Manim 单镜页写入的 **任意合法 JSON 键** 都会到达模板；模板内用 `p.get("字段名")` 读取即可，**新增可调参数只需改 Python 模板 + 更新 `manim-capabilities.ts` 文档**，无需改 Express 路由或新增表单项。
+
+**全类型通用 `params`（可与 `theme` 叠加）：**
+
+| 字段 | 说明 |
+|------|------|
+| `cjk_font` / `font` / `fontFamily` | 覆盖中文 `Text` 字体（`mk_text` / `mk_title`） |
+| `primaryColor` / `secondaryColor` / `backgroundColor` / `accentColor` | 覆盖场景主题色（`apply_scene_theme`） |
+| `title_font_size` / `label_font_size` / `formula_font_size` / `font_size` | 字号（画廊与多数模板已支持） |
+| `hold_seconds` / `rotate_seconds` / `curve_run_time` / `run_times` | 动画节奏（3D 宇宙、画廊镜头常用） |
+| `imagePath` / `videoPath` / `svgPath` | 媒体路径，`/files/uploads/...`（§7.10.9） |
+
+**三层自由度（由低到高）：**
+
+| 层级 | 用法 | 何时选 |
+|------|------|--------|
+| L1 注册 `type` + 开放 `params` | `typewriter_text`、`manim_formula`、`manim_moving_frame_box` 等 **85** 种 | 量产、GPT 分镜、对照表改 JSON |
+| L2 `manim_custom` | `params.scene` 选宇宙场景 + 该场景全部 params（`n`、`colors`、`hold_seconds`…） | 数学曲线/3D/分形，一个 type 覆盖 33 scene |
+| L3 `custom_python` | `params.code` 完整 Scene 类 | 官方画廊未内置 type、复杂迭代动画 |
+
+**与「注册」相关的唯一维护清单（新增 `type` 时）：**
+
+1. `manim/templates/*.py` + `template_catalog.py`
+2. `frontend/utils/manim-capabilities.ts`（`defaultParams` / `paramHelp`）
+3. `backend/.../shot-plan-spec.ts`（GPT 类型表，可选别名）
+4. （可选）`manim/scene_examples.json` 示例一行
+
+**不要**为每个新参数增加：Express 校验字段、前端专用表单（除非体验增强，如 `formula_curve` 构建器）。
+
+**参数发现入口（免注册查询）：**
+
+| 入口 | 内容 |
+|------|------|
+| Manim 页 → 场景示例对照表 | 每示例 × `paramHelp` 对照，✓ 表示示例 JSON 已含该字段 |
+| `GET /api/manim/examples` | 全部示例 params |
+| `GET /api/manim/catalog` | 全部 `type` + locale 默认 |
+| `GET /api/manim/universe-scenes` | `manim_custom` 的 scene 列表 |
+| `frontend/utils/manim-capabilities.ts` | **单一能力元数据源**（与 `template_catalog.py` ID 对齐） |
+
+**LaTeX / 口播补充（近期行为）：**
+
+| `type` | 要点 |
+|--------|------|
+| `manim_formula` / `mathtex_*` / `formula_steps` | `formula`、`steps`、`parts` 等支持 LaTeX；需 texlive（§9.3） |
+| `typewriter_text` | `highlight` 或 `highlights`：正文内关键词 accent 色高亮 |
+| `image_focus` / `video_embed` / `svg_icon` | `imagePath` / `videoPath` / `svgPath` ← 素材库 URL |
+
 #### 7.5.12 高级 / 自定义（4）
 
 | ID | 说明 |
@@ -750,7 +829,7 @@ shots[].type
 
 示例：`examples/projects/monty-hall/project.json`；一键成片 **「蒙提霍尔」** 按钮。
 
-**新增自定义镜头需同步：** `shot-plan-spec.ts` → `plan-timeline.ts` → `SimpleElectric.tsx`（Remotion）或 `template_catalog.py` + 模板文件（Manim）→ `manim-capabilities.ts` →（可选）`scene_examples.json`。
+**新增 Remotion 包装模块**需同步：`SimpleElectric.tsx` + `remotion-presets`。**新增 Manim `type`** 见 §7.5.13 维护清单（**仅注册 type**；`params` 键随模板开放，无需逐项注册）。**新增 `params` 字段**仅改对应 Python 模板 + `manim-capabilities.ts` 文档即可。
 
 ### 7.9 与 Manim 官方 Example Gallery 的对应关系
 
@@ -878,7 +957,7 @@ shots[].type
 
 ### 7.10 配置参考手册（速查）
 
-成片与 Manim 的**颜色、中文字体**可在 Web 配置；**字号、元素坐标**多数镜头尚未暴露为通用 JSON 字段（见 §7.10.4）。
+成片与 Manim 的**颜色、中文字体**可在 Web 配置；**全部已文档化的 `params` 均可在 JSON 中自由设置**（§7.5.13），无需为每个字段单独注册 UI。
 
 #### 7.10.1 项目 `theme` 对象（一键成片 / JSON）
 
@@ -953,13 +1032,14 @@ shots[].type
 | 能力 | 成片 `theme` | 单镜 `params` | 说明 |
 |------|-------------|---------------|------|
 | 背景色 / 主色 / 强调色 | ✅ | ✅ 可覆盖 | 主题级 |
-| 中文字体 | ✅ `fontPresetId` | ✅ `cjk_font` | 所有 `mk_text` |
-| 标题 / 标注字号 | — | ✅ 画廊 12 种 | `title_font_size` / `label_font_size` / `formula_font_size` |
-| 分步动画时长 | — | ✅ 画廊 12 种 | `run_times` 或 `{step}_run_time` |
-| 坐标 / 数值 / 表达式 | — | ✅ 画廊 12 种 | 见 §7.5.11.1；非画廊类型仍较有限 |
-| 公式 MathTex 内容 | — | ✅ | `parts`、`*_expr` 等 |
+| 中文字体 | ✅ `fontPresetId` | ✅ `cjk_font` | `mk_text` / `mk_title` |
+| 标题 / 标注 / 公式字号 | — | ✅ | 画廊全支持；其他 type 见 `paramHelp` |
+| 分步动画时长 | — | ✅ | `run_times`、`hold_seconds` 等 |
+| 坐标 / 表达式 / 数组 | — | ✅ | 模板已读的键均可写；见 §7.5.11.1 与 `manim-capabilities.ts` |
+| LaTeX 公式 | — | ✅ | `manim_formula`、`mathtex_*`、画廊 `parts` / `*_expr`；需 texlive |
+| 图片 / 视频素材 | — | ✅ | `imagePath` / `videoPath` / `svgPath`；§7.10.9 |
 
-仍无法用 JSON 配置的极端布局 → **`custom_python`**。
+**原则：** 后端**不拦截**未知 `params` 键；模板未实现的键会被忽略。极端布局或未覆盖能力 → **`manim_custom`** 或 **`custom_python`**（§7.5.13）。
 
 #### 7.10.5 示例：`manim_moving_frame_box` 完整 params
 
@@ -1006,7 +1086,19 @@ shots[].type
 | 未选文件夹点「归档到本地」 | 回退为浏览器下载 ZIP/MP4 |
 | 页脚站点门户 | ECS 根站 / 英语学习 / Manim 文档 |
 
-#### 7.10.8 一键成片预设按钮
+#### 7.10.9 用户素材上传（Manim 页 · 素材库）
+
+| 项 | 说明 |
+|----|------|
+| API | `POST /api/assets/upload`（multipart）、`GET /api/assets`、`DELETE /api/assets/:filename` |
+| 存储 | `{STORAGE}/files/uploads/` |
+| 命名 | `scene{序号}_{英文slug}.{ext}`（如 `scene1_product_intro.mp4`） |
+| 成片用法 | `shots[].params.imagePath` / `videoPath` / `svgPath` = `/files/uploads/...` |
+| 适用 `type` | `image_focus`、`video_embed`、`svg_icon`；路径由 `resolve_media_path` 解析 |
+
+上传后 URL 可写入一键成片 JSON，**无需**为每个素材单独注册 type。
+
+#### 7.10.10 一键成片预设按钮
 
 | 按钮 | 工程路径 |
 |------|----------|
@@ -1190,7 +1282,11 @@ pm2 logs sunshinelife-videos-api
 | GET | `/api/hyperframes/status` | HyperFrames 环境检测 |
 | GET | `/api/manim/status` | Manim 环境检测 |
 | GET | `/api/manim/examples` | 场景示例 + 官方 `custom_python` 条目 |
+| GET | `/api/manim/catalog` | 全部 Manim `type` + locale 默认 params |
 | GET | `/api/manim/universe-scenes` | 数学宇宙 scene 列表 |
+| GET | `/api/assets` | 用户上传素材列表 + `nextSceneIndex` |
+| POST | `/api/assets/upload` | 上传图片/视频（multipart） |
+| DELETE | `/api/assets/:filename` | 删除素材 |
 | POST | `/api/tasks/:id/purge-assets` | 归档后删除服务器任务素材 |
 | GET | `/api/tasks` | 任务列表 |
 
@@ -1221,6 +1317,7 @@ pm2 logs sunshinelife-videos-api
 | v1.4 | 2026-09 | §7.9.1 官方 27 例完整对照表；§7.10 配置手册（theme/字体/时长/ECS）；§7.11 缺口与新增路线图；Manim 字体 `fontPresetId` 传递修复 @ `b07403f` |
 | v1.5 | 2026-09 | P0–P2 官方画廊 10 种新 `type`（`gallery_scenes.py`）；Manim **85** 种；§7.5.11 扩展为 12 种画廊镜头 |
 | v1.6 | 2026-09 | 画廊 12 种 `params` 补全（表达式/坐标/字号/`run_times`）；§7.5.11.1 参数手册 |
+| v1.7 | 2026-09 | **§7.5.13 开放参数原则**（只注册 type、params 透传）；Manim 页素材库/对照表/我的示例库；`manim_formula` LaTeX、`typewriter_text` 高亮；§7.10.9 素材 API @ `d449a12` |
 
 ---
 
