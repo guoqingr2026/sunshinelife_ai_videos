@@ -104,6 +104,17 @@ export default function ManimConfig() {
       finalParams.cjk_font = preset.manimFont;
       let submitType = type;
       if (type === "custom_python") {
+        const codeStr = finalParams.code != null ? String(finalParams.code).trim() : "";
+        if (!codeStr) {
+          alert(
+            "custom_python 必须包含 params.code（完整 Scene 类代码）。\n\n" +
+              "操作：① 类型选「自定义 Python Scene」；② 参数 JSON 里要有 class_name 和 code；\n" +
+              "或从示例画廊点「NestedHearts · 嵌套心形」→ 应用到任务。"
+          );
+          setLoading(false);
+          return;
+        }
+        finalParams.code = codeStr;
         if (!finalParams.class_name && finalParams.code) {
           try {
             const parsed = parseOfficialManimCode(String(finalParams.code));
@@ -112,6 +123,11 @@ export default function ManimConfig() {
           } catch {
             /* user may already have correct shape */
           }
+        }
+        if (!finalParams.class_name) {
+          alert("custom_python 需要 params.class_name（与 class 名一致，如 NestedHearts）");
+          setLoading(false);
+          return;
         }
       }
       if (type === "manim_custom" && !finalParams.scene) {
