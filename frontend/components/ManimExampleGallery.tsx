@@ -31,6 +31,7 @@ export default function ManimExampleGallery({
   onSelect,
   compact = false,
 }: ManimExampleGalleryProps) {
+  const [open, setOpen] = useState(!compact);
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
@@ -54,16 +55,23 @@ export default function ManimExampleGallery({
 
   return (
     <div className="panel space-y-3">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm font-semibold text-ink">
+      <button
+        type="button"
+        className="w-full flex flex-wrap items-center justify-between gap-2 text-left"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="text-sm font-semibold text-ink">
           {compact
             ? `快捷示例（${examples.length}）`
             : `场景示例库（${examples.length}）— 点击即切换类型并填入 JSON`}
-        </p>
-        <p className="text-xs text-muted">当前场景：{currentType}</p>
-      </div>
+        </span>
+        <span className="flex items-center gap-2 text-xs text-muted shrink-0">
+          <span>当前场景：{currentType}</span>
+          <span>{open ? "收起" : "展开"}</span>
+        </span>
+      </button>
 
-      {!compact && (
+      {open && !compact && (
         <div className="flex flex-wrap gap-1.5 text-xs">
           <button
             type="button"
@@ -85,7 +93,7 @@ export default function ManimExampleGallery({
         </div>
       )}
 
-      {!compact && typeOptions.length > 1 && (
+      {open && !compact && typeOptions.length > 1 && (
         <div className="flex flex-wrap gap-1.5 text-xs">
           <button
             type="button"
@@ -107,7 +115,8 @@ export default function ManimExampleGallery({
         </div>
       )}
 
-      <div className={`grid gap-2 ${compact ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2"}`}>
+      {open && (
+      <div className={`grid gap-2 ${compact ? "grid-cols-1 max-h-64 overflow-y-auto" : "grid-cols-1 sm:grid-cols-2"}`}>
         {filtered.map((ex) => (
           <button
             key={ex.id}
@@ -139,8 +148,9 @@ export default function ManimExampleGallery({
           </button>
         ))}
       </div>
+      )}
 
-      {filtered.length === 0 && (
+      {open && filtered.length === 0 && (
         <p className="text-xs text-muted">当前筛选无示例，请切换分类或 type。</p>
       )}
     </div>

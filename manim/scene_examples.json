@@ -551,20 +551,23 @@
       "desc": "逐字显示口播文案",
       "params": {
         "text": "在这里填入口播文案，支持 highlight 关键词。",
-        "highlights": ["highlight"]
+        "subtitle": "副标题可选",
+        "highlight": ["highlight"]
       }
     },
     {
       "id": "formula",
-      "label": "公式推导",
-      "category": "text",
+      "label": "欧拉公式推导",
+      "category": "math",
       "type": "manim_formula",
       "needsOpengl": false,
-      "desc": "分步公式展示",
+      "desc": "主公式 + 分步 LaTeX 推导（需 texlive）",
       "params": {
         "title": "欧拉公式",
         "formula": "e^{i\\pi} + 1 = 0",
-        "steps": ["e^{i\\pi} = -1", "e^{i\\pi} + 1 = 0"]
+        "steps": ["e^{i\\pi} = -1", "e^{i\\pi} + 1 = 0"],
+        "formula_font_size": 48,
+        "step_font_size": 36
       }
     },
     {

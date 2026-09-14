@@ -9,23 +9,43 @@ from templates._no_tex import apply_no_tex
 apply_no_tex()
 
 from templates._params import get_params
-from templates._layout import mk_title
-from templates._tex import mk_mathtex
+from templates._layout import mk_title, drop_content
+from templates._theme import apply_scene_theme
+from templates._tex import latex_available, mk_mathtex
+from templates._text import mk_text
 
 
 class MathTexDerivation(Scene):
     def construct(self):
+        theme = apply_scene_theme(self)
         p = get_params({
             "title": "Derivation",
             "steps": [r"V = IR", r"I = \frac{V}{R}", r"P = VI"],
+            "step_font_size": 36,
         })
         title = mk_title(p["title"])
+        step_fs = int(p.get("step_font_size") or 36)
         items = VGroup()
-        for i, s in enumerate(p["steps"]):
-            t = mk_mathtex(str(s), font_size=36, color=YELLOW if i == len(p["steps"]) - 1 else WHITE)
-            t.shift(DOWN * (i * 0.8 + 0.3))
+        steps = p.get("steps") or []
+        for i, s in enumerate(steps):
+            is_last = i == len(steps) - 1
+            color = theme.accent if is_last else theme.text
+            t = mk_mathtex(str(s), font_size=step_fs, color=color)
             items.add(t)
+        if len(items) > 0:
+            items.arrange(DOWN, aligned_edge=LEFT, buff=0.4)
+            drop_content(items)
+
         self.play(Write(title))
         for t in items:
-            self.play(Write(t))
+            self.play(Write(t), run_time=0.65)
+
+        if not latex_available():
+            hint = mk_text(
+                "安装 texlive 可显示 LaTeX 公式",
+                font_size=16,
+                color=theme.muted,
+            ).to_edge(DOWN)
+            self.play(FadeIn(hint), run_time=0.35)
+
         self.wait(1)

@@ -351,7 +351,8 @@ export const MANIM_CAPABILITIES: ManimCapability[] = [
     paramHelp: {
       text: "正文（可写在镜头根级 text 字段）",
       subtitle: "副标题",
-      highlight: "高亮关键词字符串数组",
+      highlight: "高亮关键词字符串数组（highlight 或 highlights 均可）",
+      highlights: "同 highlight，复数写法别名",
     },
   },
   {
@@ -367,12 +368,16 @@ export const MANIM_CAPABILITIES: ManimCapability[] = [
   {
     id: "formula_steps",
     label: "公式拆解",
-    desc: "分步公式",
+    desc: "分步公式；steps 含 LaTeX 时自动 MathTex",
     category: "text",
     layer: 1,
-    primitives: ["FadeIn", "shift"],
-    defaultParams: { title: "Formulas", steps: ["P = V * I", "V = I * R", "P = I^2 * R"] },
-    paramHelp: { title: "标题", steps: "公式步骤" },
+    primitives: ["MathTex", "mk_mathtex", "Write"],
+    defaultParams: {
+      title: "Formulas",
+      steps: ["P = VI", "V = IR", "P = I^2 R"],
+      step_font_size: 34,
+    },
+    paramHelp: { title: "标题", steps: "公式步骤 LaTeX 数组", step_font_size: "步骤字号" },
   },
   {
     id: "chapter_banner",
@@ -602,16 +607,24 @@ export const MANIM_CAPABILITIES: ManimCapability[] = [
   {
     id: "manim_formula",
     label: "公式推导卡",
-    desc: "主公式 + 分步文字推导",
+    desc: "主公式 + 分步推导；formula/steps 支持 LaTeX（需 texlive）",
     category: "math",
     layer: 2,
-    primitives: ["Write", "FadeIn", "mk_text"],
+    primitives: ["MathTex", "mk_mathtex", "Write", "FadeIn"],
     defaultParams: {
-      title: "贝叶斯推导",
-      formula: "P(赢车|换门) = 2/3",
-      steps: ["第一次选中汽车概率 = 1/3", "第一次选中山羊概率 = 2/3"],
+      title: "欧拉公式",
+      formula: "e^{i\\pi} + 1 = 0",
+      steps: ["e^{i\\pi} = -1", "e^{i\\pi} + 1 = 0"],
+      formula_font_size: 48,
+      step_font_size: 36,
     },
-    paramHelp: { title: "标题", formula: "主公式", steps: "推导步骤字符串数组" },
+    paramHelp: {
+      title: "标题",
+      formula: "主公式 LaTeX，如 e^{i\\pi}+1=0",
+      steps: "推导步骤数组（LaTeX 或中文说明，自动识别）",
+      formula_font_size: "主公式字号",
+      step_font_size: "步骤字号",
+    },
   },
   {
     id: "manim_simulation_chart",
