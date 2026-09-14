@@ -9,6 +9,7 @@ import {
   getTemplateDomain,
   type ManimDomain,
 } from "../../utils/manim-catalog";
+import CustomPythonEditor from "../../components/CustomPythonEditor";
 import FontPresetSelect from "../../components/FontPresetSelect";
 import ManimExampleGallery from "../../components/ManimExampleGallery";
 import FormulaCurveBuilder, { type FormulaCurveParams } from "../../components/FormulaCurveBuilder";
@@ -17,6 +18,12 @@ import {
   exampleToTaskPayload,
   parseOfficialManimCode,
 } from "../../utils/manim-example-apply";
+import {
+  customPythonEditorToParams,
+  defaultCustomPythonEditorState,
+  paramsToCustomPythonEditor,
+  type CustomPythonEditorState,
+} from "../../utils/custom-python-params";
 import { DEFAULT_FONT_PRESET, getFontPreset } from "../../utils/typography-presets";
 
 type LayerFilter = "all" | 1 | 2 | 3;
@@ -27,6 +34,9 @@ export default function ManimConfig() {
   const [layerFilter, setLayerFilter] = useState<LayerFilter>("all");
   const [domainFilter, setDomainFilter] = useState<DomainFilter>("all");
   const [paramsJson, setParamsJson] = useState("");
+  const [customPython, setCustomPython] = useState<CustomPythonEditorState>(() =>
+    defaultCustomPythonEditorState()
+  );
   const [task, setTask] = useState<Task | null>(null);
   const [status, setStatus] = useState<ManimStatus | null>(null);
   const [loading, setLoading] = useState(false);
@@ -54,7 +64,12 @@ export default function ManimConfig() {
       skipTypeReset.current = false;
       return;
     }
-    setParamsJson(JSON.stringify(getExampleParams(type), null, 2));
+    const defaults = getExampleParams(type) as Record<string, unknown>;
+    if (type === "custom_python") {
+      setCustomPython(defaultCustomPythonEditorState());
+    } else {
+      setParamsJson(JSON.stringify(defaults, null, 2));
+    }
   }, [type]);
 
   useEffect(() => {
@@ -93,43 +108,40 @@ export default function ManimConfig() {
     setVideoError(false);
     try {
       let finalParams: Record<string, unknown>;
-      try {
-        finalParams = JSON.parse(paramsJson);
-      } catch {
-        alert("参数 JSON 格式错误");
-        setLoading(false);
-        return;
-      }
       const preset = getFontPreset(fontPresetId);
-      finalParams.cjk_font = preset.manimFont;
-      let submitType = type;
       if (type === "custom_python") {
-        const codeStr = finalParams.code != null ? String(finalParams.code).trim() : "";
-        if (!codeStr) {
-          alert(
-            "custom_python 必须包含 params.code（完整 Scene 类代码）。\n\n" +
-              "操作：① 类型选「自定义 Python Scene」；② 参数 JSON 里要有 class_name 和 code；\n" +
-              "或从示例画廊点「NestedHearts · 嵌套心形」→ 应用到任务。"
-          );
+        try {
+          finalParams = customPythonEditorToParams(customPython);
+        } catch (e) {
+          alert(e instanceof Error ? e.message : String(e));
           setLoading(false);
           return;
         }
-        finalParams.code = codeStr;
         if (!finalParams.class_name && finalParams.code) {
           try {
             const parsed = parseOfficialManimCode(String(finalParams.code));
             finalParams.class_name = parsed.class_name;
             finalParams.code = parsed.code;
+            setCustomPython((prev) => ({
+              ...prev,
+              className: parsed.class_name,
+              code: parsed.code,
+            }));
           } catch {
-            /* user may already have correct shape */
+            /* keep user input */
           }
         }
-        if (!finalParams.class_name) {
-          alert("custom_python 需要 params.class_name（与 class 名一致，如 NestedHearts）");
+      } else {
+        try {
+          finalParams = JSON.parse(paramsJson);
+        } catch {
+          alert("参数 JSON 格式错误");
           setLoading(false);
           return;
         }
       }
+      finalParams.cjk_font = preset.manimFont;
+      const submitType = type;
       if (type === "manim_custom" && !finalParams.scene) {
         alert("manim_custom 需要 params.scene（可从示例库点击填入）");
         setLoading(false);
@@ -146,7 +158,14 @@ export default function ManimConfig() {
     }
   };
 
-  const fillExample = () => setParamsJson(JSON.stringify(getExampleParams(type), null, 2));
+  const fillExample = () => {
+    const defaults = getExampleParams(type) as Record<string, unknown>;
+    if (type === "custom_python") {
+      setCustomPython(paramsToCustomPythonEditor(defaults));
+    } else {
+      setParamsJson(JSON.stringify(defaults, null, 2));
+    }
+  };
 
   const applyFormulaCurve = (params: FormulaCurveParams) => {
     if (type !== "formula_curve") {
@@ -157,25 +176,26 @@ export default function ManimConfig() {
   };
 
   const applySceneExample = (example: ManimSceneExample) => {
-    const { type: exType } = exampleToTaskPayload(example);
+    const { type: exType, params } = exampleToTaskPayload(example);
     if (exType !== type) {
       skipTypeReset.current = true;
       setType(exType);
     }
-    setParamsJson(exampleToParamsJson(example));
-  };
-
-  const pasteOfficialCode = async () => {
-    try {
-      const raw = await navigator.clipboard.readText();
-      const parsed = parseOfficialManimCode(raw);
-      skipTypeReset.current = true;
-      setType("custom_python");
-      setParamsJson(JSON.stringify(parsed, null, 2));
-    } catch (e) {
-      alert(String(e));
+    if (exType === "custom_python") {
+      setCustomPython(paramsToCustomPythonEditor(params));
+    } else {
+      setParamsJson(JSON.stringify(params, null, 2));
     }
   };
+
+  const submitParamsPreview = useMemo(() => {
+    if (type !== "custom_python") return "";
+    try {
+      return JSON.stringify(customPythonEditorToParams(customPython), null, 2);
+    } catch {
+      return "";
+    }
+  }, [type, customPython]);
 
   const copyClipUrl = () => task?.outputUrl && navigator.clipboard.writeText(task.outputUrl);
   const copyClipJson = () => task?.clipJson && navigator.clipboard.writeText(JSON.stringify(task.clipJson, null, 2));
@@ -326,32 +346,35 @@ export default function ManimConfig() {
 
           <div>
             <div className="flex justify-between items-center mb-1 flex-wrap gap-2">
-              <label className="text-sm text-muted font-semibold">参数 JSON</label>
-              <div className="flex gap-2">
-                {type === "custom_python" && (
-                  <button type="button" onClick={pasteOfficialCode} className="btn-ghost text-xs">
-                    剪贴板 → custom_python JSON
-                  </button>
-                )}
-                <button type="button" onClick={fillExample} className="btn-ghost text-xs">
-                  一键填充示例
-                </button>
-              </div>
+              <label className="text-sm text-muted font-semibold">
+                {type === "custom_python" ? "自定义 Scene 编辑器" : "参数 JSON"}
+              </label>
+              <button type="button" onClick={fillExample} className="btn-ghost text-xs">
+                {type === "custom_python" ? "填充官方 3D 示例" : "一键填充示例"}
+              </button>
             </div>
-            <textarea
-              value={paramsJson}
-              onChange={(e) => setParamsJson(e.target.value)}
-              rows={type === "custom_python" ? 14 : 10}
-              spellCheck={false}
-              className="input-field p-3 font-mono text-xs"
-            />
-            {type === "custom_python" && (
-              <p className="text-xs text-yellow-500/90 mt-1">
-                粘贴 Scene 类即可（可含 <code>from manim import *</code>，系统会自动去重）。
-                <strong>ThreeDScene</strong> 会自动启用 OpenGL + xvfb；请设置{" "}
-                <code>class_name</code> 与类名一致（如 HarmonicRibbon3D）。
-                MathTex 需 texlive；3D 需 install-opengl-deps.sh。
-              </p>
+            {type === "custom_python" ? (
+              <>
+                <CustomPythonEditor value={customPython} onChange={setCustomPython} />
+                {submitParamsPreview && (
+                  <details className="mt-3 text-xs">
+                    <summary className="cursor-pointer text-muted font-semibold select-none">
+                      查看提交用 JSON（复制到一键成片 shots[].params）
+                    </summary>
+                    <pre className="mt-2 code-block max-h-48 whitespace-pre-wrap break-all">
+                      {submitParamsPreview}
+                    </pre>
+                  </details>
+                )}
+              </>
+            ) : (
+              <textarea
+                value={paramsJson}
+                onChange={(e) => setParamsJson(e.target.value)}
+                rows={10}
+                spellCheck={false}
+                className="input-field p-3 font-mono text-xs"
+              />
             )}
             {type === "formula_curve" && (
               <p className="text-xs text-gray-500 mt-1">
