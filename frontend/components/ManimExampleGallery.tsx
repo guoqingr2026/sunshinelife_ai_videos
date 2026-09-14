@@ -56,7 +56,9 @@ export default function ManimExampleGallery({
     <div className="panel space-y-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <p className="text-sm font-semibold text-ink">
-          场景示例库（{examples.length}）— 点击即切换类型并填入 JSON
+          {compact
+            ? `快捷示例（${examples.length}）`
+            : `场景示例库（${examples.length}）— 点击即切换类型并填入 JSON`}
         </p>
         <p className="text-xs text-muted">当前场景：{currentType}</p>
       </div>

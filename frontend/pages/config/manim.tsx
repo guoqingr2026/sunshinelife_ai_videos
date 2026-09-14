@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, ManimSceneExample, ManimStatus, Task } from "../../utils/api";
 import {
   MANIM_CATEGORIES,
@@ -11,7 +11,9 @@ import {
 } from "../../utils/manim-catalog";
 import CustomPythonEditor from "../../components/CustomPythonEditor";
 import FontPresetSelect from "../../components/FontPresetSelect";
+import ManimExampleCatalogTable from "../../components/ManimExampleCatalogTable";
 import ManimExampleGallery from "../../components/ManimExampleGallery";
+import UserSceneRegistry from "../../components/UserSceneRegistry";
 import FormulaCurveBuilder, { type FormulaCurveParams } from "../../components/FormulaCurveBuilder";
 import {
   exampleToParamsJson,
@@ -24,6 +26,10 @@ import {
   paramsToCustomPythonEditor,
   type CustomPythonEditorState,
 } from "../../utils/custom-python-params";
+import {
+  loadUserSceneExamples,
+  userExampleToSceneExample,
+} from "../../utils/user-scene-examples";
 import { DEFAULT_FONT_PRESET, getFontPreset } from "../../utils/typography-presets";
 
 type LayerFilter = "all" | 1 | 2 | 3;
@@ -44,7 +50,22 @@ export default function ManimConfig() {
   const [fontPresetId, setFontPresetId] = useState(DEFAULT_FONT_PRESET.id);
   const [sceneExamples, setSceneExamples] = useState<ManimSceneExample[]>([]);
   const [exampleCategories, setExampleCategories] = useState<Array<{ id: string; label: string }>>([]);
+  const [selectedExampleId, setSelectedExampleId] = useState<string | undefined>();
+  const [userExampleTick, setUserExampleTick] = useState(0);
   const skipTypeReset = useRef(false);
+
+  const allExamples = useMemo(() => {
+    const user = loadUserSceneExamples().map(userExampleToSceneExample);
+    return [...user, ...sceneExamples];
+  }, [sceneExamples, userExampleTick]);
+
+  const allCategories = useMemo(() => {
+    const cats = [...exampleCategories];
+    if (loadUserSceneExamples().length > 0 && !cats.some((c) => c.id === "user")) {
+      return [{ id: "user", label: "我的示例" }, ...cats];
+    }
+    return cats;
+  }, [exampleCategories, userExampleTick]);
 
   const selected = getManimTemplate(type);
 
@@ -176,6 +197,7 @@ export default function ManimConfig() {
   };
 
   const applySceneExample = (example: ManimSceneExample) => {
+    setSelectedExampleId(example.id);
     const { type: exType, params } = exampleToTaskPayload(example);
     if (exType !== type) {
       skipTypeReset.current = true;
@@ -187,6 +209,38 @@ export default function ManimConfig() {
       setParamsJson(JSON.stringify(params, null, 2));
     }
   };
+
+  const getCurrentSceneConfig = useCallback(() => {
+    if (type === "custom_python") {
+      const params = customPythonEditorToParams(customPython);
+      const code = String(params.code || "");
+      return {
+        type: "custom_python",
+        label: customPython.className || "CustomScene",
+        params,
+        needsOpengl: /ThreeDScene|OpenGLScene/.test(code),
+      };
+    }
+    let params: Record<string, unknown> = {};
+    try {
+      params = JSON.parse(paramsJson) as Record<string, unknown>;
+    } catch {
+      params = {};
+    }
+    const needs3d =
+      type === "scene_3d_surface" ||
+      type === "scene_3d_orbit" ||
+      type === "manim_curve_3d" ||
+      type === "manim_parametric_surface" ||
+      type.includes("3d") ||
+      type === "manim_lorenz_attractor";
+    return {
+      type,
+      label: selected?.label || type,
+      params,
+      needsOpengl: needs3d,
+    };
+  }, [type, customPython, paramsJson, selected]);
 
   const submitParamsPreview = useMemo(() => {
     if (type !== "custom_python") return "";
@@ -291,12 +345,13 @@ export default function ManimConfig() {
 
           <FormulaCurveBuilder onApply={applyFormulaCurve} />
 
-          {sceneExamples.length > 0 && (
+          {allExamples.length > 0 && (
             <ManimExampleGallery
-              examples={sceneExamples}
-              categories={exampleCategories}
+              examples={allExamples}
+              categories={allCategories}
               currentType={type}
               onSelect={applySceneExample}
+              compact
             />
           )}
 
@@ -441,6 +496,22 @@ export default function ManimConfig() {
               </div>
             )}
           </div>
+
+          <UserSceneRegistry
+            getCurrentConfig={getCurrentSceneConfig}
+            onApply={applySceneExample}
+            onChange={() => setUserExampleTick((n) => n + 1)}
+          />
+
+          {allExamples.length > 0 && (
+            <ManimExampleCatalogTable
+              examples={allExamples}
+              categories={allCategories}
+              currentType={type}
+              selectedExampleId={selectedExampleId}
+              onSelect={applySceneExample}
+            />
+          )}
         </div>
       </div>
     </div>
