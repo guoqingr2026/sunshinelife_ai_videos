@@ -69,9 +69,11 @@ export async function renderRemotion(
 
   if (remotionInstalled()) {
     try {
-      await runRemotionCli(propsFile, outputPath, compositionId, scale);
+      const logPath = path.join(path.dirname(outputPath), `${taskId}-remotion.log`);
+      await runRemotionCli(propsFile, outputPath, compositionId, scale, logPath);
       if (isValidVideo(outputPath)) {
         if (fs.existsSync(propsFile)) fs.unlinkSync(propsFile);
+        if (fs.existsSync(logPath)) fs.unlinkSync(logPath);
         return { outputUrl: toPublicUrl(`files/remotion/${taskId}.mp4`) };
       }
       renderError = "Remotion 渲染完成但输出文件无效";
@@ -83,7 +85,11 @@ export async function renderRemotion(
       "Remotion 依赖未安装。请在项目根目录执行: pnpm install --filter remotion";
   }
 
-  if (fs.existsSync(propsFile)) fs.unlinkSync(propsFile);
+  if (renderError && fs.existsSync(propsFile)) {
+    console.warn(`Remotion 失败，保留 props: ${propsFile}`);
+  } else if (fs.existsSync(propsFile)) {
+    fs.unlinkSync(propsFile);
+  }
 
   const ffmpegOk = await tryFfmpegPlaceholder(outputPath, payload.templateId);
   if (ffmpegOk && isValidVideo(outputPath)) {
@@ -113,7 +119,8 @@ function runRemotionCli(
   propsFile: string,
   outputPath: string,
   compositionId: string,
-  scale: string
+  scale: string,
+  logPath: string
 ): Promise<void> {
   return new Promise((resolve, reject) => {
     const browser = findBrowserExecutable();
@@ -151,19 +158,16 @@ function runRemotionCli(
       if (code === 0) resolve();
       else {
         const clean = log.replace(/\x1b\[[0-9;]*m/g, "");
-        const logPath = outputPath.replace(/\.mp4$/i, "-remotion.log");
         try {
           fs.writeFileSync(logPath, clean, "utf-8");
         } catch {
           /* ignore */
         }
+        const logHint = fs.existsSync(logPath)
+          ? ` · 完整日志: files/remotion/${path.basename(logPath)}`
+          : "";
         reject(
-          new Error(
-            `Remotion CLI 退出码 ${code}: ${clean.slice(-1200)}` +
-              (fs.existsSync(logPath)
-                ? ` · 完整日志: ${path.basename(logPath)}`
-                : "")
-          )
+          new Error(`Remotion CLI 退出码 ${code}: ${clean.slice(-1200)}${logHint}`)
         );
       }
     });

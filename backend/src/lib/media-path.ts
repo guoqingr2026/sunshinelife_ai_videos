@@ -1,7 +1,26 @@
 import fs from "fs";
 import path from "path";
-import { pathToFileURL } from "url";
 import { getStorageRoot } from "./storage";
+
+const MAX_INLINE_IMAGE_BYTES = 12 * 1024 * 1024;
+
+function mimeForImageExt(ext: string): string | null {
+  switch (ext.toLowerCase()) {
+    case ".png":
+      return "image/png";
+    case ".jpg":
+    case ".jpeg":
+      return "image/jpeg";
+    case ".gif":
+      return "image/gif";
+    case ".webp":
+      return "image/webp";
+    case ".svg":
+      return "image/svg+xml";
+    default:
+      return null;
+  }
+}
 
 const MEDIA_PATH_KEYS = ["imagePath", "videoPath", "svgPath", "path", "url"] as const;
 const MANIM_MEDIA_TYPES = new Set(["image_focus", "svg_icon", "video_embed"]);
@@ -39,11 +58,22 @@ export function resolveMediaPathForManim(pathOrUrl: string): string {
   return raw;
 }
 
-/** Resolve upload path to file:// URL for Remotion headless render (avoids CORS / localhost fetch). */
-export function toRemotionLocalImageSrc(pathOrUrl: string): string | null {
+/**
+ * Inline upload as data: URL for Remotion <Img>.
+ * file:// and localhost HTTP are unreliable in headless Chrome; base64 always works.
+ */
+export function toRemotionInlineImageSrc(pathOrUrl: string): string | null {
   const abs = resolveMediaPathForManim(pathOrUrl);
   if (!path.isAbsolute(abs) || !fs.existsSync(abs)) return null;
-  return pathToFileURL(abs).href;
+
+  const mime = mimeForImageExt(path.extname(abs));
+  if (!mime) return null;
+
+  const stat = fs.statSync(abs);
+  if (stat.size > MAX_INLINE_IMAGE_BYTES) return null;
+
+  const data = fs.readFileSync(abs);
+  return `data:${mime};base64,${data.toString("base64")}`;
 }
 
 export interface TimelineImageItem {
@@ -64,10 +94,10 @@ export function resolveImageClipsInTimeline<T extends TimelineImageItem>(
       (item.params?.url as string) ||
       "";
     if (!imagePath) return item;
-    const local = toRemotionLocalImageSrc(imagePath);
+    const inline = toRemotionInlineImageSrc(imagePath);
     return {
       ...item,
-      sourceUrl: local || httpFallback(imagePath),
+      sourceUrl: inline || httpFallback(imagePath),
     };
   });
 }
