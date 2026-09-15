@@ -55,7 +55,7 @@ export function rasterizeImageToMp4(
         "+faststart",
         outputMp4,
       ],
-      { shell: true }
+      { shell: false }
     );
 
     let stderr = "";
