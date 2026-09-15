@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { pathToFileURL } from "url";
 import { getStorageRoot } from "./storage";
 
 const MEDIA_PATH_KEYS = ["imagePath", "videoPath", "svgPath", "path", "url"] as const;
@@ -36,6 +37,39 @@ export function resolveMediaPathForManim(pathOrUrl: string): string {
     if (fs.existsSync(candidate)) return candidate;
   }
   return raw;
+}
+
+/** Resolve upload path to file:// URL for Remotion headless render (avoids CORS / localhost fetch). */
+export function toRemotionLocalImageSrc(pathOrUrl: string): string | null {
+  const abs = resolveMediaPathForManim(pathOrUrl);
+  if (!path.isAbsolute(abs) || !fs.existsSync(abs)) return null;
+  return pathToFileURL(abs).href;
+}
+
+export interface TimelineImageItem {
+  type: string;
+  sourceUrl?: string;
+  params?: Record<string, unknown>;
+}
+
+export function resolveImageClipsInTimeline<T extends TimelineImageItem>(
+  timeline: T[],
+  httpFallback: (publicPath: string) => string
+): T[] {
+  return timeline.map((item) => {
+    if (item.type !== "image_clip") return item;
+    const imagePath =
+      item.sourceUrl ||
+      (item.params?.imagePath as string) ||
+      (item.params?.url as string) ||
+      "";
+    if (!imagePath) return item;
+    const local = toRemotionLocalImageSrc(imagePath);
+    return {
+      ...item,
+      sourceUrl: local || httpFallback(imagePath),
+    };
+  });
 }
 
 export function resolveMediaParamsForManim(

@@ -1,4 +1,5 @@
-import { AbsoluteFill, Img, Sequence, Video } from "remotion";
+import { AbsoluteFill, Sequence, Video } from "remotion";
+import { ImageClip } from "./ImageClip";
 import { TitleAnimation } from "./TitleAnimation";
 import { ParamDisplay } from "./ParamDisplay";
 import { ArrowAnimation } from "./ArrowAnimation";
@@ -169,16 +170,9 @@ export const SimpleElectric: React.FC<SimpleElectricProps> = ({
             }
             break;
           case "image_clip":
-            if (item.sourceUrl) {
-              content = (
-                <AbsoluteFill style={{ backgroundColor }}>
-                  <Img
-                    src={item.sourceUrl}
-                    style={{ width: "100%", height: "100%", objectFit: "contain" }}
-                  />
-                </AbsoluteFill>
-              );
-            }
+            content = (
+              <ImageClip src={item.sourceUrl} backgroundColor={backgroundColor} />
+            );
             break;
           case "quote":
             content = (

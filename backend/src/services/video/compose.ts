@@ -10,7 +10,10 @@ import { createComposeOutputBundle } from "./output-bundle";
 import { resolveManimCjkFont } from "./manim-font";
 import { injectThemeIntoManimParams } from "./manim-theme";
 import { COMPOSE_FPS } from "./shot-plan-parser";
-import { resolveMediaParamsForManim } from "../../lib/media-path";
+import {
+  resolveImageClipsInTimeline,
+  resolveMediaParamsForManim,
+} from "../../lib/media-path";
 
 function manimClipDurationFrames(
   slotFrames: number | undefined,
@@ -41,16 +44,7 @@ function toRemotionMediaUrl(publicUrl: string): string {
 }
 
 function resolveTimelineForRemotion(timeline: TimelineItem[]): TimelineItem[] {
-  return timeline.map((item) => {
-    if (item.type !== "image_clip") return item;
-    const imagePath =
-      item.sourceUrl ||
-      (item.params?.imagePath as string) ||
-      (item.params?.url as string) ||
-      "";
-    if (!imagePath) return item;
-    return { ...item, sourceUrl: toRemotionMediaUrl(imagePath) };
-  });
+  return resolveImageClipsInTimeline(timeline, toRemotionMediaUrl);
 }
 
 export async function renderCompose(

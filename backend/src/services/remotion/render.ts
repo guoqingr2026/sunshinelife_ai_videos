@@ -3,8 +3,22 @@ import fs from "fs";
 import path from "path";
 import { writeMinimalMp4 } from "../../lib/minimal-mp4";
 import { getRemotionOutputPath, toPublicUrl } from "../../lib/storage";
+import { resolveImageClipsInTimeline } from "../../lib/media-path";
 import { normalizeTimeline } from "./normalize-timeline";
 import { findBrowserExecutable } from "./browser";
+
+function toRemotionMediaUrl(publicUrl: string): string {
+  const port = process.env.PORT || 3001;
+  const base = `http://127.0.0.1:${port}`;
+  if (publicUrl.startsWith("http://") || publicUrl.startsWith("https://")) {
+    const filesIdx = publicUrl.indexOf("/files/");
+    if (filesIdx >= 0) return `${base}${publicUrl.slice(filesIdx)}`;
+    return publicUrl;
+  }
+  const filesMatch = publicUrl.match(/\/files\/.+$/);
+  if (filesMatch) return `${base}${filesMatch[0]}`;
+  return `${base}${publicUrl.startsWith("/") ? publicUrl : `/${publicUrl}`}`;
+}
 
 const REMOTION_ROOT = path.resolve(__dirname, "../../../../remotion");
 
@@ -34,9 +48,13 @@ export async function renderRemotion(
   const outputPath = path.resolve(getRemotionOutputPath(taskId));
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
+  const timeline = resolveImageClipsInTimeline(
+    payload.timeline,
+    toRemotionMediaUrl
+  );
   const normalized = {
     ...payload,
-    timeline: normalizeTimeline(payload.timeline),
+    timeline: normalizeTimeline(timeline),
   };
 
   const propsFile = path.resolve(
@@ -132,8 +150,21 @@ function runRemotionCli(
     proc.on("close", (code) => {
       if (code === 0) resolve();
       else {
-        const clean = log.replace(/\x1b\[[0-9;]*m/g, "").slice(-1200);
-        reject(new Error(`Remotion CLI 退出码 ${code}: ${clean}`));
+        const clean = log.replace(/\x1b\[[0-9;]*m/g, "");
+        const logPath = outputPath.replace(/\.mp4$/i, "-remotion.log");
+        try {
+          fs.writeFileSync(logPath, clean, "utf-8");
+        } catch {
+          /* ignore */
+        }
+        reject(
+          new Error(
+            `Remotion CLI 退出码 ${code}: ${clean.slice(-1200)}` +
+              (fs.existsSync(logPath)
+                ? ` · 完整日志: ${path.basename(logPath)}`
+                : "")
+          )
+        );
       }
     });
     proc.on("error", (err) => reject(err));
