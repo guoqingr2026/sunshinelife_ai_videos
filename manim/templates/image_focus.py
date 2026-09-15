@@ -20,7 +20,8 @@ class ImageFocus(Scene):
         title = mk_title(p["title"])
         path = resolve_media_path(p["imagePath"])
         if os.path.exists(path) and path.lower().endswith((".png", ".jpg", ".jpeg", ".gif", ".webp")):
-            img = ImageMobject(path, height=4)
+            img = ImageMobject(path)
+            img.scale_to_fit_width(config.frame_width * 0.92)
         elif os.path.exists(path) and path.lower().endswith(".svg"):
             try:
                 img = SVGMobject(path).scale_to_fit_height(4)

@@ -92,6 +92,10 @@ export const REMOTION_TYPE_ALIASES: Record<string, string> = {
   title: "title",
   outro: "fade_text",
   manim_clip: "fade_text",
+  image_bookend: "image_clip",
+  start_image: "image_clip",
+  end_image: "image_clip",
+  bookend_image: "image_clip",
 };
 
 export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
@@ -216,6 +220,7 @@ export function resolveRemotionType(type: string): string | null {
     "title", "chapter", "params", "bullet_list", "subtitle", "fade_text",
     "compare", "arrow", "quote", "stat", "flow_steps", "timeline_bar", "formula_card",
     "remotion_doors", "remotion_open_door", "remotion_car_reveal",
+    "image_clip",
   ]);
   if (remotionTypes.has(t)) return t;
   return REMOTION_TYPE_ALIASES[t] || null;

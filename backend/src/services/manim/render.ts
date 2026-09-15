@@ -5,6 +5,7 @@ import { checkManimModule, spawnPythonStdin } from "../../lib/python";
 import { getManimOutputPath, getStorageRoot, toPublicUrl } from "../../lib/storage";
 import { isPlayableMp4 } from "../../lib/video-utils";
 import { resolveManimCjkFont } from "../video/manim-font";
+import { resolveMediaParamsForManim } from "../../lib/media-path";
 
 const MANIM_ROOT = path.resolve(__dirname, "../../../../manim");
 const RENDER_SCRIPT = path.join(MANIM_ROOT, "render_task.py");
@@ -80,9 +81,14 @@ export async function renderManim(
     };
   }
 
+  const resolvedParams = resolveMediaParamsForManim(
+    payload.type,
+    payload.params ?? {}
+  );
   const payloadJson = JSON.stringify({
     taskId,
     ...payload,
+    params: resolvedParams,
     outputPath,
     storageRoot: getStorageRoot(),
   });

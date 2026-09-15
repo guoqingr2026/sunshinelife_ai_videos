@@ -1,0 +1,348 @@
+{
+  "title": "三人分金币：逆向归纳的极致智慧",
+  "theme": {
+    "name": "B站粉",
+    "primaryColor": "#fb7299",
+    "secondaryColor": "#23ade5",
+    "backgroundColor": "#141420",
+    "accentColor": "#ffe066",
+    "fontPresetId": "noto-sans-sc"
+  },
+  "shots": [
+    {
+      "type": "image_clip",
+      "label": "片头图",
+      "durationSeconds": 5,
+      "params": {
+        "imagePath": "/files/uploads/scene1_start.png"
+      }
+    },
+    { "type": "title", "label": "三人分金币：逆向归纳的极致智慧", "durationSeconds": 4 },
+
+    { "type": "chapter", "label": "第一关：三人分一百金币", "durationSeconds": 3 },
+
+    {
+      "type": "typewriter_text",
+      "label": "开场",
+      "text": "三名海盗抢到一百枚金币。",
+      "subtitle": "海盗分金博弈",
+      "highlight": ["海盗", "一百"],
+      "durationSeconds": 5
+    },
+    {
+      "type": "typewriter_text",
+      "label": "规则",
+      "text": "按顺位提出分配方案，赞成票过半即通过。",
+      "highlight": ["分配方案", "过半"],
+      "durationSeconds": 5
+    },
+    {
+      "type": "typewriter_text",
+      "label": "失败惩罚",
+      "text": "提案被否决的海盗，将被扔进海里。",
+      "highlight": ["扔进海里"],
+      "durationSeconds": 5
+    },
+
+    {
+      "type": "manim_rose_curve",
+      "label": "三人对称结构",
+      "durationSeconds": 8,
+      "params": {
+        "title": "三人表决的对称结构",
+        "k": 3,
+        "subtitle": "r = sin(3θ) · 三叶玫瑰线",
+        "primaryColor": "#fb7299",
+        "accentColor": "#ffe066"
+      }
+    },
+
+    {
+      "type": "remotion_doors",
+      "label": "三海盗门",
+      "durationSeconds": 5,
+      "params": {
+        "title": "提案顺序：A → B → C",
+        "subtitle": "先提案者占据信息优势",
+        "doors": ["海盗 A", "海盗 B", "海盗 C"]
+      }
+    },
+
+    {
+      "type": "manim_custom",
+      "label": "策略空间光带",
+      "durationSeconds": 12,
+      "params": {
+        "scene": "HarmonicRibbon3D",
+        "title": "策略在三维空间中缠绕",
+        "subtitle": "表决 · 收买 · 威胁",
+        "hold_seconds": 4,
+        "rotate_seconds": 6,
+        "colors": ["#fb7299", "#23ade5", "#ffe066"]
+      }
+    },
+
+    { "type": "chapter", "label": "第二关：逆向归纳法", "durationSeconds": 3 },
+
+    {
+      "type": "typewriter_text",
+      "label": "直觉误区",
+      "text": "直觉认为：先提案的 A 应该多分金币。",
+      "highlight": ["直觉", "多分"],
+      "durationSeconds": 5
+    },
+    {
+      "type": "keyword_pop",
+      "label": "关键方法",
+      "durationSeconds": 5,
+      "params": {
+        "title": "逆向归纳法",
+        "keywords": ["从终点", "逆推", "子博弈"]
+      }
+    },
+
+    {
+      "type": "manim_archimedean_spiral",
+      "label": "逆推螺线",
+      "durationSeconds": 9,
+      "params": {
+        "title": "从最后一幕倒推回第一幕",
+        "subtitle": "阿基米德螺线 · 向内收敛",
+        "a": 0.2,
+        "b": 0.14,
+        "primaryColor": "#23ade5",
+        "accentColor": "#ffe066"
+      }
+    },
+
+    {
+      "type": "flow_steps",
+      "label": "逆推四步",
+      "durationSeconds": 7,
+      "params": {
+        "steps": ["想象只剩 B、C", "B 提议 100:0", "B 自己赞成", "方案必然通过"]
+      }
+    },
+
+    {
+      "type": "typewriter_text",
+      "label": "关键结论",
+      "text": "因此在两人子博弈中，C 只能得到零枚。",
+      "highlight": ["C", "零枚"],
+      "durationSeconds": 5
+    },
+
+    {
+      "type": "manim_compare_table",
+      "label": "两人局收益",
+      "durationSeconds": 7,
+      "params": {
+        "title": "子博弈：B 与 C",
+        "left_title": "B（提案者）",
+        "right_title": "C（被动方）",
+        "left_items": ["分配 100 : 0", "自投赞成票", "方案必过"],
+        "right_items": ["只得 0 枚", "无法否决", "威胁无效"]
+      }
+    },
+
+    {
+      "type": "manim_curve_3d",
+      "label": "降维到两人局",
+      "durationSeconds": 10,
+      "params": {
+        "title": "从三人局降维到两人子博弈",
+        "t_max": 16,
+        "hold_seconds": 3,
+        "rotate_seconds": 5,
+        "primaryColor": "#fb7299"
+      }
+    },
+
+    { "type": "chapter", "label": "第三关：回到三人局", "durationSeconds": 3 },
+
+    {
+      "type": "typewriter_text",
+      "label": "A 的策略",
+      "text": "回到三人局：A 只需用一枚金币收买 C。",
+      "highlight": ["一枚", "收买 C"],
+      "durationSeconds": 5
+    },
+    {
+      "type": "keyword_pop",
+      "label": "最小收买",
+      "durationSeconds": 4,
+      "params": {
+        "title": "关键数字",
+        "keywords": ["99", "0", "1"]
+      }
+    },
+
+    {
+      "type": "manim_compare_table",
+      "label": "三人局均衡",
+      "durationSeconds": 7,
+      "params": {
+        "title": "子博弈精炼均衡分配",
+        "left_title": "A 的方案",
+        "right_title": "C 的理性选择",
+        "left_items": ["A 得 99 枚", "B 得 0 枚", "C 得 1 枚"],
+        "right_items": ["1 > 0", "优于两人局", "投赞成票"]
+      }
+    },
+
+    {
+      "type": "typewriter_text",
+      "label": "B 的处境",
+      "text": "B 在均衡中一无所获——这就是先动者的权力。",
+      "highlight": ["B", "先动者"],
+      "durationSeconds": 5
+    },
+
+    {
+      "type": "manim_lissajous",
+      "label": "三相博弈节拍",
+      "durationSeconds": 9,
+      "params": {
+        "title": "A · B · C 三频耦合",
+        "a": 3,
+        "b": 4,
+        "subtitle": "李萨如图形 · 3:4 频率比",
+        "accentColor": "#ffe066"
+      }
+    },
+
+    {
+      "type": "mathtex_formula",
+      "label": "博弈论概念",
+      "durationSeconds": 7,
+      "params": {
+        "title": "子博弈精炼纳什均衡",
+        "formula": "\\text{SPNE}",
+        "caption": "Subgame Perfect Nash Equilibrium"
+      }
+    },
+
+    { "type": "chapter", "label": "第四关：投票与直觉崩塌", "durationSeconds": 3 },
+
+    {
+      "type": "manim_outline",
+      "label": "推导大纲",
+      "durationSeconds": 6,
+      "params": { "title": "逆向归纳结构图" }
+    },
+
+    {
+      "type": "manim_probability_tree",
+      "label": "投票树",
+      "durationSeconds": 8,
+      "params": {
+        "title": "最终投票结构",
+        "branches": [
+          { "path": "A 投赞成", "prob": "1" },
+          { "path": "C 投赞成", "prob": "1" },
+          { "path": "B 投反对", "prob": "1" }
+        ],
+        "highlight": "两票过半 · 方案通过"
+      }
+    },
+
+    {
+      "type": "manim_lorenz_attractor",
+      "label": "三人混沌秩序",
+      "durationSeconds": 14,
+      "params": {
+        "title": "三人博弈的奇异吸引子",
+        "subtitle": "理性将混沌收束为 99-0-1",
+        "n": 3,
+        "colors": ["#fb7299", "#23ade5", "#ffe066"],
+        "hold_seconds": 5,
+        "rotate_seconds": 6
+      }
+    },
+
+    {
+      "type": "typewriter_text",
+      "label": "投票结果",
+      "text": "A 与 C 两票赞成，方案通过。",
+      "highlight": ["两票", "通过"],
+      "durationSeconds": 4
+    },
+
+    {
+      "type": "manim_compare_table",
+      "label": "直觉 vs 理性",
+      "durationSeconds": 8,
+      "params": {
+        "title": "直觉均分 ≠ 博弈均衡",
+        "left_title": "直觉方案",
+        "right_title": "理性方案",
+        "left_items": ["33 / 33 / 34", "看似公平", "不是均衡"],
+        "right_items": ["99 / 0 / 1", "A 先提案", "C 被收买"]
+      }
+    },
+
+    {
+      "type": "keyword_pop",
+      "label": "直觉崩塌",
+      "durationSeconds": 4,
+      "params": {
+        "title": "结论",
+        "keywords": ["直觉", "错误", "理性"]
+      }
+    },
+
+    {
+      "type": "manim_julia_set",
+      "label": "分形之美",
+      "durationSeconds": 10,
+      "params": {
+        "title": "复杂规则下的简洁答案",
+        "subtitle": "朱利亚集 · 边界即决策前沿",
+        "c_real": -0.7,
+        "c_imag": 0.27015
+      }
+    },
+
+    { "type": "chapter", "label": "尾声", "durationSeconds": 3 },
+
+    {
+      "type": "typewriter_text",
+      "label": "本题总结",
+      "text": "三人分金：从最后一子博弈倒推，一枚金币决定全局。",
+      "highlight": ["倒推", "一枚"],
+      "durationSeconds": 5
+    },
+
+    {
+      "type": "manim_custom",
+      "label": "尾声光轨",
+      "durationSeconds": 10,
+      "params": {
+        "scene": "Harmonic3DScene",
+        "title": "直觉之外，是秩序",
+        "hold_seconds": 4,
+        "rotate_seconds": 5,
+        "colors": ["#fb7299", "#ffe066"]
+      }
+    },
+
+    {
+      "type": "fade_text",
+      "label": "数学，是看见秩序。",
+      "durationSeconds": 4
+    },
+    {
+      "type": "fade_text",
+      "label": "关注旭日长空，光照人生。",
+      "durationSeconds": 4
+    },
+    {
+      "type": "image_clip",
+      "label": "片尾图",
+      "durationSeconds": 6,
+      "params": {
+        "imagePath": "/files/uploads/scene2_end.png"
+      }
+    }
+  ]
+}

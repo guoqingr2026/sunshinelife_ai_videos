@@ -10,6 +10,7 @@ import { createComposeOutputBundle } from "./output-bundle";
 import { resolveManimCjkFont } from "./manim-font";
 import { injectThemeIntoManimParams } from "./manim-theme";
 import { COMPOSE_FPS } from "./shot-plan-parser";
+import { resolveMediaParamsForManim } from "../../lib/media-path";
 
 function manimClipDurationFrames(
   slotFrames: number | undefined,
@@ -37,6 +38,19 @@ function toRemotionMediaUrl(publicUrl: string): string {
   const filesMatch = publicUrl.match(/\/files\/.+$/);
   if (filesMatch) return `${base}${filesMatch[0]}`;
   return `${base}${publicUrl.startsWith("/") ? publicUrl : `/${publicUrl}`}`;
+}
+
+function resolveTimelineForRemotion(timeline: TimelineItem[]): TimelineItem[] {
+  return timeline.map((item) => {
+    if (item.type !== "image_clip") return item;
+    const imagePath =
+      item.sourceUrl ||
+      (item.params?.imagePath as string) ||
+      (item.params?.url as string) ||
+      "";
+    if (!imagePath) return item;
+    return { ...item, sourceUrl: toRemotionMediaUrl(imagePath) };
+  });
 }
 
 export async function renderCompose(
@@ -105,7 +119,7 @@ export async function renderCompose(
     });
 
     const manimParams = injectThemeIntoManimParams(
-      { ...(job.params || {}) },
+      resolveMediaParamsForManim(job.type, { ...(job.params || {}) }),
       theme
     );
     const shotFont = resolveManimCjkFont(theme, manimParams) ?? composeManimFont;
@@ -190,9 +204,10 @@ export async function renderCompose(
     log: "开始 Remotion 渲染成片",
   });
 
+  const remotionTimeline = resolveTimelineForRemotion(timeline!);
   const remotionResult = await renderRemotion(taskId, {
     templateId,
-    timeline: timeline!,
+    timeline: remotionTimeline,
     theme,
     preview,
   });

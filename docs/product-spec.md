@@ -1,7 +1,7 @@
 # SunshineLife AI Videos — 产品规格书
 
-> **文档版本：** v1.7（2026-09）  
-> **适用代码：** `main` @ `d449a12` 及之后  
+> **文档版本：** v1.8（2026-09）  
+> **适用代码：** `main` @ `8fb846e` 及之后  
 > **在线地址（ECS）：** `http://47.99.184.249/sunshinelife_ai_videos/`
 
 ---
@@ -276,7 +276,153 @@
 
 > HyperFrames 产出目前需**手动**插入 Remotion timeline（`hyperframes_clip`），未与一键成片自动串联。
 
-### 5.3 Remotion 手动合成
+### 5.3 图片与短视频素材入镜指南
+
+**场景：** 片头封面、片尾二维码/品牌图、实拍短视频片段、示意图 PNG/SVG，与 Manim 动画混剪进成片。
+
+#### 5.3.1 总览：素材从上传到成片
+
+```
+┌──────────────┐     ┌─────────────────────┐     ┌──────────────────────────┐
+│ Manim 页      │ ──▶ │ 素材库上传           │ ──▶ │ /files/uploads/          │
+│ 素材库        │     │ scene{N}_{英文名}.ext │     │ scene1_start.png 等      │
+└──────────────┘     └─────────────────────┘     └────────────┬─────────────┘
+                                                                │
+                    ┌───────────────────────────────────────────┴────────────┐
+                    ▼                                                        ▼
+         ┌─────────────────────┐                              ┌─────────────────────┐
+         │ image_clip（推荐）   │                              │ image_focus /       │
+         │ Remotion 直接贴图    │                              │ video_embed /       │
+         │ 片头片尾、静态图     │                              │ svg_icon（Manim）   │
+         └──────────┬──────────┘                              └──────────┬──────────┘
+                    │                                                     │
+                    └─────────────────────┬───────────────────────────────┘
+                                          ▼
+                              ┌───────────────────────┐
+                              │ 一键成片 shots[]       │
+                              │ imagePath / videoPath  │
+                              └───────────────────────┘
+```
+
+#### 5.3.2 第一步：上传素材
+
+| 步 | 操作 |
+|----|------|
+| 1 | 打开 **Manim** 页 → 右侧 **素材库** |
+| 2 | 填写 **场景序号**（如 `1`）与 **英文命名**（如 `start`） |
+| 3 | 选择 PNG/JPG/GIF/WebP/SVG 或 MP4/MOV/WebM → **上传并保存** |
+| 4 | 记下生成的路径，如 `/files/uploads/scene1_start.png`（可点「复制 URL」） |
+
+**命名规则：** `scene{序号}_{英文slug}.{ext}`  
+示例：`scene1_start.png`、`scene2_end.png`、`scene3_demo_clip.mp4`
+
+**大小限制：** 图片 ≤ 20MB；视频 ≤ 200MB。
+
+#### 5.3.3 第二步：写入分镜 JSON
+
+在 `shots[]` 中加入镜头，**路径统一写** `/files/uploads/文件名`（不要写 ECS 磁盘绝对路径，不要带 `backend/storage`）。
+
+**片头/片尾静态图（推荐 `image_clip`）**
+
+```json
+{
+  "type": "image_clip",
+  "label": "片头图",
+  "durationSeconds": 5,
+  "params": {
+    "imagePath": "/files/uploads/scene1_start.png"
+  }
+}
+```
+
+- `image_clip` 由 **Remotion** 直接渲染 `<Img>`，**不走 Manim**，速度快、路径稳，适合片头封面与片尾品牌图。
+- 成片时间轴中对应项为 `"type": "image_clip"`，`sourceUrl` 指向 `http://127.0.0.1:PORT/files/uploads/...`。
+
+**带缩放动画的配图（`image_focus`）**
+
+```json
+{
+  "type": "image_focus",
+  "label": "示意图",
+  "durationSeconds": 5,
+  "params": {
+    "title": "标题",
+    "imagePath": "/files/uploads/scene1_diagram.png",
+    "caption": "可选说明文字"
+  }
+}
+```
+
+- 走 **Manim** 渲染为 `manim_clip`，适合需要轻微缩放/淡入的示意图。
+
+**短视频片段（`video_embed`）**
+
+```json
+{
+  "type": "video_embed",
+  "label": "实拍片段",
+  "durationSeconds": 8,
+  "params": {
+    "title": "演示",
+    "videoPath": "/files/uploads/scene3_demo_clip.mp4"
+  }
+}
+```
+
+**SVG 图标（`svg_icon`）**
+
+```json
+{
+  "type": "svg_icon",
+  "label": "图标",
+  "params": {
+    "svgPath": "/files/uploads/scene4_logo.svg"
+  }
+}
+```
+
+#### 5.3.4 三种入镜方式对比
+
+| `type` | 渲染引擎 | 适用 | Manim 任务数 |
+|--------|----------|------|--------------|
+| **`image_clip`** | Remotion | 片头/片尾静态图、全屏封面 | **不增加** |
+| **`image_focus`** | Manim | 配图 + 标题/缩放动画 | +1 |
+| **`video_embed`** | Manim | 实拍/录屏短视频 | +1 |
+| **`svg_icon`** | Manim | 矢量图标动画 | +1 |
+
+**选型建议：**
+
+- 片头封面、片尾二维码/品牌图 → **`image_clip`**
+- 正片内需要 Manim 动效的配图 → **`image_focus`**
+- 用户上传的 MP4 片段 → **`video_embed`**
+
+#### 5.3.5 ECS 存储与排查
+
+| 项 | 值 |
+|----|-----|
+| 磁盘目录（ECS） | `/opt/sunshinelife_ai_videos/backend/storage/files/uploads/` |
+| 对外 URL | `http://<IP>/sunshinelife_ai_videos/files/uploads/文件名` |
+| 本地 API 直链 | `http://127.0.0.1:3012/files/uploads/文件名` |
+| 登记清单 | 同目录 `manifest.json` |
+
+> **常见误区：** 不要在服务器上找 `/opt/sunshinelife_ai_videos/files/uploads/`——该路径不存在；素材在 **`backend/storage/files/uploads/`** 下。
+
+**验收命令（ECS）：**
+
+```bash
+ls -la /opt/sunshinelife_ai_videos/backend/storage/files/uploads/
+curl -s http://127.0.0.1:3012/api/assets | python3 -m json.tool
+curl -I http://127.0.0.1:3012/files/uploads/scene1_start.png
+sudo bash deploy/ecs/diagnose-compose.sh   # 第 6 节检查 uploads
+```
+
+#### 5.3.6 完整示例工程
+
+| 工程 | 说明 |
+|------|------|
+| `examples/projects/three-pirates-gold/` | 片头 `image_clip` + 26 镜 Manim + 片尾 `image_clip`；素材 `scene1_start.png` / `scene2_end.png` |
+
+### 5.4 Remotion 手动合成
 
 **场景：** 精细调整转场、时长、配色，不重新跑 Manim。
 
@@ -1088,15 +1234,27 @@ project.shots[].params  →  compose.renderManim  →  MANIM_PARAMS  →  Scene.
 
 #### 7.10.9 用户素材上传（Manim 页 · 素材库）
 
+> 用户操作指南见 **§5.3**；本节为技术规格。
+
 | 项 | 说明 |
 |----|------|
 | API | `POST /api/assets/upload`（multipart）、`GET /api/assets`、`DELETE /api/assets/:filename` |
-| 存储 | `{STORAGE}/files/uploads/` |
-| 命名 | `scene{序号}_{英文slug}.{ext}`（如 `scene1_product_intro.mp4`） |
-| 成片用法 | `shots[].params.imagePath` / `videoPath` / `svgPath` = `/files/uploads/...` |
-| 适用 `type` | `image_focus`、`video_embed`、`svg_icon`；路径由 `resolve_media_path` 解析 |
+| `STORAGE_PATH` | 默认 `./storage`，相对 **backend/** 解析 → 实际 `backend/storage/` |
+| 磁盘路径 | `{STORAGE}/files/uploads/`（ECS：`/opt/.../backend/storage/files/uploads/`） |
+| 对外 URL | `{PUBLIC_BASE_PATH}/files/uploads/文件名` |
+| 命名 | `scene{序号}_{英文slug}.{ext}`（如 `scene1_start.png`） |
+| 成片路径写法 | `shots[].params.imagePath` / `videoPath` / `svgPath` = **`/files/uploads/...`**（无 subpath 前缀） |
 
-上传后 URL 可写入一键成片 JSON，**无需**为每个素材单独注册 type。
+**入镜 `type` 与解析：**
+
+| `type` | 参数字段 | 渲染 | 路径解析 |
+|--------|----------|------|----------|
+| **`image_clip`** | `imagePath` | Remotion `Img` | Node `resolveTimelineForRemotion` → `http://127.0.0.1:PORT/files/...` |
+| `image_focus` | `imagePath` | Manim → `manim_clip` | Node `resolveMediaPathForManim` + Python `resolve_media_path` |
+| `video_embed` | `videoPath` | Manim → `manim_clip` | 同上 |
+| `svg_icon` | `svgPath` | Manim → `manim_clip` | 同上 |
+
+上传后写入一键成片 JSON，**无需**为每个素材单独注册 type。
 
 #### 7.10.10 一键成片预设按钮
 
@@ -1105,6 +1263,7 @@ project.shots[].params  →  compose.renderManim  →  MANIM_PARAMS  →  Scene.
 | 学习 MVP | 内置遗忘曲线 |
 | 数学题·快速版 / 完整版 | `examples/projects/math-2pow-t-equals-t32/` |
 | 蒙提霍尔 | `examples/projects/monty-hall/` |
+| 三人分金币 | `examples/projects/three-pirates-gold/`（含 `image_clip` 片头片尾） |
 | 数学宇宙 | `manim_custom` 多 scene |
 | 读书训练 | `examples/projects/reading-study/` |
 
@@ -1179,7 +1338,7 @@ project.shots[].params  →  compose.renderManim  →  MANIM_PARAMS  →  Scene.
 
 ```bash
 PORT=3001
-STORAGE_PATH=./storage
+STORAGE_PATH=./storage   # 相对 backend/，实际 backend/storage/
 REMOTION_BROWSER_EXECUTABLE=C:\Program Files\Google\Chrome\Application\chrome.exe
 # HyperFrames（可选）
 IMAGE_API_KEY=sk-...
@@ -1230,6 +1389,15 @@ IMAGE_MODEL=dall-e-3
 | 3 | 正式生成 → 任务管理下载 MP4 / 工程包 |
 | 4 | （可选）任务管理 → **本地归档** 到本机项目文件夹 |
 
+### 示例 F：片头片尾配图（三人分金币）
+
+| 步 | 操作 |
+|----|------|
+| 1 | **Manim** 页素材库上传 `start.png`、`end.png` → 得到 `scene1_start.png`、`scene2_end.png` |
+| 2 | 一键成片加载 `examples/projects/three-pirates-gold/project.json`（首尾为 `image_clip`） |
+| 3 | 确认 ECS：`ls backend/storage/files/uploads/scene1_start.png` 存在 |
+| 4 | 生成 → 时间轴首尾应为 `image_clip`，Manim 任务 **26** 个（不含片头片尾） |
+
 ### 示例 E：复现 Manim 官方画廊某一镜
 
 | 步 | 操作 |
@@ -1257,6 +1425,8 @@ IMAGE_MODEL=dall-e-3
 | ECS `git pull` 超时 | 国内服务器访问 GitHub 443 不稳定 | 换镜像：`git remote set-url origin https://ghfast.top/https://github.com/guoqingr2026/sunshinelife_ai_videos.git` 再 pull；或 Windows `deploy/ecs/upload-from-windows.ps1` |
 | `custom_python` ThreeD 黑屏 | 缺 OpenGL 依赖 | `sudo bash deploy/ecs/install-opengl-deps.sh` |
 | 本地归档按钮无效 | 非 Chrome/Edge 或未授权文件夹 | 换浏览器；或用 `scripts/sync-ecs-to-local.ps1` |
+| 片头/片尾图不显示 | 用了 `image_focus` 且路径未解析；或复用旧时间轴 | 改用 `image_clip`；路径写 `/files/uploads/...`；ECS 查 `backend/storage/files/uploads/` |
+| ECS 找不到上传文件 | 查错目录 | 正确路径：`/opt/.../backend/storage/files/uploads/`，非项目根 `files/` |
 
 诊断脚本（ECS）：
 
@@ -1302,6 +1472,7 @@ pm2 logs sunshinelife-videos-api
 | [deploy/ecs/README.md](../deploy/ecs/README.md) | 阿里云 ECS 部署 |
 | [examples/projects/math-2pow-t-equals-t32/](../examples/projects/math-2pow-t-equals-t32/) | 数学题完整示例工程 |
 | [examples/projects/reading-study/](../examples/projects/reading-study/) | 读书训练示例工程 |
+| [examples/projects/three-pirates-gold/](../examples/projects/three-pirates-gold/) | 博弈论示例 + 片头片尾 `image_clip` |
 | [Manim Example Gallery](https://docs.manim.community/en/stable/examples.html) | 官方场景代码（经 `custom_python` 接入） |
 
 ---
@@ -1318,6 +1489,7 @@ pm2 logs sunshinelife-videos-api
 | v1.5 | 2026-09 | P0–P2 官方画廊 10 种新 `type`（`gallery_scenes.py`）；Manim **85** 种；§7.5.11 扩展为 12 种画廊镜头 |
 | v1.6 | 2026-09 | 画廊 12 种 `params` 补全（表达式/坐标/字号/`run_times`）；§7.5.11.1 参数手册 |
 | v1.7 | 2026-09 | **§7.5.13 开放参数原则**（只注册 type、params 透传）；Manim 页素材库/对照表/我的示例库；`manim_formula` LaTeX、`typewriter_text` 高亮；§7.10.9 素材 API @ `d449a12` |
+| v1.8 | 2026-09 | **§5.3 图片与短视频素材入镜指南**；`image_clip` Remotion 片头片尾；`media-path` 路径预解析；`STORAGE_PATH` 固定相对 backend；三人分金币示例工程；§7.10.9 技术规格扩充 |
 
 ---
 

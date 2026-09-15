@@ -54,7 +54,21 @@ if os.path.exists(p):
 PY
 
 echo ""
-echo "=== 6. Manim / Node ==="
+echo "=== 6. 素材库 uploads（注意：在 backend/storage，不是项目根 files/）==="
+UPLOADS="$ROOT/backend/storage/files/uploads"
+if [[ -d "$UPLOADS" ]]; then
+  ls -la "$UPLOADS" | head -20
+  if [[ -f "$UPLOADS/manifest.json" ]]; then
+    echo "--- manifest.json ---"
+    python3 -c "import json; d=json.load(open('$UPLOADS/manifest.json')); print(len(d.get('assets',[])), 'assets'); [print(' ',a.get('filename')) for a in d.get('assets',[])[:10]]"
+  fi
+else
+  echo "目录不存在: $UPLOADS"
+fi
+curl -sf -o /dev/null -w "HTTP %{http_code} " "http://127.0.0.1:${PORT}/api/assets" 2>/dev/null && echo "/api/assets" || echo "FAIL /api/assets"
+
+echo ""
+echo "=== 7. Manim / Node ==="
 python3 -m manim --version 2>/dev/null | head -1 || echo "Manim 未安装"
 node -v 2>/dev/null || true
 

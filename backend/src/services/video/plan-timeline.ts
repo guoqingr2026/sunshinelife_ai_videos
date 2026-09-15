@@ -268,6 +268,17 @@ function remotionItemFromSequence(item: SequenceItem): TimelineItem {
         title: item.label,
         params: item.params,
       };
+    case "image_clip":
+      return {
+        type: "image_clip",
+        durationInFrames: item.durationInFrames || 150,
+        title: item.label,
+        sourceUrl:
+          (item.params?.imagePath as string) ||
+          (item.params?.url as string) ||
+          "",
+        params: item.params,
+      };
     default:
       return { type: "chapter", durationInFrames: 90, title: item.label };
   }

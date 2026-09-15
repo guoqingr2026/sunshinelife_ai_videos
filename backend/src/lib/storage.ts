@@ -1,9 +1,17 @@
 import fs from "fs";
 import path from "path";
 
-const STORAGE_ROOT = path.resolve(
-  process.env.STORAGE_PATH || path.join(__dirname, "../../storage")
-);
+/** Compiled entry is backend/dist — storage always under backend/ unless absolute STORAGE_PATH */
+const BACKEND_ROOT = path.resolve(__dirname, "..");
+
+function resolveStorageRoot(): string {
+  const configured = process.env.STORAGE_PATH?.trim();
+  if (!configured) return path.join(BACKEND_ROOT, "storage");
+  if (path.isAbsolute(configured)) return configured;
+  return path.resolve(BACKEND_ROOT, configured.replace(/^\.\//, ""));
+}
+
+const STORAGE_ROOT = resolveStorageRoot();
 
 export function ensureStorageDirs() {
   const dirs = [

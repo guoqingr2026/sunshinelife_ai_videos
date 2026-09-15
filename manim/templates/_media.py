@@ -13,15 +13,15 @@ def resolve_media_path(path_or_url: str) -> str:
     if "/files/" in rel:
         rel = rel.split("/files/", 1)[1]
     rel = rel.lstrip("/")
+    if rel.startswith("files/"):
+        rel = rel[len("files/") :]
+    candidates = []
     if storage:
-        candidate = os.path.join(storage, "files", rel.replace("files/", "", 1) if rel.startswith("files/") else rel)
-        if os.path.exists(candidate):
-            return candidate
-        candidate2 = os.path.join(storage, rel)
-        if os.path.exists(candidate2):
-            return candidate2
+        candidates.append(os.path.join(storage, "files", rel))
+        candidates.append(os.path.join(storage, rel))
     manim_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    asset = os.path.join(manim_root, "assets", os.path.basename(rel))
-    if os.path.exists(asset):
-        return asset
+    candidates.append(os.path.join(manim_root, "assets", os.path.basename(rel)))
+    for candidate in candidates:
+        if candidate and os.path.exists(candidate):
+            return candidate
     return raw
