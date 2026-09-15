@@ -32,6 +32,7 @@ const REMOTION_SHOT_TYPES = new Set([
   "title", "chapter", "bullet_list", "fade_text", "subtitle", "quote",
   "flow_steps", "timeline_bar", "formula_card", "compare", "arrow", "stat", "params",
   "remotion_doors", "remotion_open_door", "remotion_car_reveal",
+  "image_clip", "image_bookend", "start_image", "end_image", "bookend_image",
 ]);
 const MANIM_IDS = new Set(MANIM_TEMPLATES.map((t) => t.id));
 
