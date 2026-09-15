@@ -1,8 +1,8 @@
 import fs from "fs";
 import path from "path";
 
-/** Compiled entry is backend/dist — storage always under backend/ unless absolute STORAGE_PATH */
-const BACKEND_ROOT = path.resolve(__dirname, "..");
+/** Compiled to backend/dist/lib — go up two levels to backend/ */
+const BACKEND_ROOT = path.resolve(__dirname, "..", "..");
 
 function resolveStorageRoot(): string {
   const configured = process.env.STORAGE_PATH?.trim();
