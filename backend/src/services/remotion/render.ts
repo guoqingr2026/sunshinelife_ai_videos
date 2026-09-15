@@ -33,7 +33,14 @@ export interface TimelineItem {
 export interface RemotionPayload {
   templateId: string;
   timeline: TimelineItem[];
-  theme?: { primaryColor?: string; font?: string; logoUrl?: string };
+  theme?: {
+    primaryColor?: string;
+    secondaryColor?: string;
+    backgroundColor?: string;
+    accentColor?: string;
+    font?: string;
+    logoUrl?: string;
+  };
   preview?: boolean;
 }
 
