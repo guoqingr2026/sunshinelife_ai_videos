@@ -18,6 +18,7 @@ export interface ComposePayload {
   project?: {
     title?: string;
     theme?: ThemeConfig;
+    aspect?: "16:9" | "9:16";
     shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }>;
   };
   title?: string;

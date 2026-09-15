@@ -96,6 +96,10 @@ export const REMOTION_TYPE_ALIASES: Record<string, string> = {
   start_image: "image_clip",
   end_image: "image_clip",
   bookend_image: "image_clip",
+  split_layout: "composite_split",
+  vertical_split: "composite_split",
+  pip_video: "composite_pip",
+  picture_in_picture: "composite_pip",
 };
 
 export const MANIM_TYPE_SPECS: ManimTypeSpec[] = [
@@ -221,6 +225,8 @@ export function resolveRemotionType(type: string): string | null {
     "compare", "arrow", "quote", "stat", "flow_steps", "timeline_bar", "formula_card",
     "remotion_doors", "remotion_open_door", "remotion_car_reveal",
     "image_clip",
+    "composite_split",
+    "composite_pip",
   ]);
   if (remotionTypes.has(t)) return t;
   return REMOTION_TYPE_ALIASES[t] || null;

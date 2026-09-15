@@ -9,6 +9,7 @@ import {
 export interface ComposeProjectExport {
   title: string;
   theme?: Record<string, unknown>;
+  aspect?: "16:9" | "9:16";
   shots: Record<string, unknown>[];
   projectJson: string;
   shotCount: number;
@@ -44,10 +45,12 @@ export function buildComposeProjectFromShotPlan(): ComposeProjectExport | null {
   const shots = config.shots.map((s) => expandShotForExport(s));
   const project: Record<string, unknown> = { title, shots };
   if (config.theme) project.theme = config.theme;
+  if (config.aspect) project.aspect = config.aspect;
 
   return {
     title,
     theme: config.theme as Record<string, unknown> | undefined,
+    aspect: config.aspect,
     shots,
     projectJson: JSON.stringify(project, null, 2),
     shotCount: config.shots.length,

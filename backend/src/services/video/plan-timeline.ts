@@ -6,6 +6,7 @@ import {
   ShotSpec,
 } from "./shot-plan-parser";
 import { getActiveManimRules, getFixedShots } from "./shot-plan-store";
+import { isCompositeType } from "./composite-shots";
 import { resolveManimType, resolveRemotionType } from "./shot-plan-spec";
 
 export interface ThemeConfig {
@@ -50,6 +51,8 @@ export interface VideoProject {
   title?: string;
   theme?: ThemeConfig;
   shots?: ShotSpec[];
+  /** 成片画幅；含 composite_split 时默认 9:16 */
+  aspect?: "16:9" | "9:16";
   /** 为 true 时在显式 shots 外再自动加标题/引言/片尾；默认 false（完全按 JSON 顺序） */
   autoWrap?: boolean;
 }
@@ -100,11 +103,50 @@ function normalize(text: string): string {
   return text.toLowerCase().replace(/\s+/g, "");
 }
 
+function extractMainManimShot(composite: ShotSpec): ShotSpec {
+  const mainRaw = composite.params?.main;
+  if (mainRaw && typeof mainRaw === "object" && !Array.isArray(mainRaw)) {
+    const merged = normalizeShot({
+      ...(mainRaw as Record<string, unknown>),
+      label: composite.label,
+      durationInFrames: composite.durationInFrames,
+    });
+    if (merged) return merged;
+  }
+  return {
+    type: "typewriter_text",
+    label: composite.label,
+    params: { text: composite.label, subtitle: "" },
+    durationInFrames: composite.durationInFrames,
+  };
+}
+
 function shotSpecToSequence(shots: ShotSpec[]): SequenceItem[] {
   const items: SequenceItem[] = [];
   for (const raw of shots) {
     const s = normalizeShot(raw);
     if (!s) continue;
+    if (isCompositeType(s.type)) {
+      const main = extractMainManimShot(s);
+      const manimType = resolveManimType(main.type);
+      if (manimType) {
+        items.push({
+          kind: "manim",
+          type: manimType,
+          label: s.label,
+          params: main.params,
+          durationInFrames: s.durationInFrames,
+        });
+      }
+      items.push({
+        kind: "remotion",
+        type: s.type,
+        label: s.label,
+        params: s.params,
+        durationInFrames: s.durationInFrames,
+      });
+      continue;
+    }
     const manim = resolveManimType(s.type);
     if (manim) {
       items.push({
@@ -279,6 +321,14 @@ function remotionItemFromSequence(item: SequenceItem): TimelineItem {
           "",
         params: item.params,
       };
+    case "composite_split":
+    case "composite_pip":
+      return {
+        type: item.type,
+        durationInFrames: item.durationInFrames || 150,
+        title: item.label,
+        params: item.params,
+      };
     default:
       return { type: "chapter", durationInFrames: 90, title: item.label };
   }
@@ -291,6 +341,18 @@ function appendSequence(
 ): void {
   for (const item of sequence) {
     if (item.kind === "remotion") {
+      if (isCompositeType(item.type)) {
+        const mainIdx = timeline.length - 1;
+        const wired = remotionItemFromSequence(item);
+        timeline.push({
+          ...wired,
+          params: {
+            ...(wired.params || {}),
+            _mainManimTimelineIndex: mainIdx,
+          },
+        });
+        continue;
+      }
       timeline.push(remotionItemFromSequence(item));
       continue;
     }

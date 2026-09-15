@@ -27,12 +27,18 @@ import {
 } from "../../utils/project-theme";
 import { DEFAULT_FONT_PRESET } from "../../utils/typography-presets";
 import { normalizeShotClient, validateProjectShots } from "../../utils/normalize-project-shots";
+import {
+  appendShotToProjectJson,
+  COMPOSITE_PIP_SHOT,
+  COMPOSITE_SPLIT_SHOT,
+} from "../../utils/composite-shot-presets";
 
 const REMOTION_SHOT_TYPES = new Set([
   "title", "chapter", "bullet_list", "fade_text", "subtitle", "quote",
   "flow_steps", "timeline_bar", "formula_card", "compare", "arrow", "stat", "params",
   "remotion_doors", "remotion_open_door", "remotion_car_reveal",
   "image_clip", "image_bookend", "start_image", "end_image", "bookend_image",
+  "composite_split", "composite_pip", "split_layout", "vertical_split", "pip_video", "picture_in_picture",
 ]);
 const MANIM_IDS = new Set(MANIM_TEMPLATES.map((t) => t.id));
 
@@ -42,6 +48,11 @@ function analyzeShots(shots: Array<{ type: string }> | undefined) {
   let remotion = 0;
   const unknown: string[] = [];
   for (const s of shots) {
+    if (s.type === "composite_split" || s.type === "composite_pip") {
+      remotion++;
+      manim++;
+      continue;
+    }
     if (MANIM_IDS.has(s.type)) manim++;
     else if (REMOTION_SHOT_TYPES.has(s.type)) remotion++;
     else unknown.push(s.type);
@@ -82,14 +93,27 @@ function formatTime(iso: string): string {
 function parseProjectJson(text: string): {
   title?: string;
   theme?: ThemeConfig;
+  aspect?: "16:9" | "9:16";
   shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }>;
 } | null {
   const trimmed = text.trim();
   if (!trimmed) return null;
   try {
-    const obj = JSON.parse(trimmed);
+    const obj = JSON.parse(trimmed) as Record<string, unknown>;
     if (!obj || typeof obj !== "object") return null;
-    return obj;
+    const aspectRaw = typeof obj.aspect === "string" ? obj.aspect.trim() : "";
+    const aspect =
+      aspectRaw === "9:16" || aspectRaw === "16:9"
+        ? (aspectRaw as "16:9" | "9:16")
+        : undefined;
+    return {
+      title: typeof obj.title === "string" ? obj.title : undefined,
+      theme: obj.theme as ThemeConfig | undefined,
+      aspect,
+      shots: Array.isArray(obj.shots)
+        ? (obj.shots as Array<{ type: string; label: string; params?: Record<string, unknown> }>)
+        : undefined,
+    };
   } catch {
     return null;
   }
@@ -410,6 +434,40 @@ export default function AutoVideoPage() {
                   className="pill-tab text-xs py-1"
                 >
                   读书训练
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetLocalTask();
+                    setProjectJson(
+                      appendShotToProjectJson(projectJson, COMPOSITE_SPLIT_SHOT, {
+                        aspect: "9:16",
+                      })
+                    );
+                    setPreviewPlan(null);
+                    setPlanError("");
+                  }}
+                  className="pill-tab text-xs py-1"
+                  title="9:16 上 Manim 下实拍"
+                >
+                  +竖屏分屏
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetLocalTask();
+                    setProjectJson(
+                      appendShotToProjectJson(projectJson, COMPOSITE_PIP_SHOT, {
+                        aspect: "16:9",
+                      })
+                    );
+                    setPreviewPlan(null);
+                    setPlanError("");
+                  }}
+                  className="pill-tab text-xs py-1"
+                  title="16:9 右上角画中画"
+                >
+                  +横屏画中画
                 </button>
               </div>
             </div>

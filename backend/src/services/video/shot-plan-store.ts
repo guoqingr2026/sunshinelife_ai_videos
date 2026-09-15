@@ -14,6 +14,7 @@ export interface ShotPlanConfig {
   article: string;
   title?: string;
   theme?: ProjectThemeMeta;
+  aspect?: "16:9" | "9:16";
   rules: ManimRule[];
   shots: ShotSpec[];
   updatedAt: string;
@@ -60,6 +61,7 @@ export function saveShotPlanArticle(article: string): ShotPlanConfig {
     article,
     title: parsed.title,
     theme: parsed.theme,
+    aspect: parsed.aspect,
     rules,
     shots: parsed.shots,
     updatedAt: new Date().toISOString(),

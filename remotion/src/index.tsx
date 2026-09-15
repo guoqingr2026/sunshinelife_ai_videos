@@ -30,11 +30,15 @@ const RemotionRoot: React.FC = () => {
           timeline: defaultTimeline,
           theme: { primaryColor: "#e94560" },
         }}
-        calculateMetadata={({ props }) => ({
-          durationInFrames: calculateTotalDuration(
-            (props as { timeline: TimelineItem[] }).timeline
-          ),
-        })}
+        calculateMetadata={({ props }) => {
+          const p = props as { timeline: TimelineItem[]; aspect?: string };
+          const vertical = p.aspect === "9:16";
+          return {
+            durationInFrames: calculateTotalDuration(p.timeline),
+            width: vertical ? 1080 : 1920,
+            height: vertical ? 1920 : 1080,
+          };
+        }}
       />
     </>
   );

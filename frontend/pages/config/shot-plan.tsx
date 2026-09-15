@@ -2,6 +2,11 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api, ShotPlanConfig, ShotPlanPreview } from "../../utils/api";
 import { setProjectHandoff } from "../../utils/project-bridge";
+import {
+  COMPOSITE_PIP_SHOT,
+  COMPOSITE_PRESET_HELP,
+  COMPOSITE_SPLIT_SHOT,
+} from "../../utils/composite-shot-presets";
 
 type ManimTypeSpec = {
   id: string;
@@ -122,6 +127,37 @@ export default function ShotPlanPage() {
         <span><strong className="text-ink">② 一键成片</strong> Manim + Remotion</span>
         <span>→</span>
         <span>③ 任务管理下载</span>
+      </div>
+
+      <div className="panel-muted mb-4 text-xs text-muted space-y-2">
+        <p className="text-ink font-semibold">合成布局预设（追加到 JSON shots[]）</p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            onClick={() =>
+              copyText(
+                JSON.stringify({ aspect: "9:16", shot: COMPOSITE_SPLIT_SHOT }, null, 2),
+                "split"
+              )
+            }
+            className="pill-tab text-xs py-1"
+          >
+            {copied === "split" ? "已复制竖屏分屏镜头" : "复制竖屏分屏镜头 JSON"}
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              copyText(
+                JSON.stringify({ aspect: "16:9", shot: COMPOSITE_PIP_SHOT }, null, 2),
+                "pip"
+              )
+            }
+            className="pill-tab text-xs py-1"
+          >
+            {copied === "pip" ? "已复制画中画镜头" : "复制横屏画中画 JSON"}
+          </button>
+        </div>
+        <pre className="code-block whitespace-pre-wrap text-[10px]">{COMPOSITE_PRESET_HELP}</pre>
       </div>
 
       <div className="flex flex-wrap gap-2 mb-6">

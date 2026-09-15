@@ -1,5 +1,7 @@
 import { AbsoluteFill, Sequence, Video } from "remotion";
 import { ImageClip } from "./ImageClip";
+import { CompositeSplit } from "./CompositeSplit";
+import { CompositePip } from "./CompositePip";
 import { TitleAnimation } from "./TitleAnimation";
 import { ParamDisplay } from "./ParamDisplay";
 import { ArrowAnimation } from "./ArrowAnimation";
@@ -59,6 +61,7 @@ export interface ThemeConfig {
 export interface SimpleElectricProps {
   timeline: TimelineItem[];
   theme?: ThemeConfig;
+  aspect?: "16:9" | "9:16";
 }
 
 export const SimpleElectric: React.FC<SimpleElectricProps> = ({
@@ -172,6 +175,29 @@ export const SimpleElectric: React.FC<SimpleElectricProps> = ({
           case "image_clip":
             content = (
               <ImageClip src={item.sourceUrl} backgroundColor={backgroundColor} />
+            );
+            break;
+          case "composite_split":
+            content = (
+              <CompositeSplit
+                mainSourceUrl={item.params?.mainSourceUrl as string}
+                overlaySourceUrl={item.params?.overlaySourceUrl as string}
+                mainRatio={Number(item.params?.mainRatio ?? 0.6)}
+                overlayRatio={Number(item.params?.overlayRatio ?? 0.4)}
+                backgroundColor={backgroundColor}
+              />
+            );
+            break;
+          case "composite_pip":
+            content = (
+              <CompositePip
+                mainSourceUrl={item.params?.mainSourceUrl as string}
+                overlaySourceUrl={item.params?.overlaySourceUrl as string}
+                pipPosition={(item.params?.pipPosition as string) || "top-right"}
+                pipWidthRatio={Number(item.params?.pipWidthRatio ?? 0.28)}
+                pipMargin={Number(item.params?.pipMargin ?? 24)}
+                backgroundColor={backgroundColor}
+              />
             );
             break;
           case "quote":

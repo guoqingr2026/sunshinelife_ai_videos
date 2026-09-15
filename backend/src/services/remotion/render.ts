@@ -4,6 +4,7 @@ import path from "path";
 import { writeMinimalMp4 } from "../../lib/minimal-mp4";
 import { getRemotionOutputPath, toPublicUrl } from "../../lib/storage";
 import { materializeImageClipsInTimeline } from "../../lib/image-to-video";
+import { prepareRemotionTimeline } from "../video/composite-shots";
 import { normalizeTimeline } from "./normalize-timeline";
 import { findBrowserExecutable } from "./browser";
 
@@ -42,6 +43,7 @@ export interface RemotionPayload {
     logoUrl?: string;
   };
   preview?: boolean;
+  aspect?: "16:9" | "9:16";
 }
 
 function remotionInstalled(): boolean {
@@ -55,14 +57,16 @@ export async function renderRemotion(
   const outputPath = path.resolve(getRemotionOutputPath(taskId));
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
+  const wired = prepareRemotionTimeline(payload.timeline, toRemotionMediaUrl);
   const timeline = await materializeImageClipsInTimeline(
     taskId,
-    payload.timeline,
+    wired,
     toRemotionMediaUrl,
     payload.theme?.backgroundColor
   );
   const normalized = {
     ...payload,
+    aspect: payload.aspect || "16:9",
     timeline: normalizeTimeline(timeline),
   };
 

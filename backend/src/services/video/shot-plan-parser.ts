@@ -27,6 +27,7 @@ export interface ProjectThemeMeta {
 export interface ParsedShotPlan {
   title?: string;
   theme?: ProjectThemeMeta;
+  aspect?: "16:9" | "9:16";
   rules: ManimRule[];
   shots: ShotSpec[];
   errors: string[];
@@ -201,6 +202,11 @@ export function parseJsonPayload(jsonStr: string): ParsedShotPlan {
     }
     const title = typeof data.title === "string" ? data.title.trim() : undefined;
     const theme = normalizeTheme(data.theme);
+    const aspectRaw = typeof data.aspect === "string" ? data.aspect.trim() : "";
+    const aspect =
+      aspectRaw === "9:16" || aspectRaw === "16:9"
+        ? (aspectRaw as "16:9" | "9:16")
+        : undefined;
     const rules: ManimRule[] = Array.isArray(data.rules)
       ? (data.rules.map(normalizeRule).filter(Boolean) as ManimRule[])
       : [];
@@ -211,12 +217,13 @@ export function parseJsonPayload(jsonStr: string): ParsedShotPlan {
       return {
         title,
         theme,
+        aspect,
         rules,
         shots,
         errors: ["JSON 已识别，但 rules / shots 为空或格式不对"],
       };
     }
-    return { title, theme, rules, shots, errors: [] };
+    return { title, theme, aspect, rules, shots, errors: [] };
   } catch (e) {
     return { rules: [], shots: [], errors: [`JSON 语法错误: ${e}`] };
   }
