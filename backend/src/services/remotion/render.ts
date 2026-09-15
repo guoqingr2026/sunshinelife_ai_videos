@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { writeMinimalMp4 } from "../../lib/minimal-mp4";
 import { getRemotionOutputPath, toPublicUrl } from "../../lib/storage";
-import { resolveImageClipsInTimeline } from "../../lib/media-path";
+import { materializeImageClipsInTimeline } from "../../lib/image-to-video";
 import { normalizeTimeline } from "./normalize-timeline";
 import { findBrowserExecutable } from "./browser";
 
@@ -48,9 +48,11 @@ export async function renderRemotion(
   const outputPath = path.resolve(getRemotionOutputPath(taskId));
   fs.mkdirSync(path.dirname(outputPath), { recursive: true });
 
-  const timeline = resolveImageClipsInTimeline(
+  const timeline = await materializeImageClipsInTimeline(
+    taskId,
     payload.timeline,
-    toRemotionMediaUrl
+    toRemotionMediaUrl,
+    payload.theme?.backgroundColor
   );
   const normalized = {
     ...payload,
