@@ -79,7 +79,9 @@ POST /api/video/compose
 | `label` | string | ✅ | 显示标题，建议 ≤12 字 |
 | `params` | object | ❌ | Manim 参数；省略则用 `manim/locale/zh.json` 中文默认 |
 
-**Remotion 类型（非 Manim）：** `chapter`, `title`, `quote`, `bullet_list`, `fade_text`, `subtitle`, `flow_steps`, `timeline_bar`, `formula_card`, `compare`, `arrow`, `stat`, `params`
+**Remotion 类型（非 Manim）：** `chapter`, `title`, `quote`, `bullet_list`, `fade_text`, `subtitle`, `flow_steps`, `timeline_bar`, `formula_card`, `compare`, `arrow`, `stat`, `params`, `image_clip`, `composite_split`, `composite_pip`
+
+**项目级全片实拍（非 `shots[].type`）：** `project.globalOverlay` — 见下文 §2.5。
 
 ### 2.3 参数合并优先级
 
@@ -91,8 +93,81 @@ manim/locale/zh.json < 模板代码 fallback < API params（最高）
 
 ```http
 GET /api/manim/catalog
-→ { types: string[], locale: {...}, customTypes: ["custom_python"] }
+→ { types: string[], locale: {...}, customTypes: ["custom_python", "manim_custom", "formula_curve"] }
 ```
+
+### 2.5 一键成片：实拍混排与 custom_python
+
+详细用户指南见 **`docs/product-spec.md` §5.4**。摘要如下。
+
+#### 2.5.1 全片底栏实拍 — `globalOverlay`
+
+实拍从片头到片尾**一条视频连续播放**；`shots[]` 写普通 Manim/Remotion 镜头即可。
+
+```json
+{
+  "aspect": "9:16",
+  "globalOverlay": {
+    "mode": "split",
+    "videoPath": "/files/uploads/scene3_demo.mp4",
+    "mainRatio": 0.6,
+    "overlayRatio": 0.4,
+    "loop": true
+  },
+  "shots": [
+    { "type": "forgetting_curve", "label": "遗忘曲线", "params": { "title": "艾宾浩斯遗忘曲线" } }
+  ]
+}
+```
+
+- `loop` 省略时默认为 **`true`**（实拍短于成片则循环）。
+- 与单镜 `composite_split` 不同：composite 只作用于**一个 shot** 的时长。
+
+#### 2.5.2 单镜分屏 — `composite_split` / `composite_pip`
+
+```json
+{
+  "type": "composite_split",
+  "label": "本镜分屏",
+  "durationSeconds": 20,
+  "params": {
+    "videoPath": "/files/uploads/scene3_demo.mp4",
+    "mainRatio": 0.6,
+    "main": { "type": "typewriter_text", "text": "仅本镜文案" }
+  }
+}
+```
+
+#### 2.5.3 自写 Python — `custom_python`
+
+**无需在服务器注册**；`type` 必须是 `custom_python`，不是 Scene 类名。
+
+```json
+{
+  "type": "custom_python",
+  "label": "混沌吸引子",
+  "durationSeconds": 16,
+  "params": {
+    "class_name": "ChaosAttractorScene",
+    "code": "class ChaosAttractorScene(ThreeDScene):\n    def construct(self):\n        ..."
+  }
+}
+```
+
+推荐：Manim 页单镜调试 → 复制 `params` → 粘贴进 `shots[]`。
+
+#### 2.5.4 静态片头片尾 — `image_clip`
+
+```json
+{
+  "type": "image_clip",
+  "label": "片头图",
+  "durationSeconds": 5,
+  "params": { "imagePath": "/files/uploads/scene1_start.jpg" }
+}
+```
+
+合成前由 ffmpeg 栅格化为 MP4，再走 Remotion `<Video>`（ECS 稳定）。
 
 ---
 

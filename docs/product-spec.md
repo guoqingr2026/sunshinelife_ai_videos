@@ -1,7 +1,7 @@
 # SunshineLife AI Videos — 产品规格书
 
-> **文档版本：** v1.8（2026-09）  
-> **适用代码：** `main` @ `8fb846e` 及之后  
+> **文档版本：** v1.9（2026-09）  
+> **适用代码：** `main` @ `8689f6e` 及之后  
 > **在线地址（ECS）：** `http://47.99.184.249/sunshinelife_ai_videos/`
 
 ---
@@ -129,7 +129,7 @@
 | **导出项目 JSON** | 复制到剪贴板，可手动粘贴到一键成片 |
 | API | `GET /api/video/shot-plan/project` 返回 `{ title, shots, projectJson }` |
 
-**类型 ID 约束：** `type` 必须是系统已注册 ID（见 §7.5、§7.7）。**`params` 不做白名单校验**——任意 JSON 键会透传到 Manim `get_params()`（§7.5.13）。勿使用 GPT 自造 `type`；别名见 §7.5.12，未知 `type` 会导致成片失败。
+**类型 ID 约束：** `type` 必须是系统已注册 ID 或 **别名**（见 §7.4、§7.5.12）。**`params` 不做白名单校验**——任意 JSON 键会透传到 Manim `get_params()`（§7.5.13）。勿把 Python **类名**当 `type`（自写 Scene 用 `custom_python`，§5.4.3）；未知 `type` 时一键成片页会标红并禁止提交。
 
 ---
 
@@ -144,6 +144,13 @@
 ```json
 {
   "title": "PN 结入门",
+  "aspect": "16:9",
+  "autoWrap": false,
+  "theme": {
+    "primaryColor": "#fb7299",
+    "backgroundColor": "#141420",
+    "fontPresetId": "noto-sans-sc"
+  },
   "shots": [
     { "type": "pn_junction", "label": "PN 结原理" },
     { "type": "band_structure", "label": "能带结构" }
@@ -155,9 +162,13 @@
 |------|------|------|
 | `title` | 建议 | 视频标题，用于工程包命名 |
 | `shots` | ✅ | 有序镜头数组 |
-| `shots[].type` | ✅ | Manim 或 Remotion 类型 ID |
+| `shots[].type` | ✅ | Manim 或 Remotion 类型 ID（支持别名，见 §7.4） |
 | `shots[].label` | ✅ | 显示标题，建议 ≤12 字 |
-| `shots[].params` | 否 | Manim 自定义参数，见 `docs/manim-automation-guide.md` |
+| `shots[].params` | 否 | Manim / Remotion 参数，见 `docs/manim-automation-guide.md` |
+| `aspect` | 否 | `"16:9"`（默认）或 `"9:16"`；`globalOverlay.split` 时建议 `9:16` |
+| `globalOverlay` | 否 | **全片贯穿实拍层**（从第 0 帧到结尾），见 **§5.4** |
+| `theme` | 否 | 配色与字体预设，同时注入 Manim 与 Remotion |
+| `autoWrap` | 否 | 默认 `false`：严格按 `shots` 顺序，不自动加片头引言片尾 |
 
 从镜头规划跳转时，页顶会显示 **「已从镜头规划导入」**；若服务端有已保存规划但未跳转，可点 **「导入到项目 JSON」**。
 
@@ -168,6 +179,8 @@
 - **蒙提霍尔** — Remotion 三门 + Manim 概率树示例
 - **数学宇宙** — `manim_custom` 多曲线镜头
 - **读书训练** — 10 个学习方法 + 数学曲线隐喻（见 `examples/projects/reading-study/`）
+- **+竖屏分屏 / +横屏画中画** — 在 JSON 末尾追加**单镜** `composite_split` / `composite_pip`（§5.4.2）
+- **+全片底栏实拍** — 写入 `globalOverlay`，实拍从片头贯穿到片尾（§5.4.1）
 
 #### 4.2.2 预览与配置
 
@@ -335,8 +348,8 @@
 }
 ```
 
-- `image_clip` 由 **Remotion** 直接渲染 `<Img>`，**不走 Manim**，速度快、路径稳，适合片头封面与片尾品牌图。
-- 成片时间轴中对应项为 `"type": "image_clip"`，`sourceUrl` 指向 `http://127.0.0.1:PORT/files/uploads/...`。
+- 合成前由 **ffmpeg** 将静态图栅格化为短 MP4，时间轴变为 `manim_clip` + Remotion `<Video>`，ECS 上路径稳定，适合片头封面与片尾品牌图。
+- JSON 中写 `"type": "image_clip"` + `params.imagePath`；支持 `.jpg` / `.png` 等。
 
 **带缩放动画的配图（`image_focus`）**
 
@@ -421,8 +434,141 @@ sudo bash deploy/ecs/diagnose-compose.sh   # 第 6 节检查 uploads
 | 工程 | 说明 |
 |------|------|
 | `examples/projects/three-pirates-gold/` | 片头 `image_clip` + 26 镜 Manim + 片尾 `image_clip`；素材 `scene1_start.png` / `scene2_end.png` |
+| `examples/projects/musk-learning/` | 16:9 马斯克学习观 + 3×`image_clip` + 3D 曲线；素材 `scene1_start.jpg` 等 |
 
-### 5.4 Remotion 手动合成
+### 5.4 实拍与 Manim 混排（globalOverlay · composite）
+
+**场景：** 口播实拍、演示录屏与 Manim 动画同屏；竖屏「上动画下实拍」或横屏「全屏动画 + 角落小窗」。
+
+#### 5.4.1 全片贯穿实拍 — `project.globalOverlay`（推荐）
+
+实拍从**片头到片尾**连续播放，上方（或全屏背景）依次播放 `shots[]` 里的所有镜头。**不要**在 `shots` 里再写 `composite_split` 来实现全片底栏。
+
+**竖屏底栏分屏（9:16，上 Manim 下实拍）：**
+
+```json
+{
+  "title": "学习与记忆 MVP",
+  "aspect": "9:16",
+  "globalOverlay": {
+    "mode": "split",
+    "videoPath": "/files/uploads/scene3_demo.mp4",
+    "mainRatio": 0.6,
+    "overlayRatio": 0.4,
+    "loop": true
+  },
+  "theme": {
+    "name": "B站粉",
+    "primaryColor": "#fb7299",
+    "secondaryColor": "#23ade5",
+    "backgroundColor": "#141420",
+    "accentColor": "#ffe066",
+    "fontPresetId": "noto-sans-sc"
+  },
+  "shots": [
+    { "type": "forgetting_curve", "label": "遗忘曲线", "params": { "title": "艾宾浩斯遗忘曲线" } },
+    { "type": "chapter", "label": "02 间隔重复" },
+    { "type": "typewriter_text", "label": "主动回忆", "text": "主动回忆 · Active Recall", "subtitle": "学习技巧" },
+    { "type": "concept_network", "label": "概念网络", "params": { "center": "理解优先", "nodes": ["联系", "应用", "长期记忆"] } }
+  ]
+}
+```
+
+**横屏画中画（16:9，角落小窗）：**
+
+```json
+{
+  "aspect": "16:9",
+  "globalOverlay": {
+    "mode": "pip",
+    "videoPath": "/files/uploads/scene3_demo.mp4",
+    "pipPosition": "bottom-right",
+    "pipWidthRatio": 0.32,
+    "pipMargin": 24,
+    "loop": true
+  },
+  "shots": [ ... ]
+}
+```
+
+| `globalOverlay` 字段 | 说明 |
+|----------------------|------|
+| `mode` | `split`（竖屏上下分屏）或 `pip`（横屏画中画） |
+| `videoPath` | `/files/uploads/...`，素材库上传后的路径 |
+| `mainRatio` / `overlayRatio` | `split` 时上下占比，默认 `0.6` / `0.4` |
+| `pipPosition` | `top-right` \| `top-left` \| `bottom-right` \| `bottom-left` |
+| `pipWidthRatio` / `pipMargin` | 画中画宽度占比与边距像素 |
+| **`loop`** | 实拍**短于成片**时是否循环；**默认 `true`**；`false` 则播完停在最后一帧 |
+
+一键成片页：**「+全片底栏实拍」** 自动写入 `globalOverlay` + `aspect: "9:16"`。
+
+#### 5.4.2 单镜分屏 — `composite_split` / `composite_pip`
+
+仅**某一个镜头**时长内混排 Manim + 实拍；换镜头后实拍中断（下一段镜头不再带实拍，除非再写一镜 composite）。
+
+```json
+{
+  "type": "composite_split",
+  "label": "竖屏分屏：Manim + 实拍",
+  "durationSeconds": 20,
+  "params": {
+    "mainRatio": 0.6,
+    "overlayRatio": 0.4,
+    "videoPath": "/files/uploads/scene3_demo.mp4",
+    "main": {
+      "type": "typewriter_text",
+      "text": "仅本镜主画面文案",
+      "subtitle": "上 60%"
+    }
+  }
+}
+```
+
+| 对比 | `globalOverlay` | `composite_split` / `composite_pip` |
+|------|-----------------|-----------------------------------|
+| 作用范围 | **整片** | **单个 shot** |
+| `shots` 写法 | 普通镜头即可 | 本镜 `type` 为 composite，内嵌 `params.main` |
+| 实拍是否连续 | ✅ 一条视频从头播到尾 | ❌ 仅该镜；多镜会重复/断开 |
+| 典型用途 | 口播底栏、全程画中画 | 某一节特别强调实拍 |
+
+一键成片：**「+竖屏分屏」** / **「+横屏画中画」** 在 `shots` 末尾追加一镜。
+
+#### 5.4.3 自写 Python 镜头 — `custom_python`（无需注册）
+
+复杂 Manim 场景（RK4 混沌、官方画廊未内置 type）可在 `shots[]` 直接写：
+
+```json
+{
+  "type": "custom_python",
+  "label": "混沌吸引子",
+  "durationSeconds": 16,
+  "params": {
+    "class_name": "ChaosAttractorScene",
+    "code": "class ChaosAttractorScene(ThreeDScene):\n    def construct(self):\n        ..."
+  }
+}
+```
+
+| 要点 | 说明 |
+|------|------|
+| `type` | 必须是 **`custom_python`**，不是类名 |
+| `params.code` | 完整 `class Xxx(Scene):`；可省略 `import` |
+| 调试流程 | Manim 页 → 自定义 Python → 单镜渲染 → 复制 `params` 到 `shots` |
+| `MathTex` | ECS 需 `install-texlive-optional.sh` |
+| `ThreeDScene` | 自动 OpenGL + xvfb |
+
+#### 5.4.4 选型速查
+
+| 需求 | 用法 |
+|------|------|
+| 片头/片尾静态图 | `image_clip` + `imagePath`（§5.3.3） |
+| 正片某一镜全屏实拍 | `video_embed` + `videoPath` |
+| **全片底栏或全程画中画** | **`project.globalOverlay`** |
+| 仅某一镜上下分屏 | `composite_split` + `params.main` |
+| 任意 Python 动画 | `custom_python` + `params.code` |
+| 数学宇宙已有 scene | `manim_custom` + `params.scene` |
+
+### 5.5 Remotion 手动合成
 
 **场景：** 精细调整转场、时长、配色，不重新跑 Manim。
 
@@ -459,11 +605,23 @@ sudo bash deploy/ecs/diagnose-compose.sh   # 第 6 节检查 uploads
 interface VideoProject {
   title?: string;
   theme?: ThemeConfig;
+  aspect?: "16:9" | "9:16";
   autoWrap?: boolean;   // 默认 false：严格按 shots 顺序，不自动加片头片尾
+  globalOverlay?: {     // 全片贯穿实拍，见 §5.4.1
+    mode?: "split" | "pip";
+    videoPath: string;
+    mainRatio?: number;
+    overlayRatio?: number;
+    pipPosition?: string;
+    pipWidthRatio?: number;
+    pipMargin?: number;
+    loop?: boolean;     // 默认 true：实拍短于成片时循环
+  };
   shots: Array<{
     type: string;              // Manim 或 Remotion 类型 ID（见 §7.3–7.6）
     label: string;             // 显示标题
     params?: object;           // Manim / Remotion 参数
+    text?: string;             // 可写在顶层，合并进 params（如 typewriter_text）
     durationSeconds?: number;  // 成片占用秒数（30fps，与 durationInFrames 二选一）
     durationInFrames?: number; // 成片占用帧数（默认 Manim 槽位 150 帧 ≈ 5s）
   }>;
@@ -505,7 +663,7 @@ shots[].type
 
 ### 7.4 Remotion 包装类型（`shots[].type` 可直接使用）
 
-共 **16** 种，经 `resolveRemotionType()` 识别，由 `remotion/src/compositions/SimpleElectric.tsx` 渲染。
+共 **18** 种，经 `resolveRemotionType()` 识别，由 `remotion/src/compositions/SimpleElectric.tsx` 渲染。
 
 | ID | 中文 | 默认帧 | 主要字段 / `params` |
 |----|------|--------|---------------------|
@@ -525,6 +683,11 @@ shots[].type
 | `remotion_doors` | 三扇门 | 150 | `params.title`, `params.subtitle`, `params.doors[]` |
 | `remotion_open_door` | 开门揭示 | 150 | `params.selectedDoor`, `openedDoor`, `reveal`, `text` |
 | `remotion_car_reveal` | 汽车揭示 | 150 | `params.door`, `effect`, `text` |
+| **`image_clip`** | 静态图镜头 | 150 | `params.imagePath`；合成前 ffmpeg → MP4（§5.3.3） |
+| **`composite_split`** | 单镜竖屏分屏 | 随 `main` | `params.main`、`videoPath`、`mainRatio`（§5.4.2） |
+| **`composite_pip`** | 单镜横屏画中画 | 随 `main` | `params.main`、`videoPath`、`pipPosition`（§5.4.2） |
+
+**全片实拍层（写在 `project.globalOverlay`，不是 `shots[].type`）：** 见 §5.4.1；Remotion 组件 `GlobalOverlayLayout`，`loop` 默认 `true`。
 
 **Remotion 别名（`REMOTION_TYPE_ALIASES` → 规范 ID）：**
 
@@ -535,6 +698,11 @@ shots[].type
 | `quote` | `quote` |
 | `title_card`, `title` | `title` |
 | `outro`, `manim_clip` | `fade_text` |
+| `image_bookend`, `start_image`, `end_image`, `bookend_image` | `image_clip` |
+| `split_layout`, `vertical_split` | `composite_split` |
+| `pip_video`, `picture_in_picture` | `composite_pip` |
+
+**Manim 媒体别名（`MANIM_TYPE_ALIASES`）：** `video` / `video_clip` → `video_embed`；`image` / `picture` → `image_focus`。一键成片前端校验与后端 `resolveManimType()` 对齐（`frontend/utils/shot-type-resolve.ts`）。
 
 **仅 Remotion 手动 timeline（勿写入 `shots`）：** `device_toggle`、`manim_clip`、`hyperframes_clip`、`manim_placeholder`、`hyperframes_placeholder`。
 
@@ -1249,7 +1417,7 @@ project.shots[].params  →  compose.renderManim  →  MANIM_PARAMS  →  Scene.
 
 | `type` | 参数字段 | 渲染 | 路径解析 |
 |--------|----------|------|----------|
-| **`image_clip`** | `imagePath` | Remotion `Img` | Node `resolveTimelineForRemotion` → `http://127.0.0.1:PORT/files/...` |
+| **`image_clip`** | `imagePath` | ffmpeg 栅格化 → `manim_clip` + Remotion `Video` | `materializeImageClipsInTimeline` + `/files/uploads/...` |
 | `image_focus` | `imagePath` | Manim → `manim_clip` | Node `resolveMediaPathForManim` + Python `resolve_media_path` |
 | `video_embed` | `videoPath` | Manim → `manim_clip` | 同上 |
 | `svg_icon` | `svgPath` | Manim → `manim_clip` | 同上 |
@@ -1266,6 +1434,9 @@ project.shots[].params  →  compose.renderManim  →  MANIM_PARAMS  →  Scene.
 | 三人分金币 | `examples/projects/three-pirates-gold/`（含 `image_clip` 片头片尾） |
 | 数学宇宙 | `manim_custom` 多 scene |
 | 读书训练 | `examples/projects/reading-study/` |
+| 马斯克学习观 | `examples/projects/musk-learning/`（`image_clip` + 3D 曲线） |
+| +全片底栏实拍 | 写入 `project.globalOverlay`（§5.4.1） |
+| +竖屏分屏 / +横屏画中画 | 追加单镜 `composite_split` / `composite_pip` |
 
 ### 7.11 官方画廊缺口与建议新增镜头（路线图）
 
@@ -1425,7 +1596,10 @@ IMAGE_MODEL=dall-e-3
 | ECS `git pull` 超时 | 国内服务器访问 GitHub 443 不稳定 | 换镜像：`git remote set-url origin https://ghfast.top/https://github.com/guoqingr2026/sunshinelife_ai_videos.git` 再 pull；或 Windows `deploy/ecs/upload-from-windows.ps1` |
 | `custom_python` ThreeD 黑屏 | 缺 OpenGL 依赖 | `sudo bash deploy/ecs/install-opengl-deps.sh` |
 | 本地归档按钮无效 | 非 Chrome/Edge 或未授权文件夹 | 换浏览器；或用 `scripts/sync-ecs-to-local.ps1` |
-| 片头/片尾图不显示 | 用了 `image_focus` 且路径未解析；或复用旧时间轴 | 改用 `image_clip`；路径写 `/files/uploads/...`；ECS 查 `backend/storage/files/uploads/` |
+| 片头/片尾图不显示 | 路径错误或旧版 Remotion `<Img>` | 改用 `image_clip`；路径 `/files/uploads/...`；确认 ECS ≥ `743962c`（ffmpeg 栅格化） |
+| 实拍只在最后一镜出现 | 用了单镜 `composite_split` 而非全片层 | 改用 `project.globalOverlay`（§5.4.1），删掉多余 composite 镜头 |
+| `custom_python` 报未知类型 | 把类名写成 `type` | `type` 固定为 `custom_python`，代码放 `params.code` |
+| 实拍播完定格 | `globalOverlay.loop: false` | 省略 `loop` 或设 `"loop": true`（默认循环） |
 | ECS 找不到上传文件 | 查错目录 | 正确路径：`/opt/.../backend/storage/files/uploads/`，非项目根 `files/` |
 
 诊断脚本（ECS）：
@@ -1473,6 +1647,7 @@ pm2 logs sunshinelife-videos-api
 | [examples/projects/math-2pow-t-equals-t32/](../examples/projects/math-2pow-t-equals-t32/) | 数学题完整示例工程 |
 | [examples/projects/reading-study/](../examples/projects/reading-study/) | 读书训练示例工程 |
 | [examples/projects/three-pirates-gold/](../examples/projects/three-pirates-gold/) | 博弈论示例 + 片头片尾 `image_clip` |
+| [examples/projects/musk-learning/](../examples/projects/musk-learning/) | 马斯克学习观 16:9 + 三图 `image_clip` |
 | [Manim Example Gallery](https://docs.manim.community/en/stable/examples.html) | 官方场景代码（经 `custom_python` 接入） |
 
 ---
@@ -1490,6 +1665,7 @@ pm2 logs sunshinelife-videos-api
 | v1.6 | 2026-09 | 画廊 12 种 `params` 补全（表达式/坐标/字号/`run_times`）；§7.5.11.1 参数手册 |
 | v1.7 | 2026-09 | **§7.5.13 开放参数原则**（只注册 type、params 透传）；Manim 页素材库/对照表/我的示例库；`manim_formula` LaTeX、`typewriter_text` 高亮；§7.10.9 素材 API @ `d449a12` |
 | v1.8 | 2026-09 | **§5.3 图片与短视频素材入镜指南**；`image_clip` Remotion 片头片尾；`media-path` 路径预解析；`STORAGE_PATH` 固定相对 backend；三人分金币示例工程；§7.10.9 技术规格扩充 |
+| v1.9 | 2026-09 | **§5.4 实拍与 Manim 混排**：`globalOverlay` 全片贯穿 + 默认 `loop`；`composite_split`/`composite_pip` 单镜分屏；`custom_python` 一键成片用法；镜头类型别名校验；`image_clip` ffmpeg 栅格化说明；马斯克学习观示例 @ `8689f6e` |
 
 ---
 
