@@ -1,0 +1,260 @@
+{
+  "title": "马斯克的学习观：第一性原理与数据思维",
+  "aspect": "16:9",
+  "autoWrap": false,
+  "theme": {
+    "name": "科技蓝",
+    "primaryColor": "#00d4ff",
+    "secondaryColor": "#1b3a57",
+    "backgroundColor": "#0a1628",
+    "accentColor": "#7b68ee",
+    "fontPresetId": "noto-sans-sc"
+  },
+  "shots": [
+    {
+      "type": "image_clip",
+      "label": "片头图",
+      "durationSeconds": 5,
+      "params": {
+        "imagePath": "/files/uploads/scene1_start.jpg"
+      }
+    },
+
+    {
+      "type": "title",
+      "label": "为什么马斯克能跨行业成功？",
+      "durationSeconds": 4
+    },
+
+    {
+      "type": "manim_custom",
+      "label": "开篇光带",
+      "durationSeconds": 10,
+      "params": {
+        "scene": "HarmonicRibbon3D",
+        "title": "跨行业学习的底层结构",
+        "subtitle": "问题 · 推理 · 工具",
+        "hold_seconds": 3,
+        "rotate_seconds": 5,
+        "colors": ["#00d4ff", "#7b68ee", "#ffd166"]
+      }
+    },
+
+    { "type": "chapter", "label": "大学的真正价值", "durationSeconds": 3 },
+
+    {
+      "type": "typewriter_text",
+      "label": "大学价值",
+      "text": "大学教的不是具体技能，而是建立知识网络与提问能力。",
+      "subtitle": "马斯克学习观",
+      "highlight": ["知识网络", "提问"],
+      "durationSeconds": 6
+    },
+
+    {
+      "type": "manim_curve_3d",
+      "label": "知识路径",
+      "durationSeconds": 12,
+      "params": {
+        "title": "知识在三维空间中延展",
+        "subtitle": "从工具到原理的螺旋上升",
+        "primaryColor": "#00d4ff",
+        "accentColor": "#7b68ee",
+        "hold_seconds": 4,
+        "rotate_seconds": 6
+      }
+    },
+
+    {
+      "type": "manim_compare_table",
+      "label": "传统 vs 马斯克",
+      "durationSeconds": 8,
+      "params": {
+        "title": "两种学习范式",
+        "left_title": "传统学习",
+        "right_title": "马斯克学习",
+        "left_items": ["工具 → 练习", "先学再用", "经验驱动"],
+        "right_items": ["问题 → 推理", "先问再做", "原理驱动"]
+      }
+    },
+
+    {
+      "type": "image_clip",
+      "label": "中段配图",
+      "durationSeconds": 5,
+      "params": {
+        "imagePath": "/files/uploads/scene2_mid.jpg"
+      }
+    },
+
+    { "type": "chapter", "label": "第一性原理", "durationSeconds": 3 },
+
+    {
+      "type": "typewriter_text",
+      "label": "第一性原理",
+      "text": "回到物理与成本的底线，把问题拆到不可再拆的基本事实。",
+      "highlight": ["基本事实", "拆解"],
+      "durationSeconds": 6
+    },
+
+    {
+      "type": "manim_archimedean_spiral",
+      "label": "拆解螺线",
+      "durationSeconds": 10,
+      "params": {
+        "title": "从表象螺旋回到本质",
+        "subtitle": "阿基米德螺线 · r = a + bθ",
+        "a": 0.15,
+        "b": 0.12,
+        "primaryColor": "#00d4ff",
+        "accentColor": "#ffd166"
+      }
+    },
+
+    {
+      "type": "bar_chart",
+      "label": "材料成本拆解",
+      "durationSeconds": 8,
+      "params": {
+        "title": "电池成本的第一性拆解",
+        "values": [12, 28, 18, 35, 22]
+      }
+    },
+
+    {
+      "type": "manim_parametric_surface",
+      "label": "3D 曲面",
+      "durationSeconds": 12,
+      "params": {
+        "title": "多变量系统的可行域",
+        "subtitle": "参数曲面 · z = sin(u)cos(v)",
+        "hold_seconds": 4,
+        "rotate_seconds": 6
+      }
+    },
+
+    { "type": "chapter", "label": "普通人怎么用？", "durationSeconds": 3 },
+
+    {
+      "type": "typewriter_text",
+      "label": "三步法",
+      "text": "先定义问题，再列出约束，最后只保留可验证的推论。",
+      "highlight": ["问题", "约束", "推论"],
+      "durationSeconds": 6
+    },
+
+    {
+      "type": "concept_network",
+      "label": "信息网络",
+      "durationSeconds": 8,
+      "params": {
+        "title": "跨领域知识节点",
+        "center": "第一性原理",
+        "nodes": ["物理", "制造", "软件", "数据"]
+      }
+    },
+
+    {
+      "type": "manim_lissajous",
+      "label": "多频思维",
+      "durationSeconds": 9,
+      "params": {
+        "title": "工程与商业的频率耦合",
+        "a": 5,
+        "b": 4,
+        "subtitle": "李萨如图形 · 5:4",
+        "primaryColor": "#00d4ff",
+        "accentColor": "#7b68ee"
+      }
+    },
+
+    { "type": "chapter", "label": "庄家数据思维", "durationSeconds": 3 },
+
+    {
+      "type": "typewriter_text",
+      "label": "数据思维",
+      "text": "用数据验证直觉，用实验替代争论，用迭代逼近真相。",
+      "highlight": ["数据", "实验", "迭代"],
+      "durationSeconds": 6
+    },
+
+    {
+      "type": "manim_lorenz_attractor",
+      "label": "混沌与预测",
+      "durationSeconds": 14,
+      "params": {
+        "title": "复杂系统中的可预测区间",
+        "subtitle": "洛伦兹吸引子 · 数据收束混沌",
+        "n": 3,
+        "colors": ["#00d4ff", "#7b68ee", "#ffd166"],
+        "hold_seconds": 5,
+        "rotate_seconds": 6
+      }
+    },
+
+    {
+      "type": "manim_three_body",
+      "label": "多体博弈",
+      "durationSeconds": 12,
+      "params": {
+        "title": "多变量系统的博弈平衡",
+        "subtitle": "三体轨迹 · 非线性反馈",
+        "hold_seconds": 4,
+        "rotate_seconds": 6
+      }
+    },
+
+    { "type": "chapter_banner", "label": "三句话总结", "durationSeconds": 4 },
+
+    {
+      "type": "typewriter_text",
+      "label": "总结一",
+      "text": "先问问题，再选工具；不要反过来。",
+      "highlight": ["问题", "工具"],
+      "durationSeconds": 5
+    },
+    {
+      "type": "typewriter_text",
+      "label": "总结二",
+      "text": "拆解到基本事实，再向上重建方案。",
+      "highlight": ["基本事实"],
+      "durationSeconds": 5
+    },
+    {
+      "type": "typewriter_text",
+      "label": "总结三",
+      "text": "用数据闭环，让学习速度超过行业变化。",
+      "highlight": ["数据", "闭环"],
+      "durationSeconds": 5
+    },
+
+    {
+      "type": "manim_custom",
+      "label": "收束光轨",
+      "durationSeconds": 10,
+      "params": {
+        "scene": "Harmonic3DScene",
+        "title": "学习即压缩世界",
+        "subtitle": "原理 · 数据 · 迭代",
+        "hold_seconds": 4,
+        "rotate_seconds": 5,
+        "colors": ["#00d4ff", "#ffd166"]
+      }
+    },
+
+    {
+      "type": "fade_text",
+      "label": "原理先于工具，数据验证直觉。",
+      "durationSeconds": 4
+    },
+
+    {
+      "type": "image_clip",
+      "label": "片尾图",
+      "durationSeconds": 6,
+      "params": {
+        "imagePath": "/files/uploads/scene3_end.jpg"
+      }
+    }
+  ]
+}

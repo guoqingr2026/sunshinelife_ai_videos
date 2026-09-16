@@ -47,12 +47,29 @@ export interface ManimJob {
   params?: Record<string, unknown>;
 }
 
+export interface GlobalOverlayProject {
+  /** split = 竖屏底栏实拍；pip = 横屏画中画 */
+  mode?: "split" | "pip";
+  type?: "composite_split" | "composite_pip" | string;
+  videoPath?: string;
+  mainRatio?: number;
+  overlayRatio?: number;
+  pipPosition?: string;
+  pipWidthRatio?: number;
+  pipMargin?: number;
+  /** 实拍短于成片时循环；默认 true */
+  loop?: boolean;
+  overlay?: { videoPath?: string };
+}
+
 export interface VideoProject {
   title?: string;
   theme?: ThemeConfig;
   shots?: ShotSpec[];
-  /** 成片画幅；含 composite_split 时默认 9:16 */
+  /** 成片画幅；含 composite_split / globalOverlay.split 时默认 9:16 */
   aspect?: "16:9" | "9:16";
+  /** 全片贯穿的实拍层（从第 0 帧到结尾，视频连续播放） */
+  globalOverlay?: GlobalOverlayProject;
   /** 为 true 时在显式 shots 外再自动加标题/引言/片尾；默认 false（完全按 JSON 顺序） */
   autoWrap?: boolean;
 }

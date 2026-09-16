@@ -14,7 +14,6 @@ import {
 import { MONTY_HALL_PROJECT_JSON } from "../../utils/example-monty-hall-project";
 import { MATH_UNIVERSE_PROJECT_JSON } from "../../utils/example-math-universe-project";
 import { READING_STUDY_PROJECT_JSON } from "../../utils/example-reading-study-project";
-import { MANIM_TEMPLATES } from "../../utils/manim-catalog";
 import FontPresetSelect from "../../components/FontPresetSelect";
 import ThemeSchemeSelect from "../../components/ThemeSchemeSelect";
 import type { ThemeConfig } from "../../utils/remotion-presets";
@@ -29,36 +28,12 @@ import { DEFAULT_FONT_PRESET } from "../../utils/typography-presets";
 import { normalizeShotClient, validateProjectShots } from "../../utils/normalize-project-shots";
 import {
   appendShotToProjectJson,
+  applyGlobalOverlayToProjectJson,
   COMPOSITE_PIP_SHOT,
   COMPOSITE_SPLIT_SHOT,
+  GLOBAL_OVERLAY_SPLIT,
 } from "../../utils/composite-shot-presets";
-
-const REMOTION_SHOT_TYPES = new Set([
-  "title", "chapter", "bullet_list", "fade_text", "subtitle", "quote",
-  "flow_steps", "timeline_bar", "formula_card", "compare", "arrow", "stat", "params",
-  "remotion_doors", "remotion_open_door", "remotion_car_reveal",
-  "image_clip", "image_bookend", "start_image", "end_image", "bookend_image",
-  "composite_split", "composite_pip", "split_layout", "vertical_split", "pip_video", "picture_in_picture",
-]);
-const MANIM_IDS = new Set(MANIM_TEMPLATES.map((t) => t.id));
-
-function analyzeShots(shots: Array<{ type: string }> | undefined) {
-  if (!shots?.length) return { manim: 0, remotion: 0, unknown: [] as string[] };
-  let manim = 0;
-  let remotion = 0;
-  const unknown: string[] = [];
-  for (const s of shots) {
-    if (s.type === "composite_split" || s.type === "composite_pip") {
-      remotion++;
-      manim++;
-      continue;
-    }
-    if (MANIM_IDS.has(s.type)) manim++;
-    else if (REMOTION_SHOT_TYPES.has(s.type)) remotion++;
-    else unknown.push(s.type);
-  }
-  return { manim, remotion, unknown };
-}
+import { analyzeProjectShots } from "../../utils/shot-type-resolve";
 
 const PHASE_LABELS: Record<string, string> = {
   pending: "排队中",
@@ -148,7 +123,7 @@ export default function AutoVideoPage() {
 
   const project = useMemo(() => parseProjectJson(projectJson), [projectJson]);
   const jsonValid = project !== null && (project.shots?.length ?? 0) > 0;
-  const shotStats = useMemo(() => analyzeShots(project?.shots), [project?.shots]);
+  const shotStats = useMemo(() => analyzeProjectShots(project?.shots), [project?.shots]);
   const shotWarnings = useMemo(
     () => (project?.shots ? validateProjectShots(project.shots) : []),
     [project?.shots]
@@ -469,6 +444,23 @@ export default function AutoVideoPage() {
                 >
                   +横屏画中画
                 </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    resetLocalTask();
+                    setProjectJson(
+                      applyGlobalOverlayToProjectJson(projectJson, GLOBAL_OVERLAY_SPLIT, {
+                        aspect: "9:16",
+                      })
+                    );
+                    setPreviewPlan(null);
+                    setPlanError("");
+                  }}
+                  className="pill-tab text-xs py-1"
+                  title="实拍视频从片头贯穿到片尾（底栏 40%）"
+                >
+                  +全片底栏实拍
+                </button>
               </div>
             </div>
             <textarea
@@ -511,7 +503,9 @@ export default function AutoVideoPage() {
                 )}
                 {shotStats.unknown.length > 0 && (
                   <p className="text-red-400">
-                    未知镜头类型：{shotStats.unknown.join(", ")} — 请 git pull 更新 ECS 后重试。
+                    未知镜头类型：{shotStats.unknown.join(", ")} — 请改用已注册 type；自写 Scene 用{" "}
+                    <code className="text-primary">custom_python</code> +{" "}
+                    <code className="text-primary">params.code</code>（不要把类名当 type）。
                   </p>
                 )}
               </div>

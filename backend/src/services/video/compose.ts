@@ -11,7 +11,7 @@ import { resolveManimCjkFont } from "./manim-font";
 import { injectThemeIntoManimParams } from "./manim-theme";
 import { COMPOSE_FPS } from "./shot-plan-parser";
 import { resolveMediaParamsForManim } from "../../lib/media-path";
-import { resolveProjectAspect } from "./composite-shots";
+import { resolveGlobalOverlay, resolveProjectAspect } from "./composite-shots";
 
 function manimClipDurationFrames(
   slotFrames: number | undefined,
@@ -193,12 +193,14 @@ export async function renderCompose(
   });
 
   const aspect = resolveProjectAspect(payload.project, timeline);
+  const globalOverlay = resolveGlobalOverlay(payload.project, toRemotionMediaUrl);
   const remotionResult = await renderRemotion(taskId, {
     templateId,
     timeline: timeline!,
     theme,
     preview,
     aspect,
+    globalOverlay,
   });
 
   markComposeStep(taskId, "remotion", "done");

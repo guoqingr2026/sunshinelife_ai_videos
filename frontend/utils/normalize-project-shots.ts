@@ -59,6 +59,11 @@ export function validateProjectShots(
         `镜头 ${i + 1} manim_custom 缺少 params.scene（如 LorenzScene、CardioidScene）`
       );
     }
+    if (n.type === "custom_python" && !String(n.params?.code || "").trim()) {
+      warnings.push(
+        `镜头 ${i + 1} custom_python 缺少 params.code（完整 Scene 类定义）`
+      );
+    }
   }
   return warnings;
 }

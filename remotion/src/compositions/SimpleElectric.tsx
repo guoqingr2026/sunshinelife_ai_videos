@@ -2,6 +2,10 @@ import { AbsoluteFill, Sequence, Video } from "remotion";
 import { ImageClip } from "./ImageClip";
 import { CompositeSplit } from "./CompositeSplit";
 import { CompositePip } from "./CompositePip";
+import {
+  GlobalOverlayLayout,
+  type GlobalOverlayConfig,
+} from "./GlobalOverlayLayout";
 import { TitleAnimation } from "./TitleAnimation";
 import { ParamDisplay } from "./ParamDisplay";
 import { ArrowAnimation } from "./ArrowAnimation";
@@ -62,11 +66,13 @@ export interface SimpleElectricProps {
   timeline: TimelineItem[];
   theme?: ThemeConfig;
   aspect?: "16:9" | "9:16";
+  globalOverlay?: GlobalOverlayConfig;
 }
 
 export const SimpleElectric: React.FC<SimpleElectricProps> = ({
   timeline,
   theme = {},
+  globalOverlay,
 }) => {
   const primaryColor = theme.primaryColor || "#e94560";
   const secondaryColor = theme.secondaryColor || "#0f3460";
@@ -74,10 +80,7 @@ export const SimpleElectric: React.FC<SimpleElectricProps> = ({
   const fontFamily = resolveRemotionFontFamily(theme);
   let offset = 0;
 
-  return (
-    <ThemeFontProvider fontFamily={fontFamily}>
-    <AbsoluteFill style={{ backgroundColor, fontWeight: 700 }}>
-      {timeline.map((item, index) => {
+  const sequences = timeline.map((item, index) => {
         const duration = item.durationInFrames || 90;
         const from = offset;
         offset += duration;
@@ -314,8 +317,25 @@ export const SimpleElectric: React.FC<SimpleElectricProps> = ({
             {content}
           </Sequence>
         );
-      })}
+      });
+
+  const timelineLayer = (
+    <AbsoluteFill style={{ backgroundColor, fontWeight: 700 }}>
+      {sequences}
     </AbsoluteFill>
+  );
+
+  return (
+    <ThemeFontProvider fontFamily={fontFamily}>
+      {globalOverlay?.overlaySourceUrl ? (
+        <GlobalOverlayLayout
+          overlay={{ ...globalOverlay, backgroundColor }}
+        >
+          {timelineLayer}
+        </GlobalOverlayLayout>
+      ) : (
+        timelineLayer
+      )}
     </ThemeFontProvider>
   );
 };

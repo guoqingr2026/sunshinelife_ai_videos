@@ -4,7 +4,10 @@ import path from "path";
 import { writeMinimalMp4 } from "../../lib/minimal-mp4";
 import { getRemotionOutputPath, toPublicUrl } from "../../lib/storage";
 import { materializeImageClipsInTimeline } from "../../lib/image-to-video";
-import { prepareRemotionTimeline } from "../video/composite-shots";
+import {
+  prepareRemotionTimeline,
+  type GlobalOverlaySpec,
+} from "../video/composite-shots";
 import { normalizeTimeline } from "./normalize-timeline";
 import { findBrowserExecutable } from "./browser";
 
@@ -44,6 +47,7 @@ export interface RemotionPayload {
   };
   preview?: boolean;
   aspect?: "16:9" | "9:16";
+  globalOverlay?: GlobalOverlaySpec;
 }
 
 function remotionInstalled(): boolean {
@@ -68,6 +72,7 @@ export async function renderRemotion(
     ...payload,
     aspect: payload.aspect || "16:9",
     timeline: normalizeTimeline(timeline),
+    globalOverlay: payload.globalOverlay,
   };
 
   const propsFile = path.resolve(
