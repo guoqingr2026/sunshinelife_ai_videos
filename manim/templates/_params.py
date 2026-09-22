@@ -19,15 +19,27 @@ def _load_locale():
 
 
 def get_params(fallback=None):
-    """Merge: locale/zh.json < fallback < MANIM_PARAMS (API wins)."""
+    """Merge params so user/API content always wins over demos.
+
+    Priority (low → high):
+      1. code ``fallback`` (template hard-coded demos)
+      2. ``locale/zh.json`` defaults for this template id
+      3. ``MANIM_PARAMS`` from API / 一键成片 shots[].params  (**highest**)
+
+    Previously fallback overwrote locale, so English demo strings (and demo
+    LaTeX ``parts``) stuck even when zh.json or the user supplied content.
+    """
     fb = dict(fallback or {})
     tid = os.environ.get("MANIM_TEMPLATE_ID", "")
     locale = _load_locale().get(tid, {})
-    merged = {**locale, **fb}
+    if not isinstance(locale, dict):
+        locale = {}
+    merged = {**fb, **locale}
     raw = os.environ.get("MANIM_PARAMS", "{}")
     try:
         data = json.loads(raw)
         if isinstance(data, dict):
+            # API keys always win, including empty string / empty list clears
             return {**merged, **data}
     except json.JSONDecodeError:
         pass

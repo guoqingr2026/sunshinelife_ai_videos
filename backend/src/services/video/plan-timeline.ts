@@ -8,6 +8,7 @@ import {
 import { getActiveManimRules, getFixedShots } from "./shot-plan-store";
 import { isCompositeType } from "./composite-shots";
 import { resolveManimType, resolveRemotionType } from "./shot-plan-spec";
+import { enrichManimParams, remotionFieldsFromShot } from "./shot-params";
 
 export interface ThemeConfig {
   primaryColor: string;
@@ -151,7 +152,7 @@ function shotSpecToSequence(shots: ShotSpec[]): SequenceItem[] {
           kind: "manim",
           type: manimType,
           label: s.label,
-          params: main.params,
+          params: enrichManimParams(manimType, s.label, main.params),
           durationInFrames: s.durationInFrames,
         });
       }
@@ -170,7 +171,7 @@ function shotSpecToSequence(shots: ShotSpec[]): SequenceItem[] {
         kind: "manim",
         type: manim,
         label: s.label,
-        params: s.params,
+        params: enrichManimParams(manim, s.label, s.params),
         durationInFrames: s.durationInFrames,
       });
       continue;
@@ -284,71 +285,12 @@ function pickTheme(brief: string): ThemeConfig {
 }
 
 function remotionItemFromSequence(item: SequenceItem): TimelineItem {
-  switch (item.type) {
-    case "title":
-      return { type: "title", durationInFrames: 120, title: item.label };
-    case "chapter":
-      return { type: "chapter", durationInFrames: 90, title: item.label };
-    case "bullet_list":
-      return {
-        type: "bullet_list",
-        durationInFrames: 120,
-        title: item.label,
-        items: (item.params?.items as string[]) || ["要点一", "要点二", "要点三"],
-      };
-    case "flow_steps":
-      return {
-        type: "flow_steps",
-        durationInFrames: 150,
-        steps: (item.params?.steps as string[]) || ["输入", "理解", "输出"],
-      };
-    case "quote":
-      return { type: "quote", durationInFrames: 100, quote: item.label, author: "" };
-    case "fade_text":
-      return { type: "fade_text", durationInFrames: 90, text: item.label };
-    case "remotion_doors":
-      return {
-        type: "remotion_doors",
-        durationInFrames: 150,
-        title: (item.params?.title as string) || item.label,
-        params: item.params,
-      };
-    case "remotion_open_door":
-      return {
-        type: "remotion_open_door",
-        durationInFrames: 150,
-        title: item.label,
-        params: item.params,
-      };
-    case "remotion_car_reveal":
-      return {
-        type: "remotion_car_reveal",
-        durationInFrames: 150,
-        title: item.label,
-        params: item.params,
-      };
-    case "image_clip":
-      return {
-        type: "image_clip",
-        durationInFrames: item.durationInFrames || 150,
-        title: item.label,
-        sourceUrl:
-          (item.params?.imagePath as string) ||
-          (item.params?.url as string) ||
-          "",
-        params: item.params,
-      };
-    case "composite_split":
-    case "composite_pip":
-      return {
-        type: item.type,
-        durationInFrames: item.durationInFrames || 150,
-        title: item.label,
-        params: item.params,
-      };
-    default:
-      return { type: "chapter", durationInFrames: 90, title: item.label };
-  }
+  return remotionFieldsFromShot(
+    item.type,
+    item.label,
+    item.params,
+    item.durationInFrames
+  ) as TimelineItem;
 }
 
 function appendSequence(
@@ -377,7 +319,9 @@ function appendSequence(
     timeline.push({
       type: "manim_placeholder",
       durationInFrames: item.durationInFrames || DEFAULT_MANIM_FRAMES,
-      title: item.label,
+      title:
+        (typeof item.params?.title === "string" && item.params.title) ||
+        item.label,
       manimType: item.type,
       _autoManim: true,
     });
@@ -437,10 +381,13 @@ export function planFromBrief(
 
     for (const m of typesToRender) {
       const idx = timeline.length;
+      const manimParams = enrichManimParams(m.type, m.label, m.params);
       timeline.push({
         type: "manim_placeholder",
         durationInFrames: 150,
-        title: m.label,
+        title:
+          (typeof manimParams.title === "string" && manimParams.title) ||
+          m.label,
         manimType: m.type,
         _autoManim: true,
       });
@@ -448,7 +395,7 @@ export function planFromBrief(
         timelineIndex: idx,
         type: m.type,
         label: m.label,
-        params: m.params,
+        params: manimParams,
       });
     }
   }

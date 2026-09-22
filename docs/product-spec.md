@@ -1599,6 +1599,7 @@ IMAGE_MODEL=dall-e-3
 | 片头/片尾图不显示 | 路径错误或旧版 Remotion `<Img>` | 改用 `image_clip`；路径 `/files/uploads/...`；确认 ECS ≥ `743962c`（ffmpeg 栅格化） |
 | 实拍只在最后一镜出现 | 用了单镜 `composite_split` 而非全片层 | 改用 `project.globalOverlay`（§5.4.1），删掉多余 composite 镜头 |
 | `custom_python` 报未知类型 | 把类名写成 `type` | `type` 固定为 `custom_python`，代码放 `params.code` |
+| 公式/章节改不动仍是示例 | 只改了 `label`，或旧版 params 合并顺序错误 | 在 `params.parts` / `formula` / `title` / `text` 写全文案；部署含 `enrichManimParams` + `_params.py` 修复的版本 |
 | 实拍播完定格 | `globalOverlay.loop: false` | 省略 `loop` 或设 `"loop": true`（默认循环） |
 | ECS 找不到上传文件 | 查错目录 | 正确路径：`/opt/.../backend/storage/files/uploads/`，非项目根 `files/` |
 

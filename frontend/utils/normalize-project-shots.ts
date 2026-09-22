@@ -64,6 +64,29 @@ export function validateProjectShots(
         `镜头 ${i + 1} custom_python 缺少 params.code（完整 Scene 类定义）`
       );
     }
+    if (n.type === "manim_moving_frame_box") {
+      const parts = n.params?.parts;
+      if (!Array.isArray(parts) || parts.length === 0) {
+        warnings.push(
+          `镜头 ${i + 1} manim_moving_frame_box 请在 params.parts 写入分段公式，否则会用示例乘积求导`
+        );
+      }
+    }
+    if (n.type === "mathtex_formula" || n.type === "manim_formula") {
+      if (!String(n.params?.formula || "").trim()) {
+        warnings.push(`镜头 ${i + 1} ${n.type} 缺少 params.formula`);
+      }
+    }
+    if (n.type === "chapter_banner") {
+      if (!String(n.params?.title || n.label || "").trim()) {
+        warnings.push(`镜头 ${i + 1} chapter_banner 请设置 label 或 params.title`);
+      }
+    }
+    if (n.type === "compare") {
+      if (!n.params?.leftText && !n.params?.rightText) {
+        warnings.push(`镜头 ${i + 1} compare 请设置 params.leftText / rightText`);
+      }
+    }
   }
   return warnings;
 }

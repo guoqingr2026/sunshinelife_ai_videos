@@ -1,7 +1,7 @@
 # Manim 自动化使用手册
 
 > 与 `manim/template_catalog.py`、`frontend/utils/manim-capabilities.ts`、`backend/src/services/video/shot-plan-spec.ts` 保持同步。  
-> 当前：**42 种注册模板** + `custom_python`（L3）= **43 种可调用场景**。
+> **params 优先级（低→高）：** 模板代码 fallback → `locale/zh.json` → API / `shots[].params`（用户内容永远覆盖示例）。
 
 ---
 
@@ -86,8 +86,10 @@ POST /api/video/compose
 ### 2.3 参数合并优先级
 
 ```
-manim/locale/zh.json < 模板代码 fallback < API params（最高）
+模板代码 fallback < manim/locale/zh.json < API / shots[].params（最高，覆盖示例公式与章节名）
 ```
+
+一键成片还会把 `label` 在缺少 `title`/`text`/`chapter` 时写入 params（`enrichManimParams`），避免只改 label 仍显示「半导体基础」等默认文案。Remotion 的 `chapter`/`compare`/`formula_card` 等优先读 `params`，不再只用 label。
 
 ### 2.4 类型目录 API
 
