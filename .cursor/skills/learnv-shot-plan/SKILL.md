@@ -2,10 +2,11 @@
 name: learnv-shot-plan
 description: >-
   Designs Learnv / SunshineLife AI Videos one-click compose shot JSON from the
-  registered Manim + Remotion library with open params. Use when the user asks
-  for 分镜、一键成片 JSON、project.shots、科普视频镜头规划、math/physics popular-science
-  video plans, globalOverlay, custom_python, or to generate a VideoProject for
-  /config/auto-video.
+  registered Manim + Remotion library with open params. ALWAYS requires root
+  field renderQuality:"high" so Manim (-qh) and Remotion (full scale) both render
+  HD. Use when the user asks for 分镜、一键成片 JSON、project.shots、科普视频镜头规划、
+  math/physics popular-science video plans, globalOverlay, custom_python, or to
+  generate a VideoProject for /config/auto-video.
 ---
 
 # Learnv 分镜 JSON Skill
@@ -13,12 +14,32 @@ description: >-
 为数学 / 物理 / 工程科普生成**可直接粘贴到一键成片**的 `VideoProject` JSON。
 内容必须来自用户主题，**禁止照搬示例库默认公式、章节名、口播**。
 
+## ⚠ 强制高清（每次输出都必须写）
+
+**根级字段写死，不可省略、不可改成 preview：**
+
+```json
+"renderQuality": "high"
+```
+
+| 字段值 | Remotion（包装字 / 章节 / 对比卡） | Manim（打字机 / 公式 / 曲线） | 何时用 |
+|--------|-----------------------------------|-------------------------------|--------|
+| **`high`（唯一允许交成片）** | `--scale=1` 全分辨率 1920×1080（或 9:16 竖屏全高） | CLI **`-qh`** | Skill 默认；正式成片 |
+| `medium` | `--scale=1` | `-qm` | 仅用户明确要求折中时 |
+| `preview` | `--scale=0.5` 半分辨率 | `-ql` | **禁止**用于正式成片（字糊） |
+
+**对用户一句提示（输出 JSON 后附上）：**
+
+> 必须在 JSON 根级配置 `"renderQuality": "high"`。系统会据此让 **Manim 用 -qh、Remotion 用全分辨率**；若写成 `preview` 或勾选「预览模式」且 JSON 无 high，文字会模糊。
+
+缺 `renderQuality` 时后端虽默认按 high 处理，但 **Skill 生成的 JSON 仍必须显式写出**，避免前端误开预览模式。
+
 ## 必读参考（按需打开）
 
 | 文件 | 何时读 |
 |------|--------|
 | [catalog.md](catalog.md) | 选 `type`、写 `params` 字段 |
-| [examples.md](examples.md) | 对照完整 JSON 结构 |
+| [examples.md](examples.md) | 对照完整 JSON 结构（均含 renderQuality） |
 | `docs/product-spec.md` §5.3–5.4、§7.4–7.5 | 素材路径、globalOverlay、类型全表 |
 | `frontend/utils/manim-capabilities.ts` | 某 type 的 `defaultParams` / `paramHelp` |
 | `backend/src/services/video/shot-plan-spec.ts` | 合法 type ID 与别名 |
@@ -32,6 +53,7 @@ description: >-
   "title": "视频标题",
   "aspect": "16:9",
   "autoWrap": false,
+  "renderQuality": "high",
   "theme": {
     "name": "科技蓝",
     "primaryColor": "#00d4ff",
@@ -48,11 +70,11 @@ description: >-
 
 ## 工作流
 
-1. **拆主题** → 3～8 个章节/知识点（科普预告片）或 8～20 镜（完整课）。
-2. **每镜选 type** → 优先注册 type；复杂方程框选用 `manim_moving_frame_box`；宇宙曲线用 `manim_custom`+`scene`；任意 Python 用 `custom_python`。
-3. **写满可编辑内容** → 见下方「开放参数」；`label` 是短显示名，**正文必须进 `params`（或根级 `text`）**。
-4. **校验** → `type` 合法；公式镜头有 `parts`/`formula`；`typewriter_text` 有 `text`；路径用 `/files/uploads/...`。
-5. **交给用户** → 粘贴到 `/config/auto-video` → 预览分镜 → 一键生成。
+1. **先写死画质** → 根级 `"renderQuality": "high"`（Manim `-qh` + Remotion 全分辨率）。
+2. **拆主题** → 3～8 个章节/知识点（科普预告片）或 8～20 镜（完整课）。
+3. **每镜选 type** → 优先注册 type；复杂方程框选用 `manim_moving_frame_box`；宇宙曲线用 `manim_custom`+`scene`；任意 Python 用 `custom_python`。
+4. **写满可编辑内容** → 见下方「开放参数」；`label` 是短显示名，**正文必须进 `params`（或根级 `text`）**。
+5. **校验** → 见下方清单；然后交给用户粘贴到 `/config/auto-video` → 一键生成。
 
 ## 开放参数（必须覆盖示例）
 
@@ -87,15 +109,18 @@ image_clip(片头可选) → title → chapter → typewriter_text →
 
 ## 硬性禁止
 
+- **省略或改掉 `"renderQuality": "high"`**（正式成片禁止 `preview` / `medium`，除非用户明确要求）
 - 把 Scene **类名**当作 `type`（应用 `custom_python`）
 - 只改 `label` 却不改 `parts` / `formula` / `text`（画面仍是示例）
 - 编造未注册 `type`（查 catalog / shot-plan-spec）
 - `imagePath` 写磁盘绝对路径或带 `backend/storage` 前缀
 - 默认 `autoWrap: true`（显式 shots 时用 `false`）
 
-## 质量自检
+## 质量自检（输出前逐项打勾）
 
+- [ ] 根级 **`"renderQuality": "high"`**（Manim 高清 + Remotion 高清）
 - [ ] 所有公式/口播/章节标题来自**当前主题**，非「乘积求导」「半导体基础」
 - [ ] Manim 公式镜含完整 `params`
 - [ ] 16:9 或 9:16 与是否 `globalOverlay.split` 一致
 - [ ] 镜头数与时长合理（预览片 ≤12 镜；长片可分组）
+- [ ] 已提示用户：JSON 必须配置高清 `renderQuality`

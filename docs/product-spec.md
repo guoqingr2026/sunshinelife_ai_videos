@@ -1438,6 +1438,8 @@ project.shots[].params  →  compose.renderManim  →  MANIM_PARAMS  →  Scene.
 | +全片底栏实拍 | 写入 `project.globalOverlay`（§5.4.1） |
 | +竖屏分屏 / +横屏画中画 | 追加单镜 `composite_split` / `composite_pip` |
 
+**成片清晰度：** 项目 JSON 根级 `"renderQuality": "high"`（Skill 默认写死）→ Remotion 全分辨率 + Manim `-qh`；`"preview"` → 半分辨率试跑。一键成片页「预览模式」勾选会被 JSON 的 `high` 覆盖。
+
 ### 7.11 官方画廊缺口与建议新增镜头（路线图）
 
 **已实现（P0–P2，见 §7.5.11）：** `manim_vector_arrow`、`manim_brace_annotation`、`manim_sin_cos_plot`、`manim_point_on_path`、`manim_moving_angle`、`manim_sine_unit_circle`、`manim_boolean_ops`、`manim_following_camera`、`manim_graph_area`、`manim_heat_diagram`。

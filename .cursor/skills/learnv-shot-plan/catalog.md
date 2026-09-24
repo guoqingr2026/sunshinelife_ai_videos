@@ -3,6 +3,16 @@
 合法 `type` 以 `backend/src/services/video/shot-plan-spec.ts` 与 `manim/template_catalog.py` 为准。
 参数细节以 `frontend/utils/manim-capabilities.ts` 的 `paramHelp` 为准。
 
+## 强制高清（每个 project JSON）
+
+```json
+"renderQuality": "high"
+```
+
+- **Manim**：compose 传 `quality: "-qh"` → `render_task.py` 用 `-qh`
+- **Remotion**：compose 传 `scale: "1"` → 全分辨率（非预览半分辨率）
+- 正式成片禁止 `"renderQuality": "preview"`
+
 ## Remotion（成片包装，不跑 Manim）
 
 | type | 用途 | 关键 params |

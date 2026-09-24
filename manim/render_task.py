@@ -110,14 +110,15 @@ def find_manim_cmd():
     return [sys.executable, "-m", "manim"]
 
 
-def build_commands(base_cmd, script_file, class_name, out_name, renderer="cairo"):
-    """兼容 Manim 0.18 / 0.19；3D 场景用 opengl + xvfb"""
-    common = ["-ql", "--renderer", renderer, "--format", "mp4", "-o", out_name]
+def build_commands(base_cmd, script_file, class_name, out_name, renderer="cairo", quality="-ql"):
+    """兼容 Manim 0.18 / 0.19；3D 场景用 opengl + xvfb。quality: -qh/-qm/-ql"""
+    q = quality if quality in ("-qh", "-qm", "-ql") else "-ql"
+    common = [q, "--renderer", renderer, "--format", "mp4", "-o", out_name]
     scene = [script_file, class_name]
     return [
         [*base_cmd, "render", *common, *scene],
         [*base_cmd, *common, *scene],
-        [*base_cmd, "-ql", "--format", "mp4", "-o", out_name, *scene],
+        [*base_cmd, q, "--format", "mp4", "-o", out_name, *scene],
     ]
 
 
@@ -238,8 +239,11 @@ def main():
     env["PYTHONPATH"] = root + (os.pathsep + py_path if py_path else "")
 
     base = find_manim_cmd()
+    quality = str(payload.get("quality") or params.get("quality") or "-ql").strip()
+    if quality not in ("-qh", "-qm", "-ql"):
+        quality = "-ql"
     last_result = None
-    for cmd in build_commands(base, script_file, class_name, out_name, renderer):
+    for cmd in build_commands(base, script_file, class_name, out_name, renderer, quality):
         cmd = wrap_xvfb(cmd, use_xvfb)
         last_result = subprocess.run(
             cmd,
@@ -252,7 +256,9 @@ def main():
             break
 
     if not last_result or last_result.returncode != 0:
-        sys.stderr.write(f"CMD: {' '.join(build_commands(base, script_file, class_name, out_name, renderer)[0])}\n")
+        sys.stderr.write(
+            f"CMD: {' '.join(build_commands(base, script_file, class_name, out_name, renderer, quality)[0])}\n"
+        )
         sys.stderr.write(f"PYTHONPATH={env.get('PYTHONPATH', '')}\n")
         sys.stderr.write(f"MANIM_ROOT={root}\n")
         sys.stderr.write(last_result.stderr if last_result else "no result\n")

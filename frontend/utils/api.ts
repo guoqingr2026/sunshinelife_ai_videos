@@ -69,6 +69,10 @@ export interface ComposeStep {
 export interface VideoProject {
   title?: string;
   theme?: ThemeConfig;
+  aspect?: "16:9" | "9:16";
+  autoWrap?: boolean;
+  renderQuality?: "high" | "medium" | "preview";
+  globalOverlay?: Record<string, unknown>;
   shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }>;
 }
 

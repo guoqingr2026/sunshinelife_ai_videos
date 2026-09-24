@@ -69,6 +69,9 @@ function parseProjectJson(text: string): {
   title?: string;
   theme?: ThemeConfig;
   aspect?: "16:9" | "9:16";
+  autoWrap?: boolean;
+  renderQuality?: "high" | "medium" | "preview";
+  globalOverlay?: Record<string, unknown>;
   shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }>;
 } | null {
   const trimmed = text.trim();
@@ -81,10 +84,23 @@ function parseProjectJson(text: string): {
       aspectRaw === "9:16" || aspectRaw === "16:9"
         ? (aspectRaw as "16:9" | "9:16")
         : undefined;
+    const rq = String(obj.renderQuality || "")
+      .trim()
+      .toLowerCase();
+    const renderQuality =
+      rq === "high" || rq === "medium" || rq === "preview"
+        ? (rq as "high" | "medium" | "preview")
+        : undefined;
     return {
       title: typeof obj.title === "string" ? obj.title : undefined,
       theme: obj.theme as ThemeConfig | undefined,
       aspect,
+      autoWrap: obj.autoWrap === true,
+      renderQuality,
+      globalOverlay:
+        obj.globalOverlay && typeof obj.globalOverlay === "object"
+          ? (obj.globalOverlay as Record<string, unknown>)
+          : undefined,
       shots: Array.isArray(obj.shots)
         ? (obj.shots as Array<{ type: string; label: string; params?: Record<string, unknown> }>)
         : undefined,
@@ -103,7 +119,7 @@ export default function AutoVideoPage() {
     timeline: unknown[];
   } | null>(null);
   const [planError, setPlanError] = useState("");
-  const [preview, setPreview] = useState(true);
+  const [preview, setPreview] = useState(false);
   const [renderFinal, setRenderFinal] = useState(true);
   const [task, setTask] = useState<ComposeTask | null>(null);
   const [loading, setLoading] = useState(false);
@@ -246,11 +262,19 @@ export default function AutoVideoPage() {
     try {
       const theme = buildComposeTheme(colorSchemeIndex, fontPresetId);
       const composeProject = { ...(normalizedProject || project), theme };
+      // JSON 写死 high 时覆盖勾选框，避免 Skill 成片被预览模式糊掉
+      const quality = String(composeProject.renderQuality || "").toLowerCase();
+      const usePreview =
+        quality === "high" || quality === "hq" || quality === "1080p"
+          ? false
+          : quality === "preview" || quality === "low"
+            ? true
+            : preview;
       const { taskId } = await api.createComposeTask({
         brief: "",
         title: project.title,
         project: composeProject,
-        preview,
+        preview: usePreview,
         renderFinal,
         theme,
       });
@@ -575,7 +599,7 @@ export default function AutoVideoPage() {
                 onChange={(e) => setPreview(e.target.checked)}
                 disabled={!!isActive}
               />
-              预览模式（更快）
+              预览模式（半分辨率，更糊；正式成片请关掉，或 JSON 写 renderQuality:"high"）
             </label>
             <label className="flex items-center gap-2 text-muted font-semibold">
               <input

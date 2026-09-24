@@ -7,6 +7,7 @@
   "title": "牛顿第二定律：F=ma",
   "aspect": "16:9",
   "autoWrap": false,
+  "renderQuality": "high",
   "theme": {
     "name": "科技蓝",
     "primaryColor": "#00d4ff",
@@ -81,6 +82,7 @@
   "title": "主动回忆 60 秒",
   "aspect": "9:16",
   "autoWrap": false,
+  "renderQuality": "high",
   "globalOverlay": {
     "mode": "split",
     "videoPath": "/files/uploads/scene3_demo.mp4",

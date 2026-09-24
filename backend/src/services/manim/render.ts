@@ -15,6 +15,8 @@ export interface ManimPayload {
   params?: Record<string, unknown>;
   subtitleId?: string;
   manimCjkFont?: string;
+  /** Manim CLI: -qh | -qm | -ql */
+  quality?: "-qh" | "-qm" | "-ql";
 }
 
 export interface ManimClipJson {

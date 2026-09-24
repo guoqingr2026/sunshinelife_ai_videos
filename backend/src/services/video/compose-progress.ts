@@ -20,6 +20,7 @@ export interface ComposePayload {
     theme?: ThemeConfig;
     aspect?: "16:9" | "9:16";
     globalOverlay?: Record<string, unknown>;
+    renderQuality?: "high" | "medium" | "preview";
     shots?: Array<{ type: string; label: string; params?: Record<string, unknown> }>;
   };
   title?: string;

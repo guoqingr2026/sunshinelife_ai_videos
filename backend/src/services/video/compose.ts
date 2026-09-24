@@ -12,6 +12,11 @@ import { injectThemeIntoManimParams } from "./manim-theme";
 import { COMPOSE_FPS } from "./shot-plan-parser";
 import { resolveMediaParamsForManim } from "../../lib/media-path";
 import { resolveGlobalOverlay, resolveProjectAspect } from "./composite-shots";
+import {
+  manimQualityFlag,
+  remotionScale,
+  resolveRenderQuality,
+} from "./render-quality";
 
 function manimClipDurationFrames(
   slotFrames: number | undefined,
@@ -47,14 +52,18 @@ export async function renderCompose(
 ): Promise<{ outputUrl?: string; timeline: TimelineItem[]; bundleZipUrl?: string }> {
   const renderFinal = payload.renderFinal !== false;
   const templateId = payload.templateId || "simple-electric";
-  const preview = payload.preview ?? true;
+  const quality = resolveRenderQuality({
+    projectQuality: payload.project?.renderQuality,
+    previewFlag: payload.preview,
+  });
+  const preview = quality === "preview";
 
   markComposeStep(taskId, "queue", "done", "Worker 已接管任务");
   markComposeStep(taskId, "plan", "running");
   patchComposeProgress(taskId, {
     phase: "planning",
-    progress: "正在分析视频要求并规划时间轴…",
-    log: "开始规划时间轴",
+    progress: `正在分析视频要求并规划时间轴…（画质 ${quality}）`,
+    log: `开始规划时间轴 · renderQuality=${quality}`,
   });
 
   let timeline = payload.timeline;
@@ -129,6 +138,7 @@ export async function renderCompose(
       type: job.type,
       params: manimParams,
       manimCjkFont: shotFont,
+      quality: manimQualityFlag(quality),
     });
 
     const clipUrl = toRemotionMediaUrl(result.outputUrl);
@@ -201,6 +211,7 @@ export async function renderCompose(
     preview,
     aspect,
     globalOverlay,
+    scale: remotionScale(quality),
   });
 
   markComposeStep(taskId, "remotion", "done");

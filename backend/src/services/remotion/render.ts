@@ -48,6 +48,8 @@ export interface RemotionPayload {
   preview?: boolean;
   aspect?: "16:9" | "9:16";
   globalOverlay?: GlobalOverlaySpec;
+  /** Override Remotion --scale; if omitted uses preview ? 0.5 : 1 */
+  scale?: string;
 }
 
 function remotionInstalled(): boolean {
@@ -81,7 +83,7 @@ export async function renderRemotion(
   );
   fs.writeFileSync(propsFile, JSON.stringify(normalized));
 
-  const scale = payload.preview ? "0.5" : "1";
+  const scale = payload.scale || (payload.preview ? "0.5" : "1");
   const compositionId = "SimpleElectric";
   let renderError = "";
 

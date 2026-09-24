@@ -73,6 +73,13 @@ export interface VideoProject {
   globalOverlay?: GlobalOverlayProject;
   /** 为 true 时在显式 shots 外再自动加标题/引言/片尾；默认 false（完全按 JSON 顺序） */
   autoWrap?: boolean;
+  /**
+   * 成片清晰度（Skill / JSON 可写死）
+   * - high：Remotion 全分辨率 + Manim -qh（默认推荐）
+   * - medium：Remotion 全分辨率 + Manim -qm
+   * - preview：Remotion 半分辨率 + Manim -ql（试跑）
+   */
+  renderQuality?: "high" | "medium" | "preview";
 }
 
 export interface VideoPlan {
