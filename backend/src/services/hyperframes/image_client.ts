@@ -5,10 +5,13 @@ import { applyProxyEnv } from "../llm/openrouter-chat";
 /** OpenRouter dedicated image API (not /v1/images/generations). */
 const OPENROUTER_IMAGES_URL = "https://openrouter.ai/api/v1/images";
 
+/** OpenRouter 图像目录中 image_output=0 的模型优先（2026-03 实测）。 */
 const OPENROUTER_IMAGE_FALLBACKS = [
+  "inclusionai/ming-image-0.1-design",
+  "inclusionai/ming-image-0.1-design-layer",
+  "recraft/recraft-v4.1-flash",
+  "bytedance-seed/seedream-5-0-lite",
   "bytedance-seed/seedream-4.5",
-  "google/gemini-2.5-flash-image",
-  "google/gemini-3.1-flash-lite-image",
 ];
 
 export function getImageApiConfig(): {

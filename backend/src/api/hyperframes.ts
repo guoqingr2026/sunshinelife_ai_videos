@@ -27,7 +27,7 @@ router.get("/status", async (_req, res) => {
     );
   } else if (img.provider === "openrouter") {
     hints.push(
-      `图像 API：OpenRouter（与 AI 选题同一 Key）· 模型 ${img.imageModel}。可在 .env 设置 OPENROUTER_IMAGE_MODEL 更换。`
+      `图像 API：OpenRouter（与 AI 选题同一 Key）· 默认优先免费/低价图像模型（当前 ${img.imageModel}）。可在 .env 设置 OPENROUTER_IMAGE_MODEL。`
     );
   }
   if (!ffmpegAvailable) {

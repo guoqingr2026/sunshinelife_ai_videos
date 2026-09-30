@@ -92,9 +92,10 @@ export default function HyperFramesConfig() {
             ))}
           </ul>
           <p className="text-xs text-muted">
-            提示词模板见
-            <Link to="/config/prompts" className="text-primary underline mx-1">提示词库</Link>
-            HyperFrames 步骤。
+            图像默认优先 OpenRouter 上 <strong className="text-ink">image_output=0</strong> 的模型（如
+            inclusionai/ming-image）。文本有 <code className="text-[11px]">openrouter/free</code>，图像几乎没有同名免费路由。
+            提示词见
+            <Link to="/config/prompts" className="text-primary underline mx-1">提示词库</Link>。
           </p>
         </div>
       )}
