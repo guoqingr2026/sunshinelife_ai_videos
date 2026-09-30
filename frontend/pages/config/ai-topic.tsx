@@ -4,7 +4,8 @@ import { api, ShotPlanPreview } from "../../utils/api";
 import { setProjectHandoff } from "../../utils/project-bridge";
 
 const MODEL_OPTIONS = [
-  { id: "openrouter/openrouter/free", label: "OpenRouter 免费路由 (推荐)" },
+  { id: "openrouter/free", label: "OpenRouter 免费池 (推荐)" },
+  { id: "openrouter/auto", label: "OpenRouter Auto（智能路由，可能非免费）" },
   { id: "google/gemma-2-9b-it:free", label: "Gemma 2 9B (free)" },
   { id: "meta-llama/llama-3.1-8b-instruct:free", label: "Llama 3.1 8B (free)" },
   { id: "qwen/qwen2.5-7b-instruct:free", label: "Qwen 2.5 7B (free)" },

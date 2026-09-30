@@ -1,4 +1,17 @@
 import OpenAI from "openai";
+import { resolveSecret } from "../../lib/resolve-secret";
+
+/** Map free-llm-router refs / typos to OpenRouter API model slugs. */
+export function normalizeOpenRouterModelId(model: string): string {
+  const m = model.trim();
+  const aliases: Record<string, string> = {
+    "openrouter/openrouter/free": "openrouter/free",
+    "openrouter:openrouter/free": "openrouter/free",
+    auto: "openrouter/auto",
+    free: "openrouter/free",
+  };
+  return aliases[m] || m.replace(/^openrouter:/, "");
+}
 
 export interface LlmConfigStatus {
   configured: boolean;
@@ -14,14 +27,16 @@ export function getLlmConfig(): {
   baseUrl: string;
 } {
   const apiKey =
-    process.env.OPENROUTER_API_KEY?.trim() ||
+    resolveSecret("OPENROUTER_API_KEY") ||
     process.env.FREE_LLM_OPENROUTER_API_KEYS?.split(/[,;\s]+/)[0]?.trim();
   const proxy =
     process.env.LLM_HTTP_PROXY?.trim() ||
     process.env.HTTPS_PROXY?.trim() ||
     process.env.PROXY_URL?.trim();
   const model =
-    process.env.FREE_LLM_MODEL?.trim() || "openrouter/openrouter/free";
+    normalizeOpenRouterModelId(
+      process.env.FREE_LLM_MODEL?.trim() || "openrouter/free"
+    );
   const baseUrl =
     process.env.OPENROUTER_BASE_URL?.trim() || "https://openrouter.ai/api/v1";
   return { apiKey, proxy, model, baseUrl };
@@ -79,7 +94,7 @@ export async function chatCompletion(
   modelOverride?: string
 ): Promise<{ text: string; model: string }> {
   const { model } = getLlmConfig();
-  const useModel = (modelOverride || model).trim();
+  const useModel = normalizeOpenRouterModelId(modelOverride || model);
   const completion = await getClient().chat.completions.create({
     model: useModel,
     messages,
