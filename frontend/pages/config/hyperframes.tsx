@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { api, Task } from "../../utils/api";
+import AiCompleteButton from "../../components/AiCompleteButton";
+import { buildHyperFramesPrompt } from "../../utils/workflow-prompts";
 
 export default function HyperFramesConfig() {
   const [prompt, setPrompt] = useState(
@@ -13,6 +15,8 @@ export default function HyperFramesConfig() {
   const [loading, setLoading] = useState(false);
   const [envStatus, setEnvStatus] = useState<{
     imageApiConfigured: boolean;
+    imageProvider?: string;
+    llmConfigured?: boolean;
     ffmpegAvailable: boolean;
     hints: string[];
     ready: boolean;
@@ -74,9 +78,14 @@ export default function HyperFramesConfig() {
           </p>
           <ul className="text-xs text-muted space-y-1 list-disc list-inside">
             <li>
-              图像 API：{envStatus.imageApiConfigured ? "已配置" : "未配置（将用占位图）"}
-              {envStatus.imageApiConfigured && ` · 模型 ${envStatus.imageModel}`}
+              图像 API：
+              {envStatus.imageApiConfigured
+                ? envStatus.imageProvider === "openrouter"
+                  ? `OpenRouter（与 AI 选题同一 Key）· ${envStatus.imageModel}`
+                  : `已配置 · ${envStatus.imageModel}`
+                : "未配置（将用占位图）"}
             </li>
+            <li>文本模型（润色 Prompt）：{envStatus.llmConfigured ? "OpenRouter 就绪" : "未配置"}</li>
             <li>ffmpeg：{envStatus.ffmpegAvailable ? "可用" : "未安装（无法合成 MP4）"}</li>
             {envStatus.hints.map((h, i) => (
               <li key={i} className="text-amber-800 font-semibold">{h}</li>
@@ -92,6 +101,18 @@ export default function HyperFramesConfig() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
+          <div className="flex flex-wrap gap-2 mb-2">
+            <AiCompleteButton
+              label="用模型润色 Prompt"
+              user={buildHyperFramesPrompt(prompt, style as "handdrawn" | "ui" | "engineering")}
+              onResult={(text) => {
+                const line = text.split("\n").find((l) => l.trim().length > 20);
+                if (line) setPrompt(line.replace(/^prompt[:：]\s*/i, "").trim());
+                else setPrompt(text.trim().slice(0, 500));
+              }}
+            />
+            <Link to="/config/prompts" className="btn-outline text-sm py-1.5">提示词库</Link>
+          </div>
           <div>
             <label className="block text-sm text-muted mb-2 font-semibold">动画描述 (Prompt)</label>
             <textarea

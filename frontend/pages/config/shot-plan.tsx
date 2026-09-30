@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import AiCompleteButton from "../../components/AiCompleteButton";
 import { api, ShotPlanConfig, ShotPlanPreview } from "../../utils/api";
 import { setProjectHandoff } from "../../utils/project-bridge";
 import {
@@ -28,6 +29,8 @@ export default function ShotPlanPage() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
   const [copied, setCopied] = useState("");
+  const [quickTopic, setQuickTopic] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
 
   useEffect(() => {
     Promise.all([api.getShotPlan(), api.getShotPlanSpec()])
@@ -114,7 +117,9 @@ export default function ShotPlanPage() {
     <div>
       <h1 className="page-title">镜头规划（步骤 1）</h1>
       <p className="page-desc">
-        复制 <strong className="text-ink">GPT 分镜提示词</strong> → 生成 JSON → 贴回本页保存 →
+        推荐先
+        <Link to="/config/ai-topic" className="text-primary underline mx-1">AI 选题</Link>
+        自动生成；或复制 <strong className="text-ink">GPT 分镜提示词</strong> → 生成 JSON → 贴回本页保存 →
         <strong className="text-ink">发送到一键成片</strong>（步骤 2）。
         也可在
         <Link to="/config/prompts" className="text-primary underline mx-1">提示词库</Link>
@@ -160,10 +165,64 @@ export default function ShotPlanPage() {
         <pre className="code-block whitespace-pre-wrap text-[10px]">{COMPOSITE_PRESET_HELP}</pre>
       </div>
 
+      <div className="panel-muted mb-4 flex flex-wrap gap-2 items-end">
+        <div className="flex-1 min-w-[200px]">
+          <label className="text-xs text-muted font-semibold">一句话选题（OpenRouter）</label>
+          <input
+            className="input-field p-2 mt-1 w-full text-sm"
+            value={quickTopic}
+            onChange={(e) => setQuickTopic(e.target.value)}
+            placeholder="例：PN 结与二极管单向导电"
+          />
+        </div>
+        <button
+          type="button"
+          className="btn-primary text-sm py-2"
+          disabled={aiLoading || !quickTopic.trim()}
+          onClick={async () => {
+            setAiLoading(true);
+            setMessage("");
+            try {
+              const r = await api.generateShotPlanFromTopic({
+                topic: quickTopic.trim(),
+                save: false,
+                useSkill: true,
+              });
+              setArticle(r.article);
+              setPreview({
+                rules: r.preview.rules,
+                shots: r.preview.shots,
+                title: r.preview.title,
+                theme: r.preview.theme,
+                errors: r.preview.errors,
+              });
+              setMessage(`AI 已生成 ${r.preview.shots?.length ?? 0} 镜，请检查后保存。`);
+            } catch (e) {
+              setMessage(e instanceof Error ? e.message : "生成失败");
+            } finally {
+              setAiLoading(false);
+            }
+          }}
+        >
+          {aiLoading ? "生成中…" : "用模型生成分镜 JSON"}
+        </button>
+      </div>
+
       <div className="flex flex-wrap gap-2 mb-6">
         <button onClick={() => copyText(gptPrompt, "gpt")} className="btn-primary text-sm py-2">
           {copied === "gpt" ? "已复制！" : "复制 GPT 分镜提示词"}
         </button>
+        <AiCompleteButton
+          label="用模型按提示词生成（粘贴到下方）"
+          user={`${gptPrompt}\n\n选题：${quickTopic || "（请在上方填写选题）"}\n请输出完整 JSON 代码块。`}
+          disabled={!quickTopic.trim()}
+          onResult={(text) => {
+            setArticle(text);
+            setMessage("已填入规划文章，请点「预览解析」或「保存并生效」。");
+          }}
+          onError={(m) => setMessage(m)}
+          className="btn-outline text-sm py-2"
+        />
         <button onClick={() => copyText(defaultArticle, "article")} className="btn-secondary text-sm py-2">
           {copied === "article" ? "已复制！" : "复制完整规格文章"}
         </button>

@@ -308,6 +308,12 @@ export const api = {
       baseUrl: string;
     }>("/api/video/shot-plan/llm-status"),
 
+  llmComplete: (data: { system?: string; user: string; model?: string }) =>
+    request<{ text: string; model: string }>("/api/llm/complete", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
   generateShotPlanFromTopic: (data: {
     topic: string;
     model?: string;

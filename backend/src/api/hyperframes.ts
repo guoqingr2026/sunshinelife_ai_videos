@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { spawn } from "child_process";
 import { db } from "../lib/db";
+import { getImageApiConfig } from "../services/hyperframes/image_client";
+import { getLlmConfigStatus } from "../services/llm/openrouter-chat";
 
 const router = Router();
 
@@ -13,26 +15,33 @@ async function checkFfmpeg(): Promise<boolean> {
 }
 
 router.get("/status", async (_req, res) => {
-  const imageApiConfigured = !!(process.env.IMAGE_API_KEY || process.env.OPENAI_API_KEY);
-  const imageModel = process.env.IMAGE_MODEL || "dall-e-3";
+  const img = getImageApiConfig();
+  const llm = getLlmConfigStatus();
+  const imageApiConfigured = !!img.imageApiKey;
   const ffmpegAvailable = await checkFfmpeg();
 
   const hints: string[] = [];
   if (!imageApiConfigured) {
     hints.push(
-      "未配置 IMAGE_API_KEY 或 OPENAI_API_KEY：将生成 8×8 占位图，画面几乎看不见。请在 .env 中设置后 pm2 restart。"
+      "未配置 OPENROUTER_API_KEY / IMAGE_API_KEY：将生成 8×8 占位图。请在 .env 设置 OPENROUTER_API_KEY（推荐）后 pm2 restart。"
+    );
+  } else if (img.provider === "openrouter") {
+    hints.push(
+      `图像 API：OpenRouter（与 AI 选题同一 Key）· 模型 ${img.imageModel}。可在 .env 设置 OPENROUTER_IMAGE_MODEL 更换。`
     );
   }
   if (!ffmpegAvailable) {
     hints.push("未检测到 ffmpeg：帧序列可生成，但无法合成 MP4。请执行 apt install -y ffmpeg");
   }
   if (imageApiConfigured && ffmpegAvailable) {
-    hints.push("环境就绪。3 秒 @30fps 约需 7 次图像 API 调用，请留意费用与排队时间。");
+    hints.push("环境就绪。多帧将多次调用图像 API，请留意 OpenRouter 额度。");
   }
 
   res.json({
     imageApiConfigured,
-    imageModel,
+    imageModel: img.imageModel,
+    imageProvider: img.provider,
+    llmConfigured: llm.configured,
     ffmpegAvailable,
     hints,
     ready: imageApiConfigured && ffmpegAvailable,

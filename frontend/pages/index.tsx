@@ -3,6 +3,11 @@ import { getPortalSites } from "../utils/site-portal";
 
 const modules = [
   {
+    href: "/config/ai-topic",
+    title: "AI 选题（步骤 0）",
+    desc: "一句话选题 → OpenRouter 免费模型生成分镜 JSON",
+  },
+  {
     href: "/config/shot-plan",
     title: "镜头规划（步骤 1）",
     desc: "GPT 分镜 JSON → 保存 → 发送到一键成片",
@@ -41,12 +46,7 @@ const modules = [
   {
     href: "/config/prompts",
     title: "提示词库",
-    desc: "全流程模板提示词，手动复制 → 未来 API",
-  },
-  {
-    href: "/config/ai-topic",
-    title: "AI 选题",
-    desc: "免费模型自动生成选题分镜 JSON → 一键成片",
+    desc: "模板 +「用 OpenRouter 模型生成」按钮",
   },
 ];
 

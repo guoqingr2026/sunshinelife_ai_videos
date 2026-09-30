@@ -1,4 +1,5 @@
 import { generateFrames } from "./frame_generator";
+import { getImageApiConfig } from "./image_client";
 import { composeVideo } from "./video_composer";
 import {
   getFramesDir,
@@ -21,11 +22,13 @@ export async function renderHyperFrames(
   const videoPath = getHyperFramesVideoPath(taskId);
   const warnings: string[] = [];
 
-  const hasImageKey = !!(process.env.IMAGE_API_KEY || process.env.OPENAI_API_KEY);
-  if (!hasImageKey) {
+  const { imageApiKey, provider } = getImageApiConfig();
+  if (!imageApiKey) {
     warnings.push(
-      "未配置 IMAGE_API_KEY / OPENAI_API_KEY，已使用占位图（非真实 AI 绘图）。请在 .env 配置后重试。"
+      "未配置 OPENROUTER_API_KEY / IMAGE_API_KEY，已使用占位图。请在 ECS .env 配置 OPENROUTER_API_KEY 后重试。"
     );
+  } else if (provider === "openrouter") {
+    warnings.push("使用 OpenRouter 图像 API 生成关键帧。");
   }
 
   await generateFrames(taskId, payload, framesDir);

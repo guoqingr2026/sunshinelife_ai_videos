@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api, Subtitle } from "../../utils/api";
 import { buildPackagingPrompt } from "../../utils/packaging-prompt";
+import AiCompleteButton from "../../components/AiCompleteButton";
 
 export default function BilibiliPackagingPage() {
   const [subtitles, setSubtitles] = useState<Subtitle[]>([]);
@@ -28,7 +29,7 @@ export default function BilibiliPackagingPage() {
     <div className="max-w-3xl">
       <h1 className="page-title">B 站包装文案</h1>
       <p className="page-desc">
-        复制提示词 → 粘贴到 ChatGPT / Claude 等 → 把回复贴回来即可。无需配置 API Key。
+        可复制提示词手动生成，或直接使用站点已配置的 OpenRouter 模型一键生成文案。
       </p>
 
       <div className="space-y-4">
@@ -79,10 +80,15 @@ export default function BilibiliPackagingPage() {
           </select>
         </div>
 
-        <div className="flex gap-3">
+        <div className="flex flex-wrap gap-3">
           <button onClick={() => copy(prompt, "prompt")} disabled={!prompt} className="btn-primary">
             {copied === "prompt" ? "已复制" : "复制提示词"}
           </button>
+          <AiCompleteButton
+            disabled={!prompt}
+            user={`${prompt}\n\n请直接输出 B 站标题、简介、标签等完整包装文案。`}
+            onResult={setResult}
+          />
         </div>
 
         {prompt && (

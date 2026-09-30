@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { api } from "../../utils/api";
 import { buildPackagingPrompt } from "../../utils/packaging-prompt";
+import AiCompleteButton from "../../components/AiCompleteButton";
 import {
   WORKFLOW_STEPS,
   buildComposeProjectPromptExample,
@@ -22,6 +23,7 @@ export default function PromptsPage() {
   const [manimType, setManimType] = useState("pn_junction");
   const [subtitleSample, setSubtitleSample] = useState("大家好今天我们来讲一下PN结的工作原理");
   const [biliStyle, setBiliStyle] = useState("engineering");
+  const [aiError, setAiError] = useState("");
 
   useEffect(() => {
     api
@@ -195,7 +197,7 @@ export default function PromptsPage() {
 
             {hasPrompt && (
               <>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 items-center">
                   <button
                     type="button"
                     onClick={() => copy(prompt, step.id)}
@@ -203,7 +205,21 @@ export default function PromptsPage() {
                   >
                     {copied === step.id ? "已复制！" : "复制提示词"}
                   </button>
+                  {step.id === "shot-plan" ? (
+                    <Link to="/config/ai-topic" className="btn-outline text-sm py-2">
+                      用 AI 选题生成 JSON →
+                    </Link>
+                  ) : (
+                    <AiCompleteButton
+                      user={`${prompt}\n\n请直接给出可用于本步骤的结果，不要解释过程。`}
+                      onResult={(text) =>
+                        setResponses((prev) => ({ ...prev, [step.id]: text }))
+                      }
+                      onError={setAiError}
+                    />
+                  )}
                 </div>
+                {aiError && <p className="text-sm text-red-700">{aiError}</p>}
                 <pre className="code-block text-xs whitespace-pre-wrap max-h-64 overflow-y-auto">
                   {prompt}
                 </pre>
@@ -221,7 +237,7 @@ export default function PromptsPage() {
                     setResponses((prev) => ({ ...prev, [step.id]: e.target.value }))
                   }
                   rows={5}
-                  placeholder="将 ChatGPT / Claude 的回复粘贴到这里，便于对照下一步…"
+                  placeholder="可粘贴 AI 回复，或点「用 OpenRouter 模型生成」自动填入…"
                   className="input-field p-3 text-sm font-mono"
                 />
               </div>

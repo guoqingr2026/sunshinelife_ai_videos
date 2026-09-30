@@ -11,6 +11,7 @@ import remotionTemplatesRouter from "./api/remotion-templates";
 import hyperframesRouter from "./api/hyperframes";
 import videoRouter from "./api/video";
 import assetsRouter from "./api/assets";
+import llmRouter from "./api/llm";
 import { ensureStorageDirs, getStorageRoot } from "./lib/storage";
 import { startTaskWorker } from "./workers/task-worker";
 
@@ -43,6 +44,7 @@ app.use("/api/remotion", remotionTemplatesRouter);
 app.use("/api/hyperframes", hyperframesRouter);
 app.use("/api/video", videoRouter);
 app.use("/api/assets", assetsRouter);
+app.use("/api/llm", llmRouter);
 
 startTaskWorker();
 
