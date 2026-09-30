@@ -13,6 +13,7 @@ import ShotPlanPage from "../pages/config/shot-plan";
 import BilibiliPackagingPage from "../pages/packaging/bilibili";
 import TasksPage from "../pages/tasks/index";
 import PromptsPage from "../pages/config/prompts";
+import AiTopicPage from "../pages/config/ai-topic";
 import "../styles/globals.css";
 
 const basename = (import.meta.env.VITE_BASE_PATH || "/").replace(/\/$/, "") || undefined;
@@ -33,6 +34,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="/packaging/bilibili" element={<BilibiliPackagingPage />} />
           <Route path="/tasks" element={<TasksPage />} />
           <Route path="/config/prompts" element={<PromptsPage />} />
+          <Route path="/config/ai-topic" element={<AiTopicPage />} />
           </Routes>
         </Layout>
       </ErrorBoundary>

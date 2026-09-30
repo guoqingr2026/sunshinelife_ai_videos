@@ -300,6 +300,29 @@ export const api = {
       defaultArticle: string;
     }>("/api/video/shot-plan/spec"),
 
+  getShotPlanLlmStatus: () =>
+    request<{
+      configured: boolean;
+      model: string;
+      proxy: string | null;
+      baseUrl: string;
+    }>("/api/video/shot-plan/llm-status"),
+
+  generateShotPlanFromTopic: (data: {
+    topic: string;
+    model?: string;
+    save?: boolean;
+  }) =>
+    request<{
+      article: string;
+      preview: ShotPlanPreview;
+      model: string;
+      saved?: ShotPlanConfig;
+    }>("/api/video/shot-plan/generate", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
   getShotPlanProject: () =>
     request<{
       title: string;

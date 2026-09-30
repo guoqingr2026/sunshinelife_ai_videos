@@ -43,6 +43,11 @@ const modules = [
     title: "提示词库",
     desc: "全流程模板提示词，手动复制 → 未来 API",
   },
+  {
+    href: "/config/ai-topic",
+    title: "AI 选题",
+    desc: "免费模型自动生成选题分镜 JSON → 一键成片",
+  },
 ];
 
 export default function Home() {

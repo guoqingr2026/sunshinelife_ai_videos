@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/packaging/bilibili", label: "B站文案" },
   { href: "/tasks", label: "任务管理" },
   { href: "/config/prompts", label: "提示词库" },
+  { href: "/config/ai-topic", label: "AI 选题" },
 ];
 
 export default function Layout({ children }: { children: React.ReactNode }) {

@@ -23,7 +23,20 @@ export const WORKFLOW_STEPS: WorkflowStep[] = [
       "将 AI 回复粘贴到镜头规划页并保存",
       "点「发送到一键成片」导入项目 JSON",
     ],
-    automationNote: "后续：POST /api/video/shot-plan 可由后端直连 LLM 生成并保存。",
+    automationNote: "已接入：AI 选题页 POST /api/video/shot-plan/generate（OpenRouter 免费模型）。",
+  },
+  {
+    id: "ai-topic",
+    order: 1.5,
+    title: "AI 选题（自动 JSON）",
+    route: "/config/ai-topic",
+    purpose: "输入一句话选题，后端用提示词库同款 GPT 分镜规范 + 免费模型生成项目 JSON。",
+    manualSteps: [
+      "填写视频选题",
+      "点「生成并保存到镜头规划」",
+      "点「保存并发送到一键成片」",
+    ],
+    automationNote: "依赖服务器 OPENROUTER_API_KEY；可选 LLM_HTTP_PROXY。",
   },
   {
     id: "compose",

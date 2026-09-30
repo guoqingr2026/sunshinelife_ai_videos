@@ -73,8 +73,9 @@ export default function PromptsPage() {
         <h1 className="page-title">模板提示词合集</h1>
         <p className="page-desc">
           按生产流水线顺序整理每一步的 AI 提示词。
-          <strong className="text-ink"> 当前阶段：手动复制 → 粘贴 AI 回复</strong>；
-          后续再接入 API 自动调用。
+          <strong className="text-ink"> 手动复制</strong> 或
+          <Link to="/config/ai-topic" className="text-primary underline mx-1">AI 选题</Link>
+          自动调用免费模型生成 JSON。
         </p>
       </div>
 

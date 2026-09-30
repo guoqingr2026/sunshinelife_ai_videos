@@ -14,10 +14,16 @@ import {
 } from "../services/video/shot-plan-spec";
 import { initComposeProgress } from "../services/video/compose-progress";
 import { buildComposeProjectFromShotPlan } from "../services/video/shot-plan-project";
+import { generateShotPlanFromTopic } from "../services/video/shot-plan-generate";
+import { getLlmConfigStatus } from "../services/llm/openrouter-chat";
 import { getOutputBundleZipPath } from "../lib/storage";
 import fs from "fs";
 
 const router = Router();
+
+router.get("/shot-plan/llm-status", (_req, res) => {
+  res.json(getLlmConfigStatus());
+});
 
 router.get("/shot-plan/spec", (_req, res) => {
   res.json({
@@ -71,6 +77,34 @@ router.post("/shot-plan/preview", (req, res) => {
     res.json(parsed);
   } catch (err) {
     res.status(500).json({ error: String(err) });
+  }
+});
+
+router.post("/shot-plan/generate", async (req, res) => {
+  try {
+    const { topic, model, save } = req.body as {
+      topic?: string;
+      model?: string;
+      save?: boolean;
+    };
+    if (!topic || typeof topic !== "string") {
+      return res.status(400).json({ error: "topic is required" });
+    }
+    const generated = await generateShotPlanFromTopic(
+      topic,
+      typeof model === "string" ? model : undefined
+    );
+    const saved =
+      save === true ? saveShotPlanArticle(generated.article) : undefined;
+    res.json({
+      article: generated.article,
+      preview: generated.preview,
+      model: generated.model,
+      saved,
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    res.status(502).json({ error: message });
   }
 });
 

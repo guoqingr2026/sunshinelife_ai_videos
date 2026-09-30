@@ -43,9 +43,22 @@ export function buildComposeProjectFromShotPlan(): ComposeProjectExport | null {
 
   const title = titleFromArticle(config.article, config.title);
   const shots = config.shots.map((s) => expandShotForExport(s));
-  const project: Record<string, unknown> = { title, shots };
+  const project: Record<string, unknown> = { title, shots, renderQuality: "high" };
   if (config.theme) project.theme = config.theme;
   if (config.aspect) project.aspect = config.aspect;
+  const jsonStr = extractJsonString(config.article);
+  if (jsonStr) {
+    try {
+      const root = JSON.parse(jsonStr) as Record<string, unknown>;
+      if (root.renderQuality === "high" || root.renderQuality === "medium" || root.renderQuality === "preview") {
+        project.renderQuality = root.renderQuality;
+      }
+      if (root.globalOverlay) project.globalOverlay = root.globalOverlay;
+      if (root.autoWrap !== undefined) project.autoWrap = root.autoWrap;
+    } catch {
+      /* ignore */
+    }
+  }
 
   return {
     title,
