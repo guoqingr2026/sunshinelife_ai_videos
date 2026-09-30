@@ -312,6 +312,7 @@ export const api = {
     topic: string;
     model?: string;
     save?: boolean;
+    useSkill?: boolean;
   }) =>
     request<{
       article: string;

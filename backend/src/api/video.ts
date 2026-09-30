@@ -16,13 +16,18 @@ import { initComposeProgress } from "../services/video/compose-progress";
 import { buildComposeProjectFromShotPlan } from "../services/video/shot-plan-project";
 import { generateShotPlanFromTopic } from "../services/video/shot-plan-generate";
 import { getLlmConfigStatus } from "../services/llm/openrouter-chat";
+import { getSkillPromptStatus } from "../services/video/shot-plan-skill-prompt";
 import { getOutputBundleZipPath } from "../lib/storage";
 import fs from "fs";
 
 const router = Router();
 
 router.get("/shot-plan/llm-status", (_req, res) => {
-  res.json(getLlmConfigStatus());
+  res.json({ ...getLlmConfigStatus(), skill: getSkillPromptStatus() });
+});
+
+router.get("/shot-plan/skill-status", (_req, res) => {
+  res.json(getSkillPromptStatus());
 });
 
 router.get("/shot-plan/spec", (_req, res) => {
@@ -82,17 +87,19 @@ router.post("/shot-plan/preview", (req, res) => {
 
 router.post("/shot-plan/generate", async (req, res) => {
   try {
-    const { topic, model, save } = req.body as {
+    const { topic, model, save, useSkill } = req.body as {
       topic?: string;
       model?: string;
       save?: boolean;
+      useSkill?: boolean;
     };
     if (!topic || typeof topic !== "string") {
       return res.status(400).json({ error: "topic is required" });
     }
     const generated = await generateShotPlanFromTopic(
       topic,
-      typeof model === "string" ? model : undefined
+      typeof model === "string" ? model : undefined,
+      { useSkill: useSkill !== false }
     );
     const saved =
       save === true ? saveShotPlanArticle(generated.article) : undefined;

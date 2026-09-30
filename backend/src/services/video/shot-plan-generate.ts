@@ -1,6 +1,7 @@
 import { chatCompletion } from "../llm/openrouter-chat";
 import { parseShotPlanArticle, extractJsonString } from "./shot-plan-parser";
 import { buildGptPrompt } from "./shot-plan-spec";
+import { buildLearnvSkillPromptBlock } from "./shot-plan-skill-prompt";
 import type { ParsedShotPlan } from "./shot-plan-parser";
 
 const SYSTEM_SUFFIX = `
@@ -37,14 +38,23 @@ function ensureRenderQualityInArticle(article: string): string {
 
 export async function generateShotPlanFromTopic(
   topic: string,
-  model?: string
+  model?: string,
+  options?: { useSkill?: boolean }
 ): Promise<{ article: string; preview: ParsedShotPlan; model: string; raw: string }> {
   const subject = topic.trim();
   if (!subject) {
     throw new Error("选题不能为空");
   }
 
-  const system = buildGptPrompt() + SYSTEM_SUFFIX;
+  const useSkill = options?.useSkill !== false;
+  const skillBlock = useSkill ? buildLearnvSkillPromptBlock() : "";
+  const system = [
+    skillBlock,
+    buildGptPrompt(),
+    SYSTEM_SUFFIX,
+  ]
+    .filter((s) => s.trim().length > 0)
+    .join("\n\n---\n\n");
   const user = `请为以下科普视频选题生成完整一键成片项目 JSON：
 
 选题：${subject}

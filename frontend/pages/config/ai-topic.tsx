@@ -4,8 +4,9 @@ import { api, ShotPlanPreview } from "../../utils/api";
 import { setProjectHandoff } from "../../utils/project-bridge";
 
 const MODEL_OPTIONS = [
-  { id: "openrouter/free", label: "OpenRouter 免费池 (推荐)" },
+  { id: "openrouter/free", label: "OpenRouter 免费池 (推荐，可路由到智谱/NVIDIA 等)" },
   { id: "openrouter/auto", label: "OpenRouter Auto（智能路由，可能非免费）" },
+  { id: "z-ai/glm-4.5-flash:free", label: "智谱 GLM 4.5 Flash (free)" },
   { id: "google/gemma-2-9b-it:free", label: "Gemma 2 9B (free)" },
   { id: "meta-llama/llama-3.1-8b-instruct:free", label: "Llama 3.1 8B (free)" },
   { id: "qwen/qwen2.5-7b-instruct:free", label: "Qwen 2.5 7B (free)" },
@@ -22,15 +23,21 @@ export default function AiTopicPage() {
   const [preview, setPreview] = useState<ShotPlanPreview | null>(null);
   const [usedModel, setUsedModel] = useState("");
   const [message, setMessage] = useState("");
+  const [useSkill, setUseSkill] = useState(true);
+  const [skillLoaded, setSkillLoaded] = useState<boolean | null>(null);
 
   useEffect(() => {
     api
       .getShotPlanLlmStatus()
       .then((s) => {
         setLlmReady(s.configured);
+        const skill = (s as { skill?: { loaded?: boolean } }).skill;
+        setSkillLoaded(skill?.loaded ?? null);
         setLlmHint(
           s.configured
-            ? `模型默认：${s.model}${s.proxy ? ` · 代理 ${s.proxy}` : ""}`
+            ? `模型默认：${s.model}${s.proxy ? ` · 代理 ${s.proxy}` : ""}${
+                skill?.loaded ? " · Skill 已挂载" : " · Skill 未找到（将仅用内置提示词）"
+              }`
             : "后端未配置 OPENROUTER_API_KEY，请在 ECS .env 设置后 pm2 restart。"
         );
       })
@@ -52,6 +59,7 @@ export default function AiTopicPage() {
         topic: topic.trim(),
         model,
         save: andSave,
+        useSkill,
       });
       setArticle(result.article);
       setPreview(result.preview);
@@ -117,8 +125,25 @@ export default function AiTopicPage() {
           />
         </label>
 
+        <label className="flex items-center gap-2 text-sm text-ink cursor-pointer">
+          <input
+            type="checkbox"
+            checked={useSkill}
+            onChange={(e) => setUseSkill(e.target.checked)}
+            className="rounded border-border"
+          />
+          <span>
+            在提示词前注入 <strong>Learnv 分镜 Skill</strong>
+            {skillLoaded === false ? "（服务器未找到 Skill 文件）" : ""}
+          </span>
+        </label>
+
         <label className="block max-w-md">
-          <span className="text-sm font-semibold text-ink">免费模型</span>
+          <span className="text-sm font-semibold text-ink">OpenRouter 模型</span>
+          <p className="text-xs text-muted mt-0.5">
+            网站仅走 OpenRouter；你在本机 free-llm-router 配的智谱 Key 不会自动用于本站。
+            选「免费池」或下方智谱 free 模型 ID 即可。
+          </p>
           <select
             className="input mt-1"
             value={model}
